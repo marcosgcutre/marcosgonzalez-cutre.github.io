@@ -6,73 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Marcos González-Cutre — Artista visual.">
   <style>
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: #111;
-      background: #fff;
-      line-height: 1.6;
-    }
-    .wrap {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-    .meta {
-      color: #444;
-      margin-bottom: 20px;
-    }
-    nav a {
-      margin-right: 14px;
-      text-decoration: none;
-      color: #111;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    h2 {
-      font-size: 18px;
-      margin-top: 40px;
-    }
-    footer {
-      margin-top: 60px;
-      color: #444;
-      font-size: 14px;
-    }
+    body{margin:0;font-family:Georgia,"Times New Roman",serif;background:#fff;color:#111;line-height:1.55}
+    .wrap{max-width:980px;margin:0 auto;padding:44px 20px 70px}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap}
+    h1{font-size:26px;margin:0 0 6px;font-weight:600;letter-spacing:.2px}
+    .tag{color:#444;margin:0}
+    nav a{margin-right:14px;text-decoration:none;color:#111}
+    nav a:hover{text-decoration:underline}
+    .hero{margin-top:34px;border:1px solid #e7e7e7;padding:18px}
+    .hero img{width:100%;height:auto;display:block}
+    .hero .cap{margin-top:10px;color:#444;font-size:14px}
+    footer{margin-top:48px;color:#444;font-size:14px}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Marcos González-Cutre</h1>
-    <div class="meta">Buenos Aires / Juárez · Artista visual</div>
+    <header>
+      <div>
+        <h1>Marcos González-Cutre</h1>
+        <p class="tag">Artista visual</p>
+      </div>
 
-    <nav>
-      <a href="#">Statement</a>
-      <a href="#">Bio</a>
-      <a href="#">Obras</a>
-      <a href="#">CV</a>
-      <a href="#">Exposiciones</a>
-      <a href="mailto:tuemail@algo.com">Contacto</a>
-    </nav>
+      <nav>
+        <a href="statement.html">Statement</a>
+        <a href="works.html">Obras</a>
+        <a href="bio.html">Bio</a>
+        <a href="cv.html">CV</a>
+        <a href="exhibitions.html">Exposiciones</a>
+        <a href="contact.html">Contacto</a>
+      </nav>
+    </header>
 
-    <h2>Selección</h2>
-    <p>
-      Brava o mansa · Pre-lenguaje · Mi Buenos Aires, amado
-    </p>
-
-    <h2>Nota</h2>
-    <p>
-      Esta web funciona como archivo vivo. Se actualiza por series y procesos.
-    </p>
+    <section class="hero">
+      <!-- Reemplazá "assets/obra.jpg" por tu imagen cuando la subamos -->
+      <img src="assets/obra.jpg" alt="Obra — Marcos González-Cutre">
+      <div class="cap">Obra destacada (título, año, técnica, medidas) — próximamente</div>
+    </section>
 
     <footer>
-      © <script>document.write(new Date().getFullYear())</script>
-      Marcos González-Cutre
+      © <script>document.write(new Date().getFullYear())</script> Marcos González-Cutre
     </footer>
   </div>
 </body>
 </html>
+
