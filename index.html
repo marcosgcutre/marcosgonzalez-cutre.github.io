@@ -13,9 +13,21 @@
     .tag{color:#444;margin:0}
     nav a{margin-right:14px;text-decoration:none;color:#111}
     nav a:hover{text-decoration:underline}
-    .hero{margin-top:34px;border:1px solid #e7e7e7;padding:18px}
-    .hero img{width:100%;height:auto;display:block}
+
+    /* HERO */
+    .hero{margin-top:34px}
+    .hero img{
+      width:100%;
+      height:auto;
+      display:block;
+      object-fit:contain;
+      border:1px solid #e7e7e7;
+      padding:10px;
+      box-sizing:border-box;
+      background:#fff;
+    }
     .hero .cap{margin-top:10px;color:#444;font-size:14px}
+
     footer{margin-top:48px;color:#444;font-size:14px}
   </style>
 </head>
@@ -26,27 +38,3 @@
         <h1>Marcos Gonzalez-Cutre</h1>
         <p class="tag">Artista visual</p>
       </div>
-
-      <nav>
-        <a href="statement.html">Statement</a>
-        <a href="works.html">Obras</a>
-        <a href="bio.html">Bio</a>
-        <a href="cv.html">CV</a>
-        <a href="exhibitions.html">Exposiciones</a>
-        <a href="contact.html">Contacto</a>
-      </nav>
-    </header>
-
-    <section class="hero">
-      <!-- Reemplazá "assets/obra.jpg" por tu imagen cuando la subamos -->
-      <img src="./assets/rizoma.jpg" alt="Obra — Marcos Gonzalez-Cutre">
-      <div class="cap">Obra destacada (Rizoma, 2025, Óleo sobre tela, 230x203cm) </div>
-    </section>
-
-    <footer>
-      © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
-    </footer>
-  </div>
-</body>
-</html>
-
