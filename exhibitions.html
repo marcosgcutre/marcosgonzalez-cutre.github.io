@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Exposiciones — Marcos Gonzalez-Cutre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #fff;
+      color: #111;
+      line-height: 1.65;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+    .site-title .tag { color: #666; font-size: 12px; margin-top: 1px; }
+    nav a { margin-left: 22px; text-decoration: none; color: #111; font-size: 13px; letter-spacing: .3px; }
+    nav a:hover { text-decoration: underline; }
+    nav a.active { text-decoration: underline; }
+
+    .page-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 130px 20px 80px;
+    }
+    .page-title {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 48px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━
+       FILTROS (individuales / colectivas)
+    ━━━━━━━━━━━━━━━━━━━━━━━ */
+    .filters {
+      display: flex;
+      gap: 0;
+      margin-bottom: 40px;
+      border-bottom: 1px solid #eee;
+    }
+    .filter-btn {
+      background: none;
+      border: none;
+      padding: 8px 0;
+      margin-right: 28px;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      color: #999;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color .2s, border-color .2s;
+    }
+    .filter-btn.active {
+      color: #111;
+      border-bottom-color: #111;
+    }
+    .filter-btn:hover { color: #111; }
+
+    /* Grupos de exposiciones */
+    .expo-group { display: none; }
+    .expo-group.visible { display: block; }
+
+    /* Cada exposición */
+    .expo-item {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+    .expo-item:last-child { border-bottom: none; }
+    .expo-year {
+      color: #999;
+      min-width: 44px;
+      flex-shrink: 0;
+    }
+    .expo-info { color: #1a1a1a; }
+    .expo-info strong { font-weight: 600; display: block; margin-bottom: 2px; }
+    .expo-info span { color: #666; font-size: 13px; }
+
+    footer {
+      padding: 30px 40px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
+      nav a { margin-left: 0; margin-right: 14px; }
+      .expo-item { flex-direction: column; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="statement.html">Statement</a>
+      <a href="works.html">Obras</a>
+      <a href="bio.html">Bio</a>
+      <a href="cv.html">CV</a>
+      <a href="exhibitions.html" class="active">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <p class="page-title">Exposiciones</p>
+
+    <!-- Botones de filtro -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="mostrar('individuales', this)">Individuales</button>
+      <button class="filter-btn" onclick="mostrar('colectivas', this)">Colectivas</button>
+    </div>
+
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         ✏️ CÓMO EDITAR:
+         - Cambiá el texto entre las etiquetas
+         - Copiá un bloque <div class="expo-item"> para agregar una expo
+         - El año va en <span class="expo-year">
+         - El título en <strong>, el lugar en <span>
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+
+    <!-- INDIVIDUALES -->
+    <div id="individuales" class="expo-group visible">
+
+      <div class="expo-item">
+        <span class="expo-year">2025</span>
+        <div class="expo-info">
+          <strong>Nombre de la exposición</strong>
+          <span>Galería o espacio, Ciudad, País</span>
+        </div>
+      </div>
+
+      <div class="expo-item">
+        <span class="expo-year">2023</span>
+        <div class="expo-info">
+          <strong>Nombre de la exposición</strong>
+          <span>Galería o espacio, Ciudad, País</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLECTIVAS -->
+    <div id="colectivas" class="expo-group">
+
+      <div class="expo-item">
+        <span class="expo-year">2024</span>
+        <div class="expo-info">
+          <strong>Nombre de la exposición colectiva</strong>
+          <span>Espacio, Ciudad, País</span>
+        </div>
+      </div>
+
+      <div class="expo-item">
+        <span class="expo-year">2022</span>
+        <div class="expo-info">
+          <strong>Nombre de la exposición colectiva</strong>
+          <span>Espacio, Ciudad, País</span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+
+  <script>
+    function mostrar(grupo, btn) {
+      // Ocultar todos los grupos
+      document.querySelectorAll('.expo-group').forEach(g => g.classList.remove('visible'));
+      // Desactivar todos los botones
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      // Mostrar el seleccionado
+      document.getElementById(grupo).classList.add('visible');
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

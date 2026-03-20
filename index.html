@@ -5,113 +5,175 @@
   <title>Marcos Gonzalez-Cutre</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Marcos Gonzalez-Cutre — Artista visual.">
-
   <style>
-    body{
-      margin:0;
+
+    /* ── Reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Base ───────────────────────────────────────────── */
+    html { scroll-behavior: smooth; }
+    body {
       font-family: Georgia, "Times New Roman", serif;
-      background:#fff;
-      color:#111;
-      line-height:1.55;
+      background: #fff;
+      color: #111;
+      line-height: 1.55;
     }
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding:44px 20px 70px;
+    /* ── Header fijo ────────────────────────────────────── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
 
-    header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:18px;
-      flex-wrap:wrap;
+    .site-title h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+    .site-title .tag {
+      color: #666;
+      font-size: 12px;
+      margin-top: 1px;
     }
 
-    h1{
-      font-size:26px;
-      margin:0 0 6px;
-      font-weight:600;
-      letter-spacing:.2px;
+    nav a {
+      margin-left: 22px;
+      text-decoration: none;
+      color: #111;
+      font-size: 13px;
+      letter-spacing: .3px;
+    }
+    nav a:hover { text-decoration: underline; }
+
+    /* ── Imagen a pantalla completa ─────────────────────── */
+    .obra {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #111;
     }
 
-    .tag{
-      color:#444;
-      margin:0;
+    .obra img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;       /* ocupa toda la pantalla */
+      object-position: center;
+      display: block;
+      opacity: 0.97;
     }
 
-    nav a{
-      margin-right:14px;
-      text-decoration:none;
-      color:#111;
+    /* Caption sobre la imagen, abajo a la izquierda */
+    .obra-caption {
+      position: absolute;
+      bottom: 36px;
+      left: 44px;
+      color: #fff;
+      font-size: 13px;
+      letter-spacing: .4px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.55);
+      line-height: 1.6;
     }
 
-    nav a:hover{
-      text-decoration:underline;
+    /* Flecha sutil para indicar que hay más contenido */
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      right: 44px;
+      color: rgba(255,255,255,0.7);
+      font-size: 22px;
+      animation: bounce 2s infinite;
+      cursor: default;
+      user-select: none;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(6px); }
     }
 
-    /* HERO */
-    .hero{
-      margin-top:34px;
+    /* ── Footer ─────────────────────────────────────────── */
+    footer {
+      padding: 30px 40px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #eee;
     }
 
-    .hero img{
-      width:100%;
-      height:auto;
-      display:block;
-      object-fit:contain;
-      border:1px solid #e7e7e7;
-      padding:10px;
-      box-sizing:border-box;
-      background:#fff;
+    /* ── Responsive (móvil) ─────────────────────────────── */
+    @media (max-width: 640px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 20px;
+      }
+      nav a { margin-left: 0; margin-right: 14px; }
+      .obra-caption { left: 20px; bottom: 26px; }
+      .scroll-hint  { right: 20px; }
     }
 
-    .hero .cap{
-      margin-top:10px;
-      color:#444;
-      font-size:14px;
-    }
-
-    footer{
-      margin-top:48px;
-      color:#444;
-      font-size:14px;
-    }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
 
-    <header>
-      <div>
-        <h1>Marcos Gonzalez-Cutre</h1>
-        <p class="tag">Artista visual</p>
-      </div>
+  <!-- ── HEADER ───────────────────────────────────────── -->
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="statement.html">Statement</a>
+      <a href="works.html">Obras</a>
+      <a href="bio.html">Bio</a>
+      <a href="cv.html">CV</a>
+      <a href="exhibitions.html">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
 
-      <nav>
-        <a href="statement.html">Statement</a>
-        <a href="works.html">Obras</a>
-        <a href="bio.html">Bio</a>
-        <a href="cv.html">CV</a>
-        <a href="exhibitions.html">Exposiciones</a>
-        <a href="contact.html">Contacto</a>
-      </nav>
-    </header>
 
-    <section class="hero">
-      <img src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-      <div class="cap">
-        Obra destacada (Rizoma, 2025, Óleo sobre tela, 230×203 cm)
-      </div>
-    </section>
+  <!-- ══════════════════════════════════════════════════
+       OBRAS — duplicá este bloque para añadir más imágenes.
+       Solo cambiá: src="./assets/NombreArchivo.jpg"
+                    alt, el título y los datos de la obra.
+  ══════════════════════════════════════════════════════ -->
 
-    <footer>
-      © <script>document.write(new Date().getFullYear())</script>
-      Marcos Gonzalez-Cutre
-    </footer>
+  <section class="obra">
+    <img src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
+    <div class="obra-caption">
+      Rizoma, 2025<br>
+      Óleo sobre tela — 230 × 203 cm
+    </div>
+    <div class="scroll-hint">↓</div>
+  </section>
 
-  </div>
+  <!-- EJEMPLO: descomentá y editá para agregar obras -->
+  <!--
+  <section class="obra">
+    <img src="./assets/OtraObra.jpeg" alt="Nombre de la obra">
+    <div class="obra-caption">
+      Título de la obra, Año<br>
+      Técnica — Dimensiones
+    </div>
+  </section>
+  -->
+
+
+  <!-- ── FOOTER ───────────────────────────────────────── -->
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+
 </body>
 </html>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>CV — Marcos Gonzalez-Cutre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #fff;
+      color: #111;
+      line-height: 1.65;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+    .site-title .tag { color: #666; font-size: 12px; margin-top: 1px; }
+    nav a { margin-left: 22px; text-decoration: none; color: #111; font-size: 13px; letter-spacing: .3px; }
+    nav a:hover { text-decoration: underline; }
+    nav a.active { text-decoration: underline; }
+
+    .page-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 130px 20px 80px;
+    }
+    .page-title {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 48px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SECCIONES DEL CV
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .cv-section {
+      margin-bottom: 44px;
+    }
+    .cv-section h2 {
+      font-size: 11px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* Cada entrada del CV */
+    .cv-item {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .cv-year {
+      color: #999;
+      min-width: 44px;
+      flex-shrink: 0;
+    }
+    .cv-desc {
+      color: #1a1a1a;
+    }
+
+    footer {
+      padding: 30px 40px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
+      nav a { margin-left: 0; margin-right: 14px; }
+      .cv-item { flex-direction: column; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="statement.html">Statement</a>
+      <a href="works.html">Obras</a>
+      <a href="bio.html">Bio</a>
+      <a href="cv.html" class="active">CV</a>
+      <a href="exhibitions.html">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <p class="page-title">CV</p>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         ✏️ CÓMO EDITAR: cambiá los textos entre las etiquetas.
+         Para agregar una entrada nueva, copiá un bloque <div class="cv-item">
+         Para agregar una sección nueva, copiá un bloque <div class="cv-section">
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+
+    <!-- EDUCACIÓN -->
+    <div class="cv-section">
+      <h2>Educación</h2>
+
+      <div class="cv-item">
+        <span class="cv-year">2020</span>
+        <span class="cv-desc">Licenciatura en Artes, Universidad de [nombre], [ciudad]</span>
+      </div>
+
+      <div class="cv-item">
+        <span class="cv-year">2018</span>
+        <span class="cv-desc">Curso o taller relevante, institución, ciudad</span>
+      </div>
+    </div>
+
+    <!-- EXPOSICIONES INDIVIDUALES -->
+    <div class="cv-section">
+      <h2>Exposiciones individuales</h2>
+
+      <div class="cv-item">
+        <span class="cv-year">2025</span>
+        <span class="cv-desc">Nombre de la exposición, Galería / Espacio, Ciudad</span>
+      </div>
+
+      <div class="cv-item">
+        <span class="cv-year">2023</span>
+        <span class="cv-desc">Nombre de la exposición, Galería / Espacio, Ciudad</span>
+      </div>
+    </div>
+
+    <!-- EXPOSICIONES COLECTIVAS -->
+    <div class="cv-section">
+      <h2>Exposiciones colectivas</h2>
+
+      <div class="cv-item">
+        <span class="cv-year">2024</span>
+        <span class="cv-desc">Nombre de la expo colectiva, Espacio, Ciudad</span>
+      </div>
+
+      <div class="cv-item">
+        <span class="cv-year">2022</span>
+        <span class="cv-desc">Nombre de la expo colectiva, Espacio, Ciudad</span>
+      </div>
+    </div>
+
+    <!-- PREMIOS Y BECAS -->
+    <div class="cv-section">
+      <h2>Premios y becas</h2>
+
+      <div class="cv-item">
+        <span class="cv-year">2024</span>
+        <span class="cv-desc">Nombre del premio o beca, institución</span>
+      </div>
+    </div>
+
+    <!-- RESIDENCIAS -->
+    <div class="cv-section">
+      <h2>Residencias</h2>
+
+      <div class="cv-item">
+        <span class="cv-year">2023</span>
+        <span class="cv-desc">Nombre de la residencia, ciudad, país</span>
+      </div>
+    </div>
+
+    <!-- COLECCIONES (opcional, borrá si no aplica) -->
+    <div class="cv-section">
+      <h2>Colecciones</h2>
+
+      <div class="cv-item">
+        <span class="cv-year"></span>
+        <span class="cv-desc">Nombre de la colección o institución, ciudad</span>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+</body>
+</html>

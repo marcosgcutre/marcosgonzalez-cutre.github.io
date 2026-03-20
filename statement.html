@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Statement — Marcos Gonzalez-Cutre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #fff;
+      color: #111;
+      line-height: 1.7;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+    .site-title .tag { color: #666; font-size: 12px; margin-top: 1px; }
+    nav a { margin-left: 22px; text-decoration: none; color: #111; font-size: 13px; letter-spacing: .3px; }
+    nav a:hover { text-decoration: underline; }
+    nav a.active { text-decoration: underline; }
+
+    .page-content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 130px 20px 80px;
+    }
+    .page-title {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 36px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       EDITÁ EL TEXTO dentro de las etiquetas <p>
+       Para agregar un párrafo nuevo, copiá una línea <p>...</p>
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .statement p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+
+    footer {
+      padding: 30px 40px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
+      nav a { margin-left: 0; margin-right: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="statement.html" class="active">Statement</a>
+      <a href="works.html">Obras</a>
+      <a href="bio.html">Bio</a>
+      <a href="cv.html">CV</a>
+      <a href="exhibitions.html">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <p class="page-title">Statement</p>
+
+    <div class="statement">
+
+      <!-- ✏️ CAMBIÁ ESTE TEXTO por tu statement artístico -->
+      <p>
+        Escribí acá tu primer párrafo. Podés hablar de tu práctica, tus materiales,
+        lo que te interesa explorar en tu trabajo.
+      </p>
+
+      <p>
+        Segundo párrafo. Podés hablar de tus influencias, tu proceso, o lo que
+        buscás generar en el espectador.
+      </p>
+
+      <p>
+        Tercer párrafo. Podés agregar todos los párrafos que necesites
+        duplicando estas líneas.
+      </p>
+      <!-- ✏️ FIN DEL TEXTO A EDITAR -->
+
+    </div>
+  </main>
+
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+</body>
+</html>

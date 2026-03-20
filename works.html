@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Obras — Marcos Gonzalez-Cutre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #111;
+      color: #fff;
+      line-height: 1.55;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+    .site-title .tag { color: #aaa; font-size: 12px; margin-top: 1px; }
+    nav a { margin-left: 22px; text-decoration: none; color: #ddd; font-size: 13px; letter-spacing: .3px; }
+    nav a:hover { text-decoration: underline; }
+    nav a.active { text-decoration: underline; color: #fff; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CADA .obra = UNA PINTURA A PANTALLA COMPLETA
+       Para agregar una obra: copiá el bloque <section class="obra">
+       Cambiá: src, alt, título y datos
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .obra {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .obra img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    .obra-caption {
+      position: absolute;
+      bottom: 36px;
+      left: 44px;
+      color: #fff;
+      font-size: 13px;
+      letter-spacing: .4px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+      line-height: 1.6;
+    }
+    .obra-num {
+      position: absolute;
+      top: 80px;
+      right: 44px;
+      color: rgba(255,255,255,0.35);
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .scroll-hint {
+      position: absolute;
+      bottom: 24px;
+      right: 44px;
+      color: rgba(255,255,255,0.5);
+      font-size: 20px;
+      animation: bounce 2s infinite;
+      cursor: default;
+      user-select: none;
+    }
+    .scroll-hint.last { display: none; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(6px); }
+    }
+
+    footer {
+      padding: 30px 40px;
+      color: #555;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #222;
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
+      nav a { margin-left: 0; margin-right: 14px; }
+      .obra-caption { left: 20px; bottom: 26px; }
+      .scroll-hint { right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="statement.html">Statement</a>
+      <a href="works.html" class="active">Obras</a>
+      <a href="bio.html">Bio</a>
+      <a href="cv.html">CV</a>
+      <a href="exhibitions.html">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
+
+
+  <!-- ✏️ OBRA 1 — Cambiá src, alt, título y datos -->
+  <section class="obra">
+    <img src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
+    <div class="obra-caption">
+      Rizoma, 2025<br>
+      Óleo sobre tela — 230 × 203 cm
+    </div>
+    <div class="obra-num">01</div>
+    <div class="scroll-hint">↓</div>
+  </section>
+
+  <!-- ✏️ OBRA 2 — Copiá este bloque entero para cada obra nueva -->
+  <!--
+  <section class="obra">
+    <img src="./assets/NombreDelArchivo.jpeg" alt="Nombre de la obra">
+    <div class="obra-caption">
+      Título de la obra, Año<br>
+      Técnica — Ancho × Alto cm
+    </div>
+    <div class="obra-num">02</div>
+    <div class="scroll-hint">↓</div>
+  </section>
+  -->
+
+  <!-- ✏️ OBRA 3 -->
+  <!--
+  <section class="obra">
+    <img src="./assets/OtraObra.jpeg" alt="Nombre de la obra">
+    <div class="obra-caption">
+      Título, Año<br>
+      Técnica — Dimensiones
+    </div>
+    <div class="obra-num">03</div>
+    <div class="scroll-hint last">↓</div>
+  </section>
+  -->
+
+
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+</body>
+</html>

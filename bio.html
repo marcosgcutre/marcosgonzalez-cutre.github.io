@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Bio — Marcos Gonzalez-Cutre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #fff;
+      color: #111;
+      line-height: 1.7;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; }
+    .site-title .tag { color: #666; font-size: 12px; margin-top: 1px; }
+    nav a { margin-left: 22px; text-decoration: none; color: #111; font-size: 13px; letter-spacing: .3px; }
+    nav a:hover { text-decoration: underline; }
+    nav a.active { text-decoration: underline; }
+
+    .page-content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 130px 20px 80px;
+    }
+    .page-title {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 36px;
+    }
+
+    /* Foto de perfil opcional */
+    .bio-photo {
+      width: 100%;
+      max-width: 480px;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+      margin-bottom: 40px;
+      filter: grayscale(15%);
+    }
+
+    /* ✏️ EDITÁ LOS PÁRRAFOS DE TEXTO */
+    .bio-text p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+
+    footer {
+      padding: 30px 40px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+      border-top: 1px solid #eee;
+    }
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
+      nav a { margin-left: 0; margin-right: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="site-title">
+      <h1>Marcos Gonzalez-Cutre</h1>
+      <p class="tag">Artista visual</p>
+    </div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="statement.html">Statement</a>
+      <a href="works.html">Obras</a>
+      <a href="bio.html" class="active">Bio</a>
+      <a href="cv.html">CV</a>
+      <a href="exhibitions.html">Exposiciones</a>
+      <a href="contact.html">Contacto</a>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <p class="page-title">Bio</p>
+
+    <!-- ✏️ FOTO OPCIONAL: si tenés una foto tuya, poné el nombre del archivo acá.
+         Si no querés foto, borrá esta línea. -->
+    <!-- <img class="bio-photo" src="./assets/foto-marcos.jpg" alt="Marcos Gonzalez-Cutre"> -->
+
+    <div class="bio-text">
+
+      <!-- ✏️ CAMBIÁ ESTE TEXTO por tu bio -->
+      <p>
+        Marcos Gonzalez-Cutre nació en [ciudad, año]. Es artista visual
+        con base en [ciudad donde vivís].
+      </p>
+
+      <p>
+        Su trabajo explora [temas de tu práctica]. Trabaja principalmente
+        con [materiales o técnicas].
+      </p>
+
+      <p>
+        Ha participado en exposiciones en [lugares o ciudades]. Su obra
+        forma parte de colecciones [públicas/privadas] en [lugares].
+      </p>
+
+      <p>
+        Estudió en [institución, año]. Ha recibido [becas, premios o residencias
+        si los tenés].
+      </p>
+      <!-- ✏️ FIN DEL TEXTO -->
+
+    </div>
+  </main>
+
+  <footer>
+    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+  </footer>
+</body>
+</html>
