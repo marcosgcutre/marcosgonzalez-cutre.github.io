@@ -1,179 +1,542 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Marcos Gonzalez-Cutre</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Marcos Gonzalez-Cutre — Artista visual.">
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcos Gonzalez-Cutre</title>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* ── Reset ──────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'EB Garamond', serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
 
-    /* ── Base ───────────────────────────────────────────── */
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: Georgia, "Times New Roman", serif;
-      background: #fff;
-      color: #111;
-      line-height: 1.55;
-    }
+        header {
+            background: white;
+            padding: 2rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-    /* ── Header fijo ────────────────────────────────────── */
-    header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 40px;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-    }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .site-title h1 {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: .2px;
-    }
-    .site-title .tag {
-      color: #666;
-      font-size: 12px;
-      margin-top: 1px;
-    }
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
 
-    nav a {
-      margin-left: 22px;
-      text-decoration: none;
-      color: #111;
-      font-size: 13px;
-      letter-spacing: .3px;
-    }
-    nav a:hover { text-decoration: underline; }
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
 
-    /* ── Imagen a pantalla completa ─────────────────────── */
-    .obra {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-      background: #111;
-    }
+        nav a {
+            text-decoration: none;
+            color: #1a1a1a;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            border: none;
+            background: none;
+            padding: 0;
+        }
 
-    .obra img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;       /* ocupa toda la pantalla */
-      object-position: center;
-      display: block;
-      opacity: 0.97;
-    }
+        nav a:hover {
+            opacity: 0.6;
+        }
 
-    /* Caption sobre la imagen, abajo a la izquierda */
-    .obra-caption {
-      position: absolute;
-      bottom: 36px;
-      left: 44px;
-      color: #fff;
-      font-size: 13px;
-      letter-spacing: .4px;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.55);
-      line-height: 1.6;
-    }
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
 
-    /* Flecha sutil para indicar que hay más contenido */
-    .scroll-hint {
-      position: absolute;
-      bottom: 24px;
-      right: 44px;
-      color: rgba(255,255,255,0.7);
-      font-size: 22px;
-      animation: bounce 2s infinite;
-      cursor: default;
-      user-select: none;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(6px); }
-    }
+        .content-section {
+            display: none;
+        }
 
-    /* ── Footer ─────────────────────────────────────────── */
-    footer {
-      padding: 30px 40px;
-      color: #777;
-      font-size: 13px;
-      text-align: center;
-      border-top: 1px solid #eee;
-    }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
 
-    /* ── Responsive (móvil) ─────────────────────────────── */
-    @media (max-width: 640px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 14px 20px;
-      }
-      nav a { margin-left: 0; margin-right: 14px; }
-      .obra-caption { left: 20px; bottom: 26px; }
-      .scroll-hint  { right: 20px; }
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-  </style>
+        /* HOME */
+        .home-intro {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin-bottom: 4rem;
+            line-height: 1.8;
+        }
+
+        /* OBRAS */
+        .series {
+            margin-bottom: 5rem;
+        }
+
+        .series-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            margin-top: 3rem;
+        }
+
+        .series-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .work-item {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .work-image {
+            width: 100%;
+            height: 300px;
+            background: #f0f0f0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .work-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .work-info {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* EXHIBICIONES */
+        .exhibition {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .exhibition:last-child {
+            border-bottom: none;
+        }
+
+        .exhibition-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .exhibition-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        /* PRENSA */
+        .press-item {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .press-item:last-child {
+            border-bottom: none;
+        }
+
+        .press-image {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .press-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .press-publication {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        /* BIO / STATEMENT / CV */
+        .bio-text {
+            max-width: 900px;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .section-subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cv-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .cv-item {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .cv-item-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .cv-item-info {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        /* CONTACTO */
+        .contact-info {
+            max-width: 600px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .contact-info a {
+            color: #1a1a1a;
+            text-decoration: none;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .contact-info a:hover {
+            opacity: 0.6;
+        }
+
+        footer {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #999;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            nav {
+                gap: 1rem;
+                flex-wrap: wrap;
+            }
+
+            nav a {
+                font-size: 0.85rem;
+            }
+
+            main {
+                padding: 2rem 1.5rem;
+            }
+
+            .works-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <div class="header-content">
+            <h1>MARCOS GONZALEZ-CUTRE</h1>
+            <nav>
+                <a onclick="showSection('home')">Home</a>
+                <a onclick="showSection('obras')">Obras</a>
+                <a onclick="showSection('exhibiciones')">Exhibiciones</a>
+                <a onclick="showSection('prensa')">Prensa</a>
+                <a onclick="showSection('bio')">Bio</a>
+                <a onclick="showSection('statement')">Statement</a>
+                <a onclick="showSection('cv')">CV</a>
+                <a onclick="showSection('contacto')">Contacto</a>
+            </nav>
+        </div>
+    </header>
 
-  <!-- ── HEADER ───────────────────────────────────────── -->
-  <header>
-    <div class="site-title">
-      <h1>Marcos Gonzalez-Cutre</h1>
-      <p class="tag">Artista visual</p>
-    </div>
-    <nav>
-      <a href="statement.html">Statement</a>
-      <a href="works.html">Obras</a>
-      <a href="bio.html">Bio</a>
-      <a href="cv.html">CV</a>
-      <a href="exhibitions.html">Exposiciones</a>
-      <a href="contact.html">Contacto</a>
-    </nav>
-  </header>
+    <main>
+        <!-- HOME -->
+        <section id="home" class="content-section active">
+            <div class="home-intro">
+                <p>Artista visual basado en Buenos Aires. Trabajo principalmente con óleo sobre canvas, explorando la sedimentation del canon artístico y la metabolismo de la historia del arte.</p>
+            </div>
+        </section>
 
+        <!-- OBRAS -->
+        <section id="obras" class="content-section">
+            <div class="series">
+                <h2 class="series-title">¿Brava o mansa?</h2>
+                <div class="works-grid">
+                    <div class="work-item">
+                        <div class="work-image">[Obra 1]</div>
+                        <div class="work-title">Título</div>
+                        <div class="work-info">Año, Técnica, Dimensiones</div>
+                    </div>
+                </div>
+            </div>
 
-  <!-- ══════════════════════════════════════════════════
-       OBRAS — duplicá este bloque para añadir más imágenes.
-       Solo cambiá: src="./assets/NombreArchivo.jpg"
-                    alt, el título y los datos de la obra.
-  ══════════════════════════════════════════════════════ -->
+            <div class="series">
+                <h2 class="series-title">Erosión del canon</h2>
+                <div class="works-grid">
+                    <div class="work-item">
+                        <div class="work-image">[Obra 1]</div>
+                        <div class="work-title">Título</div>
+                        <div class="work-info">Año, Técnica, Dimensiones</div>
+                    </div>
+                </div>
+            </div>
 
-  <section class="obra">
-    <img src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-    <div class="obra-caption">
-      Rizoma, 2025<br>
-      Óleo sobre tela — 230 × 203 cm
-    </div>
-    <div class="scroll-hint">↓</div>
-  </section>
+            <div class="series">
+                <h2 class="series-title">Buenos Aires</h2>
+                <div class="works-grid">
+                    <div class="work-item">
+                        <div class="work-image">[Obra 1]</div>
+                        <div class="work-title">Título</div>
+                        <div class="work-info">Año, Técnica, Dimensiones</div>
+                    </div>
+                </div>
+            </div>
 
-  <!-- EJEMPLO: descomentá y editá para agregar obras -->
-  <!--
-  <section class="obra">
-    <img src="./assets/OtraObra.jpeg" alt="Nombre de la obra">
-    <div class="obra-caption">
-      Título de la obra, Año<br>
-      Técnica — Dimensiones
-    </div>
-  </section>
-  -->
+            <div class="series">
+                <h2 class="series-title">Jantus (2014-2022)</h2>
+                <div class="works-grid">
+                    <div class="work-item">
+                        <div class="work-image">[Obra 1]</div>
+                        <div class="work-title">Título</div>
+                        <div class="work-info">Año, Técnica, Dimensiones</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <!-- EXHIBICIONES -->
+        <section id="exhibiciones" class="content-section">
+            <h2 class="series-title">Exhibiciones</h2>
+            
+            <div class="section-subtitle">Individuales</div>
+            <div class="exhibition">
+                <div class="exhibition-title">Título Exposición</div>
+                <div class="exhibition-info">Galería, Ciudad, País, Año</div>
+            </div>
 
-  <!-- ── FOOTER ───────────────────────────────────────── -->
-  <footer>
-    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
-  </footer>
+            <div class="section-subtitle">Colectivas</div>
+            <div class="exhibition">
+                <div class="exhibition-title">Título Exposición</div>
+                <div class="exhibition-info">Espacio, Ciudad, País, Año</div>
+            </div>
 
+            <div class="section-subtitle">Ferias</div>
+            <div class="exhibition">
+                <div class="exhibition-title">Feria de Arte</div>
+                <div class="exhibition-info">Ciudad, País, Año</div>
+            </div>
+        </section>
+
+        <!-- PRENSA -->
+        <section id="prensa" class="content-section">
+            <h2 class="series-title">Prensa</h2>
+            <div class="press-item">
+                <img src="assets/bonart-1.png" alt="Bonart" class="press-image" style="max-width: 600px;">
+                <div class="press-publication">Bonart - Barcelona, 2018</div>
+            </div>
+            <div class="press-item">
+                <img src="assets/bonart-2.png" alt="Bonart" class="press-image" style="max-width: 600px;">
+                <div class="press-publication">Bonart - Barcelona, 2018</div>
+            </div>
+            <div class="press-item">
+                <img src="assets/bonart-3.png" alt="Bonart" class="press-image" style="max-width: 600px;">
+                <div class="press-publication">Bonart - Barcelona, 2018</div>
+            </div>
+        </section>
+
+        <!-- BIO -->
+        <section id="bio" class="content-section">
+            <h2 class="series-title">Biografía</h2>
+            <div class="bio-text">
+                <p>Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino que actualmente estudia la Licenciatura en Arte en la Universidad de Palermo. Estudió en la Universidad Nacional de las Artes y realizó el Fine Arts Program en la Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff), Alemania (2014). Se formó con Laura Varangot y Richard Sturgeon.</p>
+                <p style="margin-top: 1.5rem;">Expuso en Barcelona, Nueva York y Buenos Aires y en exhibiciones colectivas en Río de Janeiro, Londres, Helsinki, Osaka, Tokio y Seúl.</p>
+            </div>
+        </section>
+
+        <!-- STATEMENT -->
+        <section id="statement" class="content-section">
+            <h2 class="series-title">Statement</h2>
+            <div class="bio-text">
+                <p>Para mí, pintar es una conversación incesante con los materiales y el espacio. El óleo me eleva espiritualmente, me hipnotiza con su olor y textura, me erotiza. Cada pincelada es un gesto de goce y entrega. Intento traducir en mis pinturas lo que siento al ver las obras de los artistas que amo, como si hubiera recibido un mensaje en algún museo, galería o taller.</p>
+                <p style="margin-top: 1.5rem;">Sueño con hacer una obra gigante, instalativa, que necesite horas, años para ser recorrida, una obra magna capaz de producir un estruendo memorable.</p>
+            </div>
+        </section>
+
+        <!-- CV -->
+        <section id="cv" class="content-section">
+            <h2 class="series-title">CV</h2>
+            
+            <div class="cv-section">
+                <div class="section-subtitle">Educación</div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Licenciatura en Arte</div>
+                    <div class="cv-item-info">Universidad de Palermo (actualmente)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Licenciatura en Arte</div>
+                    <div class="cv-item-info">Universidad Nacional de las Artes, 2014-2017</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Fine Arts Program</div>
+                    <div class="cv-item-info">Kunstgut Fine Arts Academy of Berlin, Alemania (2014)</div>
+                </div>
+            </div>
+
+            <div class="cv-section">
+                <div class="section-subtitle">Talleres</div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Taller de Pintura</div>
+                    <div class="cv-item-info">Richard Sturgeon</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Taller de Dibujo y Modelo Vivo</div>
+                    <div class="cv-item-info">Laura Varangot</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Taller de Dibujo</div>
+                    <div class="cv-item-info">Juan Bernárdez</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Taller de Dibujo</div>
+                    <div class="cv-item-info">Ricardo Conte</div>
+                </div>
+            </div>
+
+            <div class="cv-section">
+                <div class="section-subtitle">Exhibiciones Individuales</div>
+                <div class="cv-item">
+                    <div class="cv-item-title">XXI C. Paintings</div>
+                    <div class="cv-item-info">Jantus, ArtLab, Nueva York, Estados Unidos (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">L'enfant Brut</div>
+                    <div class="cv-item-info">Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-title">Jantus</div>
+                    <div class="cv-item-info">Galería Cor, Barcelona, España (2018)</div>
+                </div>
+            </div>
+
+            <div class="cv-section">
+                <div class="section-subtitle">Ferias</div>
+                <div class="cv-item">
+                    <div class="cv-item-info">ArtExpo New York, Nueva York, Estados Unidos (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Parallax Art Fair, Londres, Reino Unido (2018)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Tokyo International Art Fair, Tokio, Japón (2018)</div>
+                </div>
+            </div>
+
+            <div class="cv-section">
+                <div class="section-subtitle">Exposiciones Colectivas (selección)</div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Ministerio de Cultura de Benito Juárez, Argentina (2024)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Departamento 112, Buenos Aires, Argentina (2024)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Varkaus Stadsbibliotek, Varkaus, Finlandia (2022)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">AVA Art Festival, Osaka, Japón (2022)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">MAJO, Museo Fundación Romulo Raggio, Buenos Aires (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Centro Cultural dos Correios, Río de Janeiro, Brasil (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">30 under 30, Viridian Gallery, Nueva York (2019)</div>
+                </div>
+                <div class="cv-item">
+                    <div class="cv-item-info">Kaapelitehdas, Helsinki, Finlandia (2018)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACTO -->
+        <section id="contacto" class="content-section">
+            <h2 class="series-title">Contacto</h2>
+            <div class="contact-info">
+                <p><a href="mailto:contacto@marcosgonzalezcutre.com">contacto@marcosgonzalezcutre.com</a></p>
+                <p style="margin-top: 1rem;"><a href="https://instagram.com/marcosgonzalezcutre" target="_blank">@marcosgonzalezcutre</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Marcos Gonzalez-Cutre. Buenos Aires, Argentina.</p>
+    </footer>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+    </script>
 </body>
 </html>
