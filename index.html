@@ -7,181 +7,101 @@
   <meta name="description" content="Marcos Gonzalez-Cutre, artista visual. Óleo sobre tela.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
     body {
       font-family: Georgia, "Times New Roman", serif;
       background: #fff;
       color: #111;
-      line-height: 1.7;
+      line-height: 1.6;
     }
-    header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 40px;
-      background: rgba(17,17,17,0.92);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .site-title h1 { font-size: 20px; font-weight: 600; letter-spacing: .2px; color: #fff; }
-    .site-title .tag { color: #aaa; font-size: 12px; margin-top: 1px; }
-    nav a { margin-left: 22px; text-decoration: none; color: #ddd; font-size: 13px; letter-spacing: .3px; }
-    nav a:hover { text-decoration: underline; }
-    nav a.active { text-decoration: underline; color: #fff; }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       HERO — obra a pantalla completa
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    .hero {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-      background: #111;
-    }
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      opacity: .92;
-    }
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 40%);
-      pointer-events: none;
-    }
-    .hero-caption {
-      position: absolute;
-      bottom: 44px;
-      left: 44px;
-      color: #fff;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
-    }
-    .hero-caption .name {
-      font-size: 15px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      opacity: .85;
-      margin-bottom: 10px;
-    }
-    .hero-caption .work {
-      font-size: 14px;
-      letter-spacing: .4px;
-      color: #ccc;
-    }
-    .scroll-hint {
-      position: absolute;
-      bottom: 24px;
-      right: 44px;
-      color: rgba(255,255,255,0.5);
-      font-size: 20px;
-      animation: bounce 2s infinite;
-      user-select: none;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(6px); }
-    }
-
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       INTRO
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    .intro {
+    .wrap {
       max-width: 640px;
       margin: 0 auto;
-      padding: 110px 20px 90px;
+      padding: 90px 24px 80px;
     }
-    .page-title {
+    h1 {
+      font-size: 40px;
+      font-weight: 400;
+      letter-spacing: .2px;
+      margin-bottom: 8px;
+    }
+    .tag {
+      color: #777;
+      font-size: 16px;
+      margin-bottom: 56px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SERIES — lista simple, sin imágenes
+       ✏️ Para agregar/quitar una serie, editá las líneas de abajo
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .label {
       font-size: 13px;
       letter-spacing: 1.5px;
       text-transform: uppercase;
       color: #999;
-      margin-bottom: 36px;
+      margin-bottom: 14px;
     }
-    .intro p {
+    .series-list {
+      font-size: 19px;
+      margin-bottom: 56px;
+    }
+    .series-list div {
+      margin-bottom: 4px;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       NAVEGACIÓN — links de texto, sin header fijo
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    nav {
       font-size: 16px;
-      margin-bottom: 24px;
-      color: #1a1a1a;
     }
-    .intro .more {
-      display: inline-block;
-      margin-top: 12px;
-      font-size: 14px;
-      letter-spacing: .3px;
+    nav a {
       color: #111;
       text-decoration: none;
       border-bottom: 1px solid #ccc;
     }
-    .intro .more:hover { border-bottom-color: #111; }
+    nav a:hover { border-bottom-color: #111; }
+    nav .sep {
+      color: #ccc;
+      margin: 0 10px;
+    }
 
     footer {
-      padding: 30px 40px;
-      color: #777;
+      margin-top: 90px;
+      color: #999;
       font-size: 13px;
-      text-align: center;
-      border-top: 1px solid #eee;
     }
+
     @media (max-width: 640px) {
-      header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 20px; }
-      nav a { margin-left: 0; margin-right: 14px; }
-      .hero-caption { left: 20px; bottom: 26px; }
-      .scroll-hint { right: 20px; }
+      .wrap { padding: 60px 20px 60px; }
+      h1 { font-size: 32px; }
+      nav { line-height: 2.2; }
+      nav .sep { display: none; }
+      nav a { display: block; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="site-title">
-      <h1>Marcos Gonzalez-Cutre</h1>
-      <p class="tag">Artista visual</p>
+  <div class="wrap">
+    <h1>Marcos Gonzalez-Cutre</h1>
+    <p class="tag">Artista visual — Buenos Aires</p>
+
+    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas -->
+    <p class="label">Series</p>
+    <div class="series-list">
+      <div>¿Brava o mansa?</div>
+      <div>Erosión del canon</div>
+      <div>Buenos Aires</div>
+      <div>Jantus (2014–2022)</div>
     </div>
+
     <nav>
-      <a href="index.html" class="active">Inicio</a>
-      <a href="statement.html">Statement</a>
-      <a href="works.html">Obras</a>
-      <a href="bio.html">Bio</a>
-      <a href="cv.html">CV</a>
-      <a href="exhibitions.html">Exposiciones</a>
-      <a href="contact.html">Contacto</a>
+      <a href="bio.html">Bio</a><span class="sep">·</span><a href="statement.html">Statement</a><span class="sep">·</span><a href="cv.html">CV</a><span class="sep">·</span><a href="works.html">Portfolio</a><span class="sep">·</span><a href="exhibitions.html">Exposiciones</a><span class="sep">·</span><a href="contact.html">Contacto</a>
     </nav>
-  </header>
 
-  <section class="hero">
-    <img src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-    <div class="hero-caption">
-      <div class="name">Marcos Gonzalez-Cutre</div>
-      <div class="work">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</div>
-    </div>
-    <div class="scroll-hint">↓</div>
-  </section>
-
-  <main class="intro">
-    <p class="page-title">Inicio</p>
-
-    <!-- ✏️ CAMBIÁ ESTE TEXTO por tu presentación -->
-    <p>
-      Artista visual basado en Buenos Aires. Trabajo principalmente con óleo sobre tela,
-      explorando la sedimentación del canon artístico y el metabolismo de la historia del arte.
-    </p>
-    <p>
-      Expuse en Barcelona, Nueva York y Buenos Aires, y en exhibiciones colectivas en
-      Río de Janeiro, Londres, Helsinki, Osaka, Tokio y Seúl.
-    </p>
-    <!-- ✏️ FIN DEL TEXTO -->
-
-    <a class="more" href="works.html">Ver obras →</a>
-  </main>
-
-  <footer>
-    © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
-  </footer>
+    <footer>
+      © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
+    </footer>
+  </div>
 </body>
 </html>
