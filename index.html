@@ -8,96 +8,75 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
       background: #fff;
       color: #111;
-      line-height: 1.6;
+      line-height: 1.55;
+      font-size: 19px;
     }
     .wrap {
-      max-width: 640px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 90px 24px 80px;
+      padding: 60px 24px 90px;
     }
     h1 {
-      font-size: 40px;
+      font-family: Georgia, "Times New Roman", serif;
       font-weight: 400;
+      font-size: 46px;
       letter-spacing: .2px;
-      margin-bottom: 8px;
-    }
-    .tag {
-      color: #777;
-      font-size: 16px;
-      margin-bottom: 56px;
+      color: #1a1a1a;
+      margin-bottom: 34px;
     }
 
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       SERIES — lista simple, sin imágenes
-       ✏️ Para agregar/quitar una serie, editá las líneas de abajo
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    .label {
-      font-size: 13px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #999;
-      margin-bottom: 14px;
-    }
-    .series-list {
-      font-size: 19px;
-      margin-bottom: 56px;
-    }
-    .series-list div {
-      margin-bottom: 4px;
-    }
+    p { margin-bottom: 2px; }
+    .block { margin-bottom: 34px; }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       NAVEGACIÓN — links de texto, sin header fijo
+       SERIES — ✏️ editá o agregá líneas acá
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    nav {
-      font-size: 16px;
-    }
-    nav a {
-      color: #111;
-      text-decoration: none;
-      border-bottom: 1px solid #ccc;
-    }
-    nav a:hover { border-bottom-color: #111; }
-    nav .sep {
-      color: #ccc;
-      margin: 0 10px;
-    }
+    .series-item { font-style: italic; }
+
+    a { color: #111; text-decoration: none; border-bottom: 1px solid #111; }
+    a:hover { opacity: .6; }
 
     footer {
-      margin-top: 90px;
+      margin-top: 50px;
       color: #999;
-      font-size: 13px;
+      font-size: 14px;
     }
 
     @media (max-width: 640px) {
-      .wrap { padding: 60px 20px 60px; }
-      h1 { font-size: 32px; }
-      nav { line-height: 2.2; }
-      nav .sep { display: none; }
-      nav a { display: block; }
+      body { font-size: 17px; }
+      h1 { font-size: 34px; }
+      .wrap { padding: 40px 20px 70px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Marcos Gonzalez-Cutre</h1>
-    <p class="tag">Artista visual — Buenos Aires</p>
 
-    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas -->
-    <p class="label">Series</p>
-    <div class="series-list">
-      <div>¿Brava o mansa?</div>
-      <div>Erosión del canon</div>
-      <div>Buenos Aires</div>
-      <div>Jantus (2014–2022)</div>
+    <div class="block">
+      <p>Artista visual — Buenos Aires</p>
     </div>
 
-    <nav>
-      <a href="bio.html">Bio</a><span class="sep">·</span><a href="statement.html">Statement</a><span class="sep">·</span><a href="cv.html">CV</a><span class="sep">·</span><a href="works.html">Portfolio</a><span class="sep">·</span><a href="exhibitions.html">Exposiciones</a><span class="sep">·</span><a href="contact.html">Contacto</a>
-    </nav>
+    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas -->
+    <div class="block">
+      <p>Series:</p>
+      <p class="series-item">¿Brava o mansa?</p>
+      <p class="series-item">Erosión del canon</p>
+      <p class="series-item">Buenos Aires</p>
+      <p class="series-item">Jantus (2014–2022)</p>
+    </div>
+
+    <div class="block">
+      <p><a href="bio.html">Bio</a></p>
+      <p><a href="statement.html">Statement</a></p>
+      <p><a href="cv.html">CV</a></p>
+      <p><a href="works.html">Portfolio</a></p>
+      <p><a href="exhibitions.html">Exposiciones</a></p>
+      <p><a href="contact.html">Contacto</a></p>
+    </div>
 
     <footer>
       © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
