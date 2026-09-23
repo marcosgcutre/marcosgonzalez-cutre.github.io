@@ -7,7 +7,6 @@
   <meta name="description" content="Marcos Gonzalez-Cutre, artista visual. Óleo sobre tela.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
     body {
       font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
       background: #fff;
@@ -32,36 +31,42 @@
     p { margin-bottom: 0; }
     .block { margin-bottom: 22px; }
 
+    a, .toggle {
+      color: #111;
+      text-decoration: none;
+      border-bottom: 1px solid #111;
+      cursor: pointer;
+      background: none;
+      border-top: none; border-left: none; border-right: none;
+      font: inherit;
+      font-style: inherit;
+      padding: 0;
+      display: inline-block;
+    }
+    a:hover, .toggle:hover { opacity: .6; }
     .series-item { font-style: italic; }
 
-    a { color: #111; text-decoration: none; border-bottom: 1px solid #111; }
-    a:hover { opacity: .6; }
-
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       SECCIONES — todo vive en esta misma página,
-       los links de arriba solo hacen scroll hasta acá
+       ACORDEÓN — click en un título, se abre el contenido ahí mismo
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    section {
-      margin-top: 80px;
-      padding-top: 22px;
-      border-top: 1px solid #eee;
+    .item { margin-bottom: 2px; }
+    .toggle.open { border-bottom-color: #ccc; }
+    .panel {
+      display: none;
+      padding: 14px 0 18px 0;
+      margin-bottom: 6px;
     }
-    section h2 {
-      font-family: Georgia, "Times New Roman", serif;
-      font-weight: 400;
-      font-size: 24px;
-      color: #1a1a1a;
-      margin-bottom: 18px;
-    }
-    section .block p { margin-bottom: 14px; }
-    section h3 {
+    .panel.open { display: block; }
+
+    .panel .block p { margin-bottom: 14px; }
+    .panel h3 {
       font-size: 13px;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       color: #999;
-      margin: 26px 0 10px;
+      margin: 22px 0 10px;
     }
-    section h3:first-of-type { margin-top: 0; }
+    .panel h3:first-of-type { margin-top: 0; }
 
     .entry { margin-bottom: 10px; }
     .entry .y { color: #999; margin-right: 8px; }
@@ -75,11 +80,10 @@
     .work-caption {
       color: #666;
       font-size: 16px;
-      margin-bottom: 30px;
     }
 
     footer {
-      margin-top: 60px;
+      margin-top: 40px;
       color: #999;
       font-size: 14px;
     }
@@ -88,7 +92,6 @@
       body { font-size: 18px; }
       h1 { font-size: 28px; }
       .wrap { padding: 22px 20px 50px; }
-      section { margin-top: 56px; }
     }
   </style>
 </head>
@@ -96,162 +99,185 @@
   <div class="wrap">
     <h1>Marcos Gonzalez-Cutre</h1>
 
-    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas -->
+    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio. -->
     <div class="block">
-      <p class="series-item"><a href="#portfolio">¿Brava o mansa?</a></p>
-      <p class="series-item"><a href="#portfolio">Erosión del canon</a></p>
-      <p class="series-item"><a href="#portfolio">Buenos Aires</a></p>
-      <p class="series-item"><a href="#portfolio">Jantus (2014–2022)</a></p>
-    </div>
-
-    <div class="block">
-      <p><a href="#bio">Bio</a></p>
-      <p><a href="#statement">Statement</a></p>
-      <p><a href="#cv">CV</a></p>
-      <p><a href="#portfolio">Portfolio</a></p>
-      <p><a href="#exposiciones">Exposiciones</a></p>
-      <p><a href="#contacto">Contacto</a></p>
+      <div class="item"><a class="series-item toggle" data-target="portfolio">¿Brava o mansa?</a></div>
+      <div class="item"><a class="series-item toggle" data-target="portfolio">Erosión del canon</a></div>
+      <div class="item"><a class="series-item toggle" data-target="portfolio">Buenos Aires</a></div>
+      <div class="item"><a class="series-item toggle" data-target="portfolio">Jantus (2014–2022)</a></div>
     </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          BIO
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="bio">
-      <h2>Bio</h2>
-      <div class="block">
-        <p>
-          Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino que
-          actualmente estudia la Licenciatura en Arte en la Universidad de Palermo.
-          Estudió en la Universidad Nacional de las Artes y realizó el Fine Arts
-          Program en la Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff),
-          Alemania (2014). Se formó con Laura Varangot y Richard Sturgeon.
-        </p>
-        <p>
-          Expuso en Barcelona, Nueva York y Buenos Aires, y en exhibiciones
-          colectivas en Río de Janeiro, Londres, Helsinki, Osaka, Tokio y Seúl.
-        </p>
+    <div class="item">
+      <a class="toggle" data-target="bio">Bio</a>
+      <div class="panel" id="panel-bio">
+        <div class="block">
+          <p>
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino que
+            actualmente estudia la Licenciatura en Arte en la Universidad de Palermo.
+            Estudió en la Universidad Nacional de las Artes y realizó el Fine Arts
+            Program en la Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff),
+            Alemania (2014). Se formó con Laura Varangot y Richard Sturgeon.
+          </p>
+          <p>
+            Expuso en Barcelona, Nueva York y Buenos Aires, y en exhibiciones
+            colectivas en Río de Janeiro, Londres, Helsinki, Osaka, Tokio y Seúl.
+          </p>
+        </div>
       </div>
-    </section>
+    </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          STATEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="statement">
-      <h2>Statement</h2>
-      <div class="block">
-        <p>
-          Para mí, pintar es una conversación incesante con los materiales que uso
-          y el espacio donde realizo mi práctica. El óleo me eleva espiritualmente,
-          me hipnotiza con su olor y textura, me erotiza. Intento traducir en mis
-          pinturas lo que siento al ver las obras de los artistas que amo, como si
-          hubiera recibido un mensaje en algún museo, galería, taller.
-        </p>
-        <p>
-          Hago pinturas de gran formato con una paleta que va cambiando:
-          composiciones que no cuentan con un punto focal particular sino que
-          permiten al espectador forjar su propio recorrido visual.
-        </p>
-        <p>
-          Sueño con hacer una obra gigante, instalativa, que necesite horas, años
-          para ser recorrida, una obra magna capaz de producir un estruendo
-          memorable.
-        </p>
+    <div class="item">
+      <a class="toggle" data-target="statement">Statement</a>
+      <div class="panel" id="panel-statement">
+        <div class="block">
+          <p>
+            Para mí, pintar es una conversación incesante con los materiales que uso
+            y el espacio donde realizo mi práctica. El óleo me eleva espiritualmente,
+            me hipnotiza con su olor y textura, me erotiza. Intento traducir en mis
+            pinturas lo que siento al ver las obras de los artistas que amo, como si
+            hubiera recibido un mensaje en algún museo, galería, taller.
+          </p>
+          <p>
+            Hago pinturas de gran formato con una paleta que va cambiando:
+            composiciones que no cuentan con un punto focal particular sino que
+            permiten al espectador forjar su propio recorrido visual.
+          </p>
+          <p>
+            Sueño con hacer una obra gigante, instalativa, que necesite horas, años
+            para ser recorrida, una obra magna capaz de producir un estruendo
+            memorable.
+          </p>
+        </div>
       </div>
-    </section>
+    </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          CV
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="cv">
-      <h2>CV</h2>
+    <div class="item">
+      <a class="toggle" data-target="cv">CV</a>
+      <div class="panel" id="panel-cv">
+        <h3>Educación</h3>
+        <div class="entry"><span class="t">Licenciatura en Arte</span> — Universidad de Palermo (actualmente)</div>
+        <div class="entry"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Alemania</div>
 
-      <h3>Educación</h3>
-      <div class="entry"><span class="t">Licenciatura en Arte</span> — Universidad de Palermo (actualmente)</div>
-      <div class="entry"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
-      <div class="entry"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Alemania</div>
+        <h3>Talleres</h3>
+        <div class="entry">Taller de Pintura, Richard Sturgeon</div>
+        <div class="entry">Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
+        <div class="entry">Taller de Dibujo, Juan Bernárdez</div>
+        <div class="entry">Taller de Dibujo, Ricardo Conte</div>
 
-      <h3>Talleres</h3>
-      <div class="entry">Taller de Pintura, Richard Sturgeon</div>
-      <div class="entry">Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
-      <div class="entry">Taller de Dibujo, Juan Bernárdez</div>
-      <div class="entry">Taller de Dibujo, Ricardo Conte</div>
+        <h3>Exposiciones individuales</h3>
+        <div class="entry"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
 
-      <h3>Exposiciones individuales</h3>
-      <div class="entry"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
+        <h3>Ferias</h3>
+        <div class="entry"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
+        <div class="entry"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
 
-      <h3>Ferias</h3>
-      <div class="entry"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
-      <div class="entry"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
-
-      <h3>Exposiciones colectivas (selección)</h3>
-      <div class="entry"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
-      <div class="entry"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
-      <div class="entry"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
-      <div class="entry"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
-      <div class="entry"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
-      <div class="entry"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
-      <div class="entry"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
-      <div class="entry"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
-    </section>
+        <h3>Exposiciones colectivas (selección)</h3>
+        <div class="entry"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
+        <div class="entry"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
+        <div class="entry"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
+        <div class="entry"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
+        <div class="entry"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
+      </div>
+    </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          PORTFOLIO
          ✏️ Para sumar una obra: copiá el bloque de img + work-caption
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="portfolio">
-      <h2>Portfolio</h2>
-      <div class="block">
-        <img class="work-img" src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-        <p class="work-caption">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</p>
+    <div class="item">
+      <a class="toggle" data-target="portfolio">Portfolio</a>
+      <div class="panel" id="panel-portfolio">
+        <div class="block">
+          <img class="work-img" src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
+          <p class="work-caption">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</p>
+        </div>
       </div>
-    </section>
+    </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          EXPOSICIONES
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="exposiciones">
-      <h2>Exposiciones</h2>
+    <div class="item">
+      <a class="toggle" data-target="exposiciones">Exposiciones</a>
+      <div class="panel" id="panel-exposiciones">
+        <h3>Individuales</h3>
+        <div class="entry"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
 
-      <h3>Individuales</h3>
-      <div class="entry"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
+        <h3>Colectivas</h3>
+        <div class="entry"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
+        <div class="entry"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
+        <div class="entry"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
+        <div class="entry"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
+        <div class="entry"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
 
-      <h3>Colectivas</h3>
-      <div class="entry"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
-      <div class="entry"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
-      <div class="entry"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
-      <div class="entry"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
-      <div class="entry"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
-      <div class="entry"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
-      <div class="entry"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
-      <div class="entry"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
-
-      <h3>Ferias</h3>
-      <div class="entry"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
-      <div class="entry"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
-      <div class="entry"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
-    </section>
+        <h3>Ferias</h3>
+        <div class="entry"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
+        <div class="entry"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
+        <div class="entry"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
+      </div>
+    </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          CONTACTO
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <section id="contacto">
-      <h2>Contacto</h2>
-      <div class="block">
-        <p><a href="mailto:marcosgcutre@gmail.com">marcosgcutre@gmail.com</a></p>
-        <p><a href="https://instagram.com/marcosgonzalezcutre" target="_blank">@marcosgonzalezcutre</a></p>
+    <div class="item">
+      <a class="toggle" data-target="contacto">Contacto</a>
+      <div class="panel" id="panel-contacto">
+        <div class="block">
+          <p><a href="mailto:marcosgcutre@gmail.com">marcosgcutre@gmail.com</a></p>
+          <p><a href="https://instagram.com/marcosgonzalezcutre" target="_blank">@marcosgonzalezcutre</a></p>
+        </div>
       </div>
-    </section>
+    </div>
 
     <footer>
       © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
     </footer>
   </div>
+
+  <script>
+    document.querySelectorAll('.toggle').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var id = btn.getAttribute('data-target');
+        var panel = document.getElementById('panel-' + id);
+        var isOpen = panel.classList.contains('open');
+
+        document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('open'); });
+        document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
+
+        if (!isOpen) {
+          panel.classList.add('open');
+          document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
+            t.classList.add('open');
+          });
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
