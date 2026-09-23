@@ -50,36 +50,41 @@ ${SNOISE}
 const float TAU = 6.2831853;
 void main(){
   float u = aSeed.x, v = aSeed.y, w = aSeed.z, s = aSeed.w;
-  float visible = step(s, 0.3 + 0.7 * uDensity);
+  // aparición/desaparición gradual: sin partículas que "saltan" al cambiar la densidad
+  float visible = smoothstep(s - 0.04, s + 0.04, 0.3 + 0.7 * uDensity);
   float t = uTime * uFlow;
 
+  // bandas fijas: el filamento sólo decide cuánto se agrupan, nunca cuántas bandas hay
   float theta = u * TAU;
-  float bands = 14.0 + 34.0 * uFilament;
-  float banded = floor(u * bands) / bands * TAU + (fract(u * 977.0) - 0.5) * 0.015;
+  const float BANDS = 36.0;
+  float banded = (floor(u * BANDS) + 0.5) / BANDS * TAU + (fract(u * 977.0) - 0.5) * 0.015;
   theta = mix(theta, banded, uFilament * 0.85);
 
-  vec3 p;
-  if (w < uSkirt * 0.42) {
-    // base: disco que se abre y se curva, como la cola de la referencia
-    float r = 0.3 + 0.85 * sqrt(v) * (0.5 + 0.5 * uSkirt);
-    float h = -0.92 + 0.10 * sin(theta * 3.0 + r * 5.0 + uSeedShift * 2.3);
-    h += 0.22 * r * r * r * (0.3 + uSkirt) + (fract(w * 531.0) - 0.5) * 0.05;
-    p = vec3(cos(theta) * r, h, sin(theta) * r);
-  } else {
-    // cuerpo: volumen con densidad variable hacia la superficie
-    float phi = acos(1.0 - 2.0 * v);
-    float k = fract(w * 7.31 + s * 3.7);
-    float rad = mix(pow(k, 0.33), 0.9 + 0.1 * k, 0.3 + 0.6 * uDensity);
-    rad *= 1.0 + uLobeAmp * 0.38 * sin(uLobes * theta + uSeedShift * 2.0 + t * 0.35)
-                           * sin(phi * (1.0 + floor(uLobes * 0.5)));
-    vec3 dir = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
-    p = dir * rad;
-    p.y = p.y * (0.85 + 0.75 * uElong) + 0.15;
-    float up = max(p.y, 0.0);
-    p.x += 0.45 * sin(uSeedShift) * up * up;
-    p.z += 0.35 * cos(uSeedShift * 1.3) * up * up;
-    p.xz *= mix(1.0, 0.55, smoothstep(-0.2, 1.5, p.y) * (0.3 + 0.7 * uElong));
-  }
+  // cuerpo: volumen con densidad variable hacia la superficie
+  float phi = acos(1.0 - 2.0 * v);
+  float k = fract(w * 7.31 + s * 3.7);
+  float rad = mix(pow(k, 0.33), 0.9 + 0.1 * k, 0.3 + 0.6 * uDensity);
+  // lóbulos enteros mezclados: sin costura en theta = 0 y sin saltos entre 2 y 3 lóbulos
+  float l0 = floor(uLobes), lf = fract(uLobes);
+  float ph = uSeedShift * 2.0 + t * 0.35;
+  float lobe = mix(sin(l0 * theta + ph) * sin(phi * (1.0 + floor(l0 * 0.5))),
+                   sin((l0 + 1.0) * theta + ph) * sin(phi * (1.0 + floor((l0 + 1.0) * 0.5))), lf);
+  rad *= 1.0 + uLobeAmp * 0.38 * lobe;
+  vec3 body = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta)) * rad;
+  body.y = body.y * (0.85 + 0.75 * uElong) + 0.15;
+  float up = max(body.y, 0.0);
+  body.x += 0.45 * sin(uSeedShift) * up * up;
+  body.z += 0.35 * cos(uSeedShift * 1.3) * up * up;
+  body.xz *= mix(1.0, 0.55, smoothstep(-0.2, 1.5, body.y) * (0.3 + 0.7 * uElong));
+
+  // base: disco que se abre y se curva, como la cola de la referencia
+  float r = 0.3 + 0.85 * sqrt(v) * (0.5 + 0.5 * uSkirt);
+  float h = -0.92 + 0.10 * sin(theta * 3.0 + r * 5.0 + uSeedShift * 2.3);
+  h += 0.22 * r * r * r * (0.3 + uSkirt) + (fract(w * 531.0) - 0.5) * 0.05;
+  vec3 skirt = vec3(cos(theta) * r, h, sin(theta) * r);
+
+  // pertenencia continua: al crecer la base, las partículas migran del cuerpo al disco
+  vec3 p = mix(body, skirt, smoothstep(w, w + 0.05, uSkirt * 0.42));
 
   float a = uTwist * p.y * 1.7 + 0.12 * sin(t * 0.4);
   float ca = cos(a), sa = sin(a);

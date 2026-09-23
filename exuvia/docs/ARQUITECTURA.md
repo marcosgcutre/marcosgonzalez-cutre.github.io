@@ -4,7 +4,7 @@ Documento de trabajo que acompaña al prototipo de `exuvia/`. Distingue entre lo
 
 ## 1. Qué demuestra el prototipo y qué no
 
-El prototipo es una web estática (HTML + módulos ES + three.js 0.186 desde jsDelivr) que corre en cualquier navegador con WebGL. Implementa la cadena completa que tendrá el producto: fuentes simuladas → normalizador → rasgos → reglas → genoma visual → organismo, más el sistema de mutaciones, el archivo de exuvias, la vista de reloj y la función de compartir. Hay tres perfiles simulados (el de la imagen de referencia, alguien que empieza desde cero y un atleta irregular) para comprobar lo que importa en esta etapa: que datos distintos producen organismos distintos y reconocibles, y que la misma persona cambia de forma de manera legible a lo largo del tiempo. La línea de tiempo permite recorrer 240 días y ver las mudas ocurrir.
+El prototipo es una web estática (HTML + módulos ES + three.js 0.186 desde jsDelivr) que corre en cualquier navegador con WebGL. Implementa la cadena completa que tendrá el producto: fuentes simuladas → normalizador → rasgos → reglas → genoma visual → organismo, más el sistema de mutaciones, el archivo de exuvias, la vista de reloj y la función de compartir. Hay cuatro perfiles simulados (el de la imagen de referencia, el mismo con sólo Apple Watch y sin WHOOP, alguien que empieza desde cero y un atleta irregular) para comprobar lo que importa en esta etapa: que datos distintos producen organismos distintos (si además son *reconocibles* para su dueño es algo que el prototipo no puede probar, ver §10), que la ausencia de un dispositivo no degrada al organismo, y que la misma persona cambia de forma de manera legible a lo largo del tiempo. La línea de tiempo permite recorrer 240 días y ver las mudas ocurrir.
 
 No demuestra rendimiento nativo, ni integración real con ninguna API, ni el comportamiento en watchOS. La vista de reloj es una aproximación en navegador, no una prueba de lo que el hardware del reloj sostiene.
 
@@ -14,7 +14,7 @@ No demuestra rendimiento nativo, ni integración real con ninguna API, ni el com
 
 - El costo por frame es un único draw call de `N` puntos con tres evaluaciones de ruido simplex por vértice. En el navegador de escritorio de prueba (render por software, SwiftShader) se sostienen ~44 fps con 40.000 partículas; en GPU real el margen es mucho mayor. Falta medir en teléfonos concretos, y es lo primero a hacer con el prototipo publicado.
 - Las transiciones entre formas son gratuitas y continuas: una mutación es una interpolación lenta de uniforms, que visualmente se lee como una muda.
-- La forma es determinista: mismo genoma + misma semilla = mismo organismo. Esto permite compartir un organismo como un puñado de bytes (ver §6) y regenerar miniaturas de exuvias sin almacenar imágenes.
+- La forma es determinista: mismo genoma + misma semilla = mismo organismo. Esto permite compartir un organismo como un puñado de bytes (ver §7) y regenerar miniaturas de exuvias sin almacenar imágenes.
 
 El límite de este enfoque es que las partículas no interactúan entre sí (no hay física, no hay "enjambre" real). Si en algún momento se busca comportamiento emergente — partículas que se atraen, que migran de una estructura a otra — hace falta simulación por GPU con texturas de posición (técnica GPGPU / "ping-pong") o compute shaders. Eso es más costoso y, en mi opinión, no hace falta para el MVP: la sensación de organismo vivo sale del ruido temporal y de la respiración, no de la física.
 
@@ -30,13 +30,13 @@ El límite de este enfoque es que las partículas no interactúan entre sí (no 
 
 Está en `js/genome.js` y se puede inspeccionar y manipular en la pestaña LAB. Tiene dos capas:
 
-**Rasgos (features).** Diez valores entre 0 y 1, calculados sólo con datos hasta el día evaluado (nunca con el futuro). Siete son *estructurales*, de ventana larga: carga de actividad (28 días), distancia acumulada (90 d, escala logarítmica), constancia de hábitos (28 d), rachas de abstinencia (log, saturan a 180 días), práctica de meditación (28 d), variedad de actividades (entropía de Shannon de los tipos de entrenamiento en 60 d, ponderada por volumen) y calidad de sueño (14 d). Tres son de *estado*, del día: recuperación, esfuerzo y tendencia de HRV (media de 7 días frente a 60).
+**Rasgos (features).** Diez valores entre 0 y 1, calculados sólo con datos hasta el día evaluado (nunca con el futuro). Siete son *estructurales*, de ventana larga: carga de actividad (28 días), distancia acumulada (90 d, escala logarítmica), regularidad de la práctica (días con entrenamiento o meditación por semana y su estabilidad a lo largo de 8 semanas), abstinencia sostenida (75 % proporción de días limpios en 90 d, 25 % racha actual en escala logarítmica), práctica de meditación (28 d), variedad de actividades (entropía de Shannon de los tipos de entrenamiento en 60 d, ponderada por volumen) y calidad de sueño (14 d). Tres son de *estado*, del día: recuperación, esfuerzo y tendencia de HRV (media de 7 días frente a 60).
 
-**Reglas.** Cada parámetro visual es una combinación lineal de rasgos con pesos que suman 1, reescalada a un rango. Por ejemplo, `densidad = 0,5·abstinencia + 0,3·constancia + 0,2·sueño`. La tabla completa es visible en LAB.
+**Reglas.** Cada parámetro visual es una combinación lineal de rasgos con pesos que suman 1, reescalada a un rango. Por ejemplo, `densidad = 0,5·abstinencia + 0,3·regularidad + 0,2·sueño`. Si un rasgo no tiene datos (por ejemplo, no hay WHOOP y por lo tanto no hay recuperación), vale *sin dato*, no un valor inventado, y la regla se recalcula con los pesos de los rasgos que sí existen. La tabla completa es visible en LAB.
 
 La separación en dos escalas de tiempo es la decisión conceptual más importante del sistema: **la forma es la memoria, el movimiento es el presente.** Un mal día cambia la velocidad, el brillo y la respiración, pero no destruye una estructura construida en meses. Esto evita que la app castigue, y es coherente con la exigencia de prudencia sobre los datos fisiológicos.
 
-Tres decisiones de prudencia ya implementadas: ninguna regla es punitiva (valores bajos atenúan y aquietan, no deforman ni "enferman" al organismo); una abstinencia sólo cuenta si ese hábito existió (quien nunca fumó no gana densidad por "no fumar"); y la HRV sólo se compara consigo misma dentro del mismo método de medición (ver §4).
+Decisiones de prudencia implementadas: ninguna regla es punitiva (valores bajos atenúan y aquietan, no deforman ni "enferman" al organismo); una abstinencia sólo cuenta desde que ese hábito aparece en la historia (quien nunca fumó no gana densidad por "no fumar"); un día sin registro no rompe una racha (olvidarse de anotar no es recaer: la racha son los días desde la última ocurrencia registrada); una recaída deja marca pero no borra meses (en la simulación, un día de alcohol tras 68 días limpios baja la densidad de 0,90 a 0,85); la falta de un dispositivo no penaliza (los rasgos sin datos se excluyen, ver arriba); y la HRV sólo se compara consigo misma dentro del mismo método de medición (ver §4). La recuperación de WHOOP ya integra HRV y sueño, así que no se combina con ellos en una misma regla.
 
 Lo que este sistema **no** resuelve y conviene discutir: los pesos son arbitrarios. Son legibles y ajustables, pero no hay nada que los fundamente más allá del criterio estético. Eso es aceptable si se asume que el organismo es una interpretación artística, pero entonces la app no debería insinuar en ningún lugar que un organismo "mejor" corresponde a una salud mejor.
 
@@ -55,9 +55,13 @@ La arquitectura del prototipo separa **adaptadores** (uno por fuente, producen p
 **Problemas de datos que el normalizador ya enfrenta:**
 
 - *Métricas con el mismo nombre que no son comparables.* WHOOP reporta HRV como RMSSD; HealthKit la expone como SDNN (`HKQuantityTypeIdentifierHeartRateVariabilitySDNN`). Son estadísticos distintos y no se deben mezclar ni promediar. El prototipo guarda el método junto al valor y sólo calcula tendencias dentro del mismo método.
-- *Duplicados.* Una misma carrera registrada por el Apple Watch y por WHOOP aparece dos veces. El prototipo fusiona entrenamientos del mismo tipo que empiezan con menos de 20 minutos de diferencia; en la simulación, 96 de los entrenamientos del perfil de referencia se fusionan así.
+- *Duplicados.* Una misma carrera registrada por el Apple Watch y por WHOOP aparece dos veces. El prototipo fusiona entrenamientos del mismo tipo que empiezan con menos de 20 minutos de diferencia; en la simulación, 107 de los entrenamientos del perfil de referencia se fusionan así.
 - *Prioridad de fuentes.* Recuperación, esfuerzo y sueño vienen de WHOOP si existe; pasos, energía, mindfulness y distancia de Apple Health. Esta tabla debería ser configurable por el usuario.
+- *Sueño con dos medidas distintas.* WHOOP da un puntaje propio de rendimiento de sueño; Apple Watch da horas por fase (`HKCategoryTypeIdentifierSleepAnalysis`). No son comparables: el rasgo de sueño usa el puntaje de WHOOP si existe en la ventana y, si no, la duración, nunca una mezcla.
+- *Zona horaria y "día".* El prototipo asigna días en UTC. En producción el día canónico tiene que ser el día local del usuario, y hay que decidir a qué día pertenece una noche de sueño o un ciclo de WHOOP que cruza la medianoche (el prototipo usa el día en que termina el sueño). Viajar cambia la zona horaria y puede duplicar o saltar un día.
 - *Lo que ningún wearable sabe.* Alcohol, azúcar, tabaco: registro manual. Es la parte más frágil del sistema (depende de la honestidad y constancia del usuario) y también la más cercana al concepto.
+
+**Límite de la simulación (circularidad).** El simulador genera fisiología a partir de las mismas suposiciones que usan las reglas: por ejemplo, que el alcohol baja la HRV del día siguiente o que meditar mejora el sueño. Por eso la simulación sólo valida que la cadena funciona (que los datos fluyen, que las ausencias se manejan, que las mudas ocurren); no valida que el organismo responda de forma sensata a datos reales. Eso sólo puede comprobarse con historias reales exportadas de Apple Health o WHOOP.
 
 ## 5. Arquitectura de datos propuesta
 
@@ -73,9 +77,9 @@ Dónde se procesa es una decisión de privacidad antes que técnica. Como Health
 
 Implementado en `js/mutations.js`. Una muda requiere tres condiciones simultáneas: **madurez** (al menos 21 días en la forma actual), **rastro** (suficiente constancia y actividad acumuladas desde la última muda; el umbral crece con cada etapa) y **cambio real** (la estructura actual se alejó al menos un 10 % de la forma con la que empezó la etapa, medida sobre los parámetros estructurales). HOME muestra las tres como líneas finas en lugar de una barra de experiencia.
 
-La tercera condición es la que separa esto de un sistema de niveles: si sólo pasa el tiempo o sólo se acumula esfuerzo, pero la vida no cambia de forma, no hay muda. En la simulación del atleta irregular esto se ve con claridad: entrena mucho más que el perfil de referencia, pero su estructura oscila y las mudas llegan más espaciadas. La etapa nueva recibe el nombre del parámetro que más cambió (DISCIPLINE, CORE, BLOOM, ASCENT, ROOT, LATTICE) y cada exuvia guarda su genoma, así que puede volver a dibujarse y observarse.
+La tercera condición es la que separa esto de un sistema de niveles: si sólo pasa el tiempo o sólo se acumula esfuerzo, pero la vida no cambia de forma, no hay muda. En la simulación del atleta irregular esto se ve con claridad: entrena mucho más que el perfil de referencia, pero su estructura oscila y en 240 días muda sólo dos veces, con una etapa de 153 días. La etapa nueva recibe el nombre del parámetro que más cambió y de la dirección del cambio (por ejemplo DISCIPLINE si la coherencia sube, FLUX si baja); los nombres son provisorios y son una decisión de autor. Cada exuvia guarda su genoma, así que puede volver a dibujarse y observarse.
 
-Punto abierto: con los umbrales actuales el perfil de referencia muda cinco veces en 240 días, aproximadamente cada 35–65 días. Si se buscan mudas más raras y significativas, los umbrales tienen que subir; es una decisión de ritmo de la experiencia más que técnica.
+Punto abierto: con los umbrales actuales el perfil de referencia muda cuatro veces en 240 días, con etapas de entre 35 y 86 días. Si se buscan mudas más raras y significativas, los umbrales tienen que subir; es una decisión de ritmo de la experiencia más que técnica.
 
 ## 7. Compartir
 
@@ -112,7 +116,8 @@ Lo que ya existe en el prototipo corresponde a los seis puntos pedidos. Para pas
 Dejo esto como tensiones del concepto, no como respuestas:
 
 - **¿Qué significa que el organismo "mejore"?** Si más constancia produce más densidad, orden y brillo, el sistema tiene una estética normativa aunque no lo diga: hay organismos más deseables que otros. Eso lo acerca a la gamificación que el concepto dice evitar. ¿Querés que exista una forma "mejor", o que cada trayectoria produzca formas distintas sin jerarquía?
-- **¿Qué pasa con las recaídas?** Hoy, volver a tomar alcohol reinicia una racha y baja la densidad, pero no borra la estructura. ¿Debería una recaída dejar una huella visible (una cicatriz) o desaparecer sin rastro?
+- **¿Qué pasa con las recaídas?** Hoy una recaída reinicia la racha visible y baja la densidad unos puntos, marca que se diluye a lo largo de 90 días. ¿Debería dejar además una huella permanente (una cicatriz en la forma) o desaparecer con el tiempo?
+- **¿Quién puede mudar?** El rastro que habilita una muda premia regularidad y actividad. Alguien lesionado o en reposo prolongado cambia de vida pero no acumula rastro, y por lo tanto no muda. Es una jerarquía implícita, del mismo tipo que la de la primera pregunta. La alternativa es que el rastro mida cuánto cambió la forma, en cualquier dirección, y no cuánto se hizo.
 - **¿El organismo es reconocible por su dueño?** El prototipo demuestra que perfiles distintos producen formas distintas; no demuestra que una persona reconozca la suya entre otras. Es algo que se puede probar con usuarios reales.
 - **"Every habit leaves a trace" frente a privacidad.** Si cada hábito deja huella en la forma, la forma revela hábitos (§7). ¿Hasta dónde se quiere que el organismo compartido sea legible?
 

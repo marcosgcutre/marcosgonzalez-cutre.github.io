@@ -20,7 +20,7 @@ function makeStage(genome, size, count, seed) {
 
 function compose(ctx, organismCanvas, info, opts) {
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-  ctx.drawImage(organismCanvas, 0, 110, W, W);
+  ctx.drawImage(organismCanvas, 100, 190, W - 200, W - 200); // termina en y=1070, sin pisar el texto
   ctx.fillStyle = '#e8f6ff';
   ctx.textAlign = 'center';
   ctx.font = '300 64px Montserrat, sans-serif';
@@ -37,7 +37,7 @@ function compose(ctx, organismCanvas, info, opts) {
   ctx.font = '400 20px "Space Grotesk", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillStyle = '#7fa6c9';
-  ctx.fillText('DÍAS EN ESTA FORMA', W / 2, 1182);
+  ctx.fillText(info.ageLabel ?? 'DÍAS EN ESTA FORMA', W / 2, 1182);
 
   const chosen = info.indicators.filter((x) => opts.include.has(x.id));
   if (chosen.length) {
@@ -56,6 +56,7 @@ function compose(ctx, organismCanvas, info, opts) {
 }
 
 export async function shareImage(genome, info, opts) {
+  await document.fonts?.ready; // sin esto el texto de la tarjeta sale en la fuente de sistema
   const st = makeStage(genome, W, 70000, info.seed);
   st.render(0, info.time);
   const out = document.createElement('canvas'); out.width = W; out.height = H;
@@ -66,6 +67,7 @@ export async function shareImage(genome, info, opts) {
 }
 
 export async function shareVideo(genome, info, opts, seconds = 4, onProgress) {
+  await document.fonts?.ready;
   const st = makeStage(genome, W, 60000, info.seed);
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const ctx = out.getContext('2d');
@@ -119,7 +121,9 @@ export function encodeGenome(genome, meta) {
 export function decodeGenome(hash) {
   const p = new URLSearchParams(hash.replace(/^#/, ''));
   if (!p.get('m')) return null;
-  const bin = atob(p.get('m').replace(/-/g, '+').replace(/_/g, '/'));
+  let bin;
+  try { bin = atob(p.get('m').replace(/-/g, '+').replace(/_/g, '/')); } catch { return null; } // enlace roto → app normal
+  if (bin.length < PARAMS.filter((k) => RULES[k]).length + 1) return null;
   const bytes = [...bin].map((c) => c.charCodeAt(0));
   const g = {}; let i = 0;
   for (const k of PARAMS.filter((k) => RULES[k])) { const r = RULES[k]; g[k] = r.min + (bytes[i++] / 255) * (r.max - r.min); }

@@ -12,17 +12,22 @@ export const MIN_DAYS = 21;
 export const DISTANCE = 0.1;
 export const traceThreshold = (stage) => 14 + stage * 4;
 
+// Nombre de la etapa según el parámetro que más cambió y en qué dirección.
+// Nombres provisorios: son una decisión de autor, no del sistema.
 const NAMES = {
-  coherence: 'DISCIPLINE', density: 'CORE', lobes: 'BLOOM', lobeAmp: 'BLOOM',
-  twist: 'ASCENT', elong: 'ASCENT', skirt: 'ROOT', filament: 'LATTICE',
+  coherence: ['DISCIPLINE', 'FLUX'], density: ['CORE', 'DRIFT'], lobes: ['BLOOM', 'FOLD'],
+  lobeAmp: ['BLOOM', 'FOLD'], twist: ['SPIRAL', 'UNWIND'], elong: ['ASCENT', 'REST'],
+  skirt: ['ROOT', 'LIFT'], filament: ['LATTICE', 'MIST'],
 };
 
 const seedFor = (userSeed, stage) => ((userSeed % 97) / 97) * 6.28 + stage * 1.37;
 
 function dayScore(day, f) {
-  // rastro diario: constancia + actividad; nunca negativo
-  const active = Math.min(1, (day.strain ?? 0) / 14);
-  return 0.55 * f.consistency + 0.3 * active + 0.15 * (day.mindfulMin >= 5 ? 1 : 0);
+  // rastro diario: regularidad + actividad + meditación; nunca negativo.
+  // Sin WHOOP no hay "strain": la actividad se estima con los minutos de entrenamiento.
+  const minutes = day.workouts.reduce((s, w) => s + (w.minutes ?? 45), 0);
+  const active = day.strain != null ? Math.min(1, day.strain / 14) : Math.min(1, minutes / 60);
+  return 0.55 * (f.consistency ?? 0) + 0.3 * active + 0.15 * (day.mindfulMin >= 5 ? 1 : 0);
 }
 
 // Recorre toda la historia y devuelve la línea de tiempo completa.
@@ -41,10 +46,10 @@ export function runHistory(days, userSeed) {
 
     if (age >= MIN_DAYS && trace >= traceThreshold(stage) && dist >= DISTANCE) {
       // la dirección dominante del cambio nombra la nueva etapa
-      let best = 'coherence', bestDelta = -Infinity;
+      let best = 'coherence', bestDelta = 0;
       for (const k of STRUCTURAL) {
-        const dlt = Math.abs(normalizedParam(g, k) - normalizedParam(stageGenome, k));
-        if (dlt > bestDelta) { bestDelta = dlt; best = k; }
+        const dlt = normalizedParam(g, k) - normalizedParam(stageGenome, k);
+        if (Math.abs(dlt) > Math.abs(bestDelta)) { bestDelta = dlt; best = k; }
       }
       const prevGenome = timeline[i - 1]?.genome ?? g;
       exuvias.push({
@@ -56,7 +61,7 @@ export function runHistory(days, userSeed) {
       stage += 1; stageStart = i; trace = 0;
       const g2 = toGenome(f, seedFor(userSeed, stage));
       stageGenome = g2;
-      timeline.push({ features: f, genome: g2, stage, trace, dist: 0, name: NAMES[best], age: 0, mutatedToday: true });
+      timeline.push({ features: f, genome: g2, stage, trace, dist: 0, name: NAMES[best][bestDelta >= 0 ? 0 : 1], age: 0, mutatedToday: true });
       continue;
     }
     timeline.push({ features: f, genome: g, stage, trace, dist, name: stage === 0 ? 'INITIATION' : timeline[i - 1]?.name, age, mutatedToday: false });

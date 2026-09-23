@@ -134,5 +134,12 @@
 
   <noscript>EXUVIA necesita JavaScript y WebGL.</noscript>
   <script type="module" src="js/main.js"></script>
+  <script>
+    // si three.js no llega desde la CDN el módulo falla en silencio: avisarlo en vez de dejar la pantalla negra
+    setTimeout(function () {
+      if (!window.__exuviaReady) document.getElementById('app').insertAdjacentHTML('afterbegin',
+        '<p style="padding:16px;color:#6f8aa6;font-size:13px">No se pudo cargar el motor 3D (sin conexión o CDN bloqueada). Recargá la página.</p>');
+    }, 10000);
+  </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ const WHOOP_SPORT = { running: 'running', surfing: 'surf' };
 
 function blank(date) {
   return {
-    date, recovery: null, strain: null, rhr: null, sleepPerformance: null,
+    date, recovery: null, strain: null, rhr: null, sleepPerformance: null, sleepHours: null,
     hrv: null,            // { value, method: 'rmssd'|'sdnn', source }
     steps: null, activeKcal: null, mindfulMin: 0,
     workouts: [],         // { type, minutes, km, sources: [] }
@@ -61,6 +61,11 @@ export function normalize({ whoop, appleHealth, manual }) {
   }
   for (const c of appleHealth?.categorySamples ?? []) {
     if (c.type === 'HKCategoryTypeIdentifierMindfulSession') get(c.startDate.slice(0, 10)).mindfulMin += c.durationMin;
+    // sueño: se asigna al día en que termina; sólo cuentan las fases dormidas, no "en cama"
+    if (c.type === 'HKCategoryTypeIdentifierSleepAnalysis' && c.value !== 'inBed') {
+      const day = get(isoDay(c.endDate));
+      day.sleepHours = +((day.sleepHours ?? 0) + (Date.parse(c.endDate) - Date.parse(c.startDate)) / 3600e3).toFixed(2);
+    }
   }
   for (const w of appleHealth?.workouts ?? []) {
     const type = HK_WORKOUT[w.workoutActivityType] ?? 'other';

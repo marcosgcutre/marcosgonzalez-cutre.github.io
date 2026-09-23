@@ -36,6 +36,13 @@ export const PERSONAS = {
       strength: 0.15,
     }),
   },
+  appleOnly: {
+    label: 'Sólo Apple Watch (sin WHOOP)',
+    seed: 3310,
+    days: 240,
+    sources: ['apple', 'manual'],
+    behave: (ago) => PERSONAS.marcos.behave(ago),
+  },
   starter: {
     label: 'Empieza desde cero',
     seed: 1337,
@@ -97,10 +104,13 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
     };
     const km = did.run ? +(b.runKm[0] + rnd() * (b.runKm[1] - b.runKm[0])).toFixed(1) : 0;
 
-    // registro manual: lo que ningún wearable sabe
-    manual.push({ date, habit: 'alcohol', value: did.alcohol });
-    manual.push({ date, habit: 'sugar', value: did.sugar });
-    manual.push({ date, habit: 'smoking', value: did.smoking });
+    // registro manual: lo que ningún wearable sabe. Las ocurrencias se anotan;
+    // los días "limpios" sólo a veces se confirman — hay días sin registro.
+    for (const habit of ['alcohol', 'sugar', 'smoking']) {
+      const confirm = rnd() < 0.6;
+      if (did[habit]) manual.push({ date, habit, value: true });
+      else if (confirm) manual.push({ date, habit, value: false });
+    }
 
     // fisiología latente
     const load = (did.run ? 5 + km * 0.55 : 0) + (did.surf ? 9 : 0) + (did.diving ? 5 : 0) + (did.strength ? 6 : 0);
@@ -137,8 +147,12 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
 
     // ---- Apple Health (forma de HKSample serializada por una app iOS) ----
     appleHealth.quantitySamples.push({ type: 'HKQuantityTypeIdentifierStepCount', value: steps, unit: 'count', startDate: date });
+    // SDNN simulado como fracción de RMSSD sólo para tener un valor; en la realidad
+    // no hay conversión válida entre ambos y el sistema nunca los mezcla.
     appleHealth.quantitySamples.push({ type: 'HKQuantityTypeIdentifierHeartRateVariabilitySDNN', value: +(hrv * 0.82).toFixed(1), unit: 'ms', startDate: date });
     appleHealth.quantitySamples.push({ type: 'HKQuantityTypeIdentifierActiveEnergyBurned', value: Math.round(250 + load * 38), unit: 'kcal', startDate: date });
+    // Apple Watch registra sueño por fases; aquí un solo bloque "asleepCore" por noche
+    appleHealth.categorySamples.push({ type: 'HKCategoryTypeIdentifierSleepAnalysis', value: 'asleepCore', startDate: new Date(t0 - 1 * 3600e3).toISOString(), endDate: new Date(t0 + (sleepHours - 1) * 3600e3).toISOString() });
     if (did.meditation) appleHealth.categorySamples.push({ type: 'HKCategoryTypeIdentifierMindfulSession', startDate: date, durationMin: 8 + Math.round(rnd() * 15) });
     if (did.run) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeRunning', startDate: wStart, duration: Math.round(km * 5.8), totalDistance: km * 1000 });
     if (did.surf) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeSurfingSports', startDate: new Date(t0 + 10 * 3600e3 + 120e3).toISOString(), duration: 95, totalDistance: null });
@@ -147,5 +161,7 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
 
     prevAlcohol = did.alcohol; prevStrain = strain;
   }
+  const src = P.sources ?? ['whoop', 'apple', 'manual'];
+  if (!src.includes('whoop')) for (const k of Object.keys(whoop)) whoop[k] = [];
   return { whoop, appleHealth, manual, meta: { persona: personaKey, start: isoDay(start), days: P.days } };
 }
