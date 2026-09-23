@@ -1,16 +1,18 @@
 // Sistema de mutaciones.
-// Una mutación no llega por tiempo ni por puntos solamente. Hacen falta tres cosas:
+// Una muda no es un premio. Ocurre cuando la forma cambió lo suficiente, en cualquier
+// dirección: empezar a correr, dejar de correr, tomar, dejar de tomar, lesionarse,
+// mudarse de ciudad. Hacen falta dos cosas:
 //   1. madurez: un mínimo de días en la forma actual;
-//   2. rastro: suficiente actividad/constancia acumulada desde la última muda;
-//   3. cambio real: la estructura actual se alejó de la forma con la que empezó la etapa.
-// Si sólo pasa el tiempo, no hay muda. Si hay mucho esfuerzo pero la vida no cambió
-// de forma, tampoco. Eso es lo que la separa de un sistema de niveles.
+//   2. cambio: la estructura se alejó de la forma con la que empezó la etapa.
+// Una vida estable no muda y no por eso es peor: simplemente no cambió de piel.
+// Un patrón irregular pero repetido (dos meses de exceso, dos de abandono) tampoco:
+// la irregularidad sostenida ya es su forma. Muda cuando el patrón cambia.
 
 import { extractFeatures, toGenome, structuralDistance, STRUCTURAL, normalizedParam, traits } from './genome.js';
 
+export const WARMUP = 28;  // las ventanas de 28–90 días necesitan datos antes de que la forma signifique algo
 export const MIN_DAYS = 21;
-export const DISTANCE = 0.1;
-export const traceThreshold = (stage) => 14 + stage * 4;
+export const NET = 0.1;    // distancia estructural media desde el inicio de la etapa
 
 // Nombre de la etapa según el parámetro que más cambió y en qué dirección.
 // Nombres provisorios: son una decisión de autor, no del sistema.
@@ -22,29 +24,21 @@ const NAMES = {
 
 const seedFor = (userSeed, stage) => ((userSeed % 97) / 97) * 6.28 + stage * 1.37;
 
-function dayScore(day, f) {
-  // rastro diario: regularidad + actividad + meditación; nunca negativo.
-  // Sin WHOOP no hay "strain": la actividad se estima con los minutos de entrenamiento.
-  const minutes = day.workouts.reduce((s, w) => s + (w.minutes ?? 45), 0);
-  const active = day.strain != null ? Math.min(1, day.strain / 14) : Math.min(1, minutes / 60);
-  return 0.55 * (f.consistency ?? 0) + 0.3 * active + 0.15 * (day.mindfulMin >= 5 ? 1 : 0);
-}
-
-// Recorre toda la historia y devuelve la línea de tiempo completa.
 export function runHistory(days, userSeed) {
-  const timeline = [];   // por día: { features, genome, stage, trace }
+  const timeline = [];   // por día: { features, genome, stage, age, net, name }
   const exuvias = [];    // formas abandonadas
-  let stage = 0, stageStart = 0, trace = 0, stageGenome = null;
+  let stage = 0, stageStart = 0, stageGenome = null;
 
   for (let i = 0; i < days.length; i++) {
     const f = extractFeatures(days, i);
     const g = toGenome(f, seedFor(userSeed, stage));
-    if (!stageGenome) stageGenome = g;
-    trace += dayScore(days[i], f);
-    const age = i - stageStart;
-    const dist = structuralDistance(g, stageGenome);
+    // durante el arranque la primera forma se va definiendo; se fija al terminarlo
+    if (i <= WARMUP) stageGenome = g;
 
-    if (age >= MIN_DAYS && trace >= traceThreshold(stage) && dist >= DISTANCE) {
+    const age = i - stageStart;
+    const net = structuralDistance(g, stageGenome);
+
+    if (i > WARMUP && age >= MIN_DAYS && net >= NET) {
       // la dirección dominante del cambio nombra la nueva etapa
       let best = 'coherence', bestDelta = 0;
       for (const k of STRUCTURAL) {
@@ -58,22 +52,21 @@ export function runHistory(days, userSeed) {
         start: days[stageStart].date, end: days[i - 1]?.date ?? days[i].date,
         days: age, genome: prevGenome, traits: traits(prevGenome),
       });
-      stage += 1; stageStart = i; trace = 0;
+      stage += 1; stageStart = i;
       const g2 = toGenome(f, seedFor(userSeed, stage));
       stageGenome = g2;
-      timeline.push({ features: f, genome: g2, stage, trace, dist: 0, name: NAMES[best][bestDelta >= 0 ? 0 : 1], age: 0, mutatedToday: true });
+      timeline.push({ features: f, genome: g2, stage, age: 0, net: 0, name: NAMES[best][bestDelta >= 0 ? 0 : 1], mutatedToday: true });
       continue;
     }
-    timeline.push({ features: f, genome: g, stage, trace, dist, name: stage === 0 ? 'INITIATION' : timeline[i - 1]?.name, age, mutatedToday: false });
+    timeline.push({ features: f, genome: g, stage, age, net, name: stage === 0 ? 'INITIATION' : timeline[i - 1]?.name, mutatedToday: false });
   }
   return { timeline, exuvias };
 }
 
-// Estado de progreso hacia la próxima muda (para mostrarlo sin convertirlo en barra de XP)
+// Estado hacia la próxima muda: madurez y cambio
 export function progress(entry) {
   return {
     maturity: Math.min(1, entry.age / MIN_DAYS),
-    trace: Math.min(1, entry.trace / traceThreshold(entry.stage)),
-    change: Math.min(1, entry.dist / DISTANCE),
+    change: Math.min(1, entry.net / NET),
   };
 }

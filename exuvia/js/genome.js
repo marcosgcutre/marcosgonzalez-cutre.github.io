@@ -3,7 +3,10 @@
 //   · ESTRUCTURA (lenta): historia de semanas/meses → forma, densidad, simetría.
 //   · ESTADO (rápida): el día de hoy → velocidad, pulso, brillo.
 // La forma es la memoria; el movimiento es el presente.
-// Ninguna regla es "punitiva": un mal día atenúa y aquieta, no deforma ni enferma.
+// No hay formas mejores ni peores. Cada rasgo mueve la forma entre dos extremos
+// igual de completos (ordenada ↔ turbulenta, compacta ↔ dispersa, lenta ↔ rápida);
+// ningún dato quita materia ni brillo. Tomar o no tomar alcohol es un dato más:
+// cambia la forma, no la califica.
 // Un dato ausente no es un dato malo: los rasgos sin datos valen null y las reglas
 // se recalculan con los que sí hay.
 
@@ -11,16 +14,17 @@ const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 
 export const HABITS = [
-  { id: 'sugar', label: 'Sin azúcar', kind: 'abstinence' },
-  { id: 'alcohol', label: 'No alcohol', kind: 'abstinence' },
-  { id: 'smoking', label: 'Sin fumar', kind: 'abstinence' },
+  // hábitos de consumo registrados a mano; label = cómo se muestra el conteo de días
+  { id: 'sugar', label: 'Sin azúcar', kind: 'consumption' },
+  { id: 'alcohol', label: 'Sin alcohol', kind: 'consumption' },
+  { id: 'smoking', label: 'Sin fumar', kind: 'consumption' },
 ];
 
 export const FEATURES = {
   activityLoad: { label: 'Carga de actividad (28 d)', scale: 'estructura' },
   endurance: { label: 'Distancia acumulada (90 d)', scale: 'estructura' },
   consistency: { label: 'Regularidad de la práctica (8 sem.)', scale: 'estructura' },
-  abstinence: { label: 'Abstinencia sostenida (90 d)', scale: 'estructura' },
+  consumption: { label: 'Frecuencia de consumo (90 d)', scale: 'estructura' },
   mindfulness: { label: 'Práctica de meditación (28 d)', scale: 'estructura' },
   exploration: { label: 'Variedad de actividades (60 d)', scale: 'estructura' },
   sleepQuality: { label: 'Calidad de sueño (14 d)', scale: 'estructura' },
@@ -29,26 +33,28 @@ export const FEATURES = {
   hrvTrend: { label: 'Tendencia HRV (7 d vs 60 d)', scale: 'estado' },
 };
 
+// Brillo fijo: la luminosidad no depende de ningún dato.
+export const GLOW = 0.85;
+
 // Cada parámetro = min + (max-min) · Σ(peso · feature) / Σ(pesos con dato).
 export const RULES = {
-  expansion: { min: 0.8, max: 1.2, from: { endurance: 0.35, activityLoad: 0.25, exploration: 0.2, recovery: 0.2 }, meaning: 'Espacio que ocupa' },
-  coherence: { min: 0, max: 1, from: { consistency: 0.4, sleepQuality: 0.3, mindfulness: 0.3 }, meaning: 'Orden frente a ruido' },
-  density: { min: 0.1, max: 1, from: { abstinence: 0.5, consistency: 0.3, sleepQuality: 0.2 }, meaning: 'Materia visible, compacidad' },
-  flow: { min: 0.15, max: 1.1, from: { strainToday: 0.45, activityLoad: 0.35, hrvTrend: 0.2 }, meaning: 'Velocidad del movimiento' },
+  expansion: { min: 0.9, max: 1.1, from: { endurance: 0.4, activityLoad: 0.3, exploration: 0.3 }, meaning: 'Espacio que ocupa (rango corto: más grande no es más)' },
+  coherence: { min: 0, max: 1, from: { consistency: 0.5, sleepQuality: 0.25, mindfulness: 0.25 }, meaning: 'Ordenada ↔ turbulenta' },
+  density: { min: 0, max: 1, from: { consumption: 0.5, consistency: 0.3, sleepQuality: 0.2 }, meaning: 'Dispersa ↔ compacta (misma materia)' },
+  flow: { min: 0.15, max: 1.1, from: { strainToday: 0.45, activityLoad: 0.35, recovery: 0.2 }, meaning: 'Lenta ↔ rápida' },
   lobes: { min: 1, max: 6, from: { exploration: 0.7, activityLoad: 0.3 }, meaning: 'Complejidad de la silueta' },
   lobeAmp: { min: 0.1, max: 1, from: { exploration: 0.5, endurance: 0.5 }, meaning: 'Profundidad de los pliegues' },
   twist: { min: 0, max: 1.2, from: { endurance: 0.5, consistency: 0.5 }, meaning: 'Torsión sobre el eje' },
   elong: { min: 0, max: 1, from: { mindfulness: 0.5, sleepQuality: 0.5 }, meaning: 'Verticalidad' },
   skirt: { min: 0.1, max: 1, from: { exploration: 0.6, endurance: 0.4 }, meaning: 'Base, arraigo al terreno' },
-  filament: { min: 0, max: 1, from: { consistency: 0.6, abstinence: 0.4 }, meaning: 'Estructura en filamentos' },
+  filament: { min: 0, max: 1, from: { consistency: 0.6, consumption: 0.4 }, meaning: 'Nube ↔ filamentos' },
   pulse: { min: 0.12, max: 0.45, from: { strainToday: 0.6, activityLoad: 0.4 }, meaning: 'Frecuencia de respiración visual (Hz)' },
-  // la recuperación de WHOOP ya se calcula con HRV y sueño: usarla junto a ellos contaría dos veces lo mismo
+  // la recuperación de WHOOP ya se calcula con HRV y sueño: nunca comparten regla
   pulseAmp: { min: 0.3, max: 1, from: { hrvTrend: 1 }, meaning: 'Amplitud de respiración' },
-  glow: { min: 0.35, max: 1, from: { recovery: 0.6, sleepQuality: 0.4 }, meaning: 'Luminosidad' },
-  cyan: { min: 0.05, max: 1, from: { mindfulness: 0.5, sleepQuality: 0.5 }, meaning: 'Cian: calma, descanso' },
-  blue: { min: 0.05, max: 1, from: { consistency: 0.6, endurance: 0.4 }, meaning: 'Azul: disciplina, fondo' },
-  violet: { min: 0.05, max: 1, from: { abstinence: 0.7, hrvTrend: 0.3 }, meaning: 'Violeta: abstinencia sostenida' },
-  orange: { min: 0.02, max: 0.7, from: { strainToday: 0.5, exploration: 0.5 }, meaning: 'Naranja: energía, exploración' },
+  cyan: { min: 0.05, max: 1, from: { mindfulness: 0.5, sleepQuality: 0.5 }, meaning: 'Cian' },
+  blue: { min: 0.05, max: 1, from: { consistency: 0.6, endurance: 0.4 }, meaning: 'Azul' },
+  violet: { min: 0.05, max: 1, from: { consumption: 0.6, hrvTrend: 0.4 }, meaning: 'Violeta' },
+  orange: { min: 0.02, max: 0.7, from: { strainToday: 0.5, exploration: 0.5 }, meaning: 'Naranja' },
 };
 
 // Parámetros que describen la ESTRUCTURA (se usan para decidir una mutación).
@@ -80,8 +86,8 @@ function firstOccurrence(days) {
 }
 export const trackedAt = (days, idx) => HABITS.filter((h) => firstOccurrence(days)[h.id] <= idx);
 
-// Días desde la última vez registrada. Un día sin registro no rompe la racha:
-// olvidarse de anotar no es recaer.
+// Días desde la última vez registrada. Un día sin registro no cuenta como ocurrencia:
+// olvidarse de anotar no cambia el conteo.
 export function daysSince(days, idx, id) {
   for (let i = idx; i >= 0; i--) if (days[i].habits[id] === true) return idx - i;
   return idx + 1;
@@ -93,21 +99,19 @@ export function extractFeatures(days, idx) {
   const w28 = win(28), w90 = win(90), w60 = win(60), w14 = win(14);
 
   const strains = w28.map((x) => x.strain).filter((x) => x != null);
-  const km90 = w90.flatMap((x) => x.workouts).reduce((s, w) => s + (w.km ?? 0), 0);
+  // sumas escaladas al largo real de la ventana: con 30 días de historia no se "tiene menos"
+  const km90 = w90.flatMap((x) => x.workouts).reduce((s, w) => s + (w.km ?? 0), 0) * (90 / w90.length);
 
-  // Abstinencia: sobre todo la proporción de días limpios en 90 d (lenta), un poco la
-  // racha actual. Una recaída deja marca, pero no borra meses en un día.
+  // Consumo: proporción de días con el hábito en los últimos 90 d (desde que existe).
+  // Es un dato, no una nota: más o menos consumo mueve la forma hacia un lado u otro.
   const first = firstOccurrence(days);
-  const abstinence = mean(trackedAt(days, idx).map((h) => {
-    const from = Math.max(first[h.id], idx - 89);
-    const span = days.slice(from, idx + 1);
-    const clean = span.filter((x) => x.habits[h.id] !== true).length / span.length;
-    const run = clamp01(Math.log1p(daysSince(days, idx, h.id)) / Math.log1p(180));
-    return 0.75 * clean + 0.25 * run;
+  const consumption = mean(trackedAt(days, idx).map((h) => {
+    const span = days.slice(Math.max(first[h.id], idx - 89), idx + 1);
+    return span.filter((x) => x.habits[h.id] === true).length / span.length;
   }));
 
   // Regularidad: cuántos días por semana hay práctica (entrenamiento o meditación)
-  // y cuán estable es ese número entre semanas. Independiente de la abstinencia.
+  // y cuán estable es ese número entre semanas. Independiente del consumo.
   // Ocho semanas: con cuatro, un ciclo de exceso/abandono de dos meses parece constancia.
   const weeks = [];
   for (let e = idx; e - 6 >= 0 && weeks.length < 8; e -= 7) weeks.push(days.slice(e - 6, e + 1).filter(practiced).length);
@@ -122,7 +126,7 @@ export function extractFeatures(days, idx) {
   for (const w of w60.flatMap((x) => x.workouts)) counts[w.type] = (counts[w.type] ?? 0) + 1;
   const total = Object.values(counts).reduce((s, x) => s + x, 0);
   const entropy = total ? -Object.values(counts).reduce((s, c) => s + (c / total) * Math.log(c / total), 0) : 0;
-  const breadth = Math.min(1, total / 30); // sin volumen no hay exploración, aunque haya variedad
+  const breadth = Math.min(1, (total * (60 / w60.length)) / 30); // sin volumen no hay exploración, aunque haya variedad
 
   // HRV: sólo comparar valores del mismo método (RMSSD con RMSSD)
   const method = d.hrv?.method;
@@ -141,7 +145,7 @@ export function extractFeatures(days, idx) {
     activityLoad: strains.length >= 7 ? clamp01(mean(strains) / 14) : null,
     endurance: clamp01(Math.log1p(km90) / Math.log1p(450)),
     consistency,
-    abstinence,
+    consumption,
     mindfulness: clamp01(w28.filter(didMeditate).length / 28),
     exploration: clamp01((entropy / Math.log(5)) * 0.7 + breadth * 0.3),
     sleepQuality,
@@ -152,7 +156,7 @@ export function extractFeatures(days, idx) {
 }
 
 export function toGenome(features, seedShift) {
-  const g = { seedShift };
+  const g = { seedShift, glow: GLOW };
   for (const [k, r] of Object.entries(RULES)) {
     let s = 0, wsum = 0;
     for (const [f, w] of Object.entries(r.from)) {
@@ -180,26 +184,26 @@ export function traits(g) {
     EXPANSIVO: pct(n('expansion') * 0.6 + n('lobeAmp') * 0.4),
     'CAÓTICO': pct((1 - n('coherence')) * 0.6 + n('flow') * 0.4),
     DENSO: pct(n('density')),
-    'LÚCIDO': pct(n('elong') * 0.5 + n('glow') * 0.5),
+    'LÚCIDO': pct(n('elong') * 0.5 + n('coherence') * 0.5),
   };
 }
 
-// Indicadores legibles para HOME
+// Indicadores para HOME: hechos, sin barra hacia una meta
 export function indicators(days, idx) {
   const out = [];
   for (const h of trackedAt(days, idx)) {
     const n = daysSince(days, idx, h.id);
-    if (n >= 3) out.push({ id: h.id, label: h.label, value: n, unit: 'días', progress: Math.min(1, n / 180) });
+    if (n >= 3) out.push({ id: h.id, label: h.label, value: n, unit: 'días' });
   }
   const med = streak(days, idx, didMeditate);
   const med28 = days.slice(Math.max(0, idx - 27), idx + 1).filter(didMeditate).length;
-  if (med28) out.push({ id: 'meditation', label: 'Meditación', value: med, unit: 'días seguidos', progress: med28 / 28 });
+  if (med28) out.push({ id: 'meditation', label: 'Meditación', value: med, unit: 'días seguidos' });
   const w90 = days.slice(Math.max(0, idx - 89), idx + 1).flatMap((x) => x.workouts);
   const km = w90.filter((w) => w.type === 'running').reduce((s, w) => s + (w.km ?? 0), 0);
-  if (km) out.push({ id: 'running', label: 'Running · 90 d', value: Math.round(km), unit: 'km', progress: Math.min(1, km / 450) });
+  if (km) out.push({ id: 'running', label: 'Running · 90 d', value: Math.round(km), unit: 'km' });
   const surf = w90.filter((w) => w.type === 'surf').length;
-  if (surf) out.push({ id: 'surf', label: 'Surf · 90 d', value: surf, unit: 'sesiones', progress: Math.min(1, surf / 40) });
+  if (surf) out.push({ id: 'surf', label: 'Surf · 90 d', value: surf, unit: 'sesiones' });
   const dive = w90.filter((w) => w.type === 'diving').length;
-  if (dive) out.push({ id: 'diving', label: 'Buceo · 90 d', value: dive, unit: dive === 1 ? 'vez' : 'veces', progress: Math.min(1, dive / 10) });
+  if (dive) out.push({ id: 'diving', label: 'Buceo · 90 d', value: dive, unit: dive === 1 ? 'vez' : 'veces' });
   return out;
 }

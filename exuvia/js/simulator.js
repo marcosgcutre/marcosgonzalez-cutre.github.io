@@ -18,7 +18,7 @@ const DAY = 86400000;
 export const isoDay = (d) => new Date(d).toISOString().slice(0, 10);
 
 // Cada persona describe conductas por día relativo a "hoy" (0 = hoy, 240 = hace 240 días).
-// p(ago) devuelve probabilidades; los hábitos de abstinencia tienen fecha de inicio.
+// p(ago) devuelve probabilidades; los cambios de hábito tienen fecha.
 export const PERSONAS = {
   marcos: {
     label: 'Referencia (imagen)',
@@ -58,6 +58,16 @@ export const PERSONAS = {
       strength: ago < 60 ? 0.2 : 0.02,
     }),
   },
+  steady: {
+    label: 'Vida estable, sin cambios',
+    seed: 2718,
+    days: 240,
+    behave: () => ({
+      alcohol: 0.25, sugar: 0.4, smoking: 0,
+      meditation: 0, run: 0.35, runKm: [6, 9],
+      surf: 0, diving: 0, strength: 0.15,
+    }),
+  },
   chaotic: {
     label: 'Atleta irregular',
     seed: 9001,
@@ -88,7 +98,7 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
   const manual = [];
 
   let fitness = 0.2;      // estado latente, no observable directamente
-  let abstEffect = 0;     // efecto acumulado de abstinencia
+  let abstEffect = 0;     // efecto fisiológico acumulado de no consumir (suposición de la simulación)
   let prevAlcohol = false, prevStrain = 8;
   let hrvBase = 48, rhrBase = 62;
 

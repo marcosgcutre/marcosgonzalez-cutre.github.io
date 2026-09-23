@@ -88,12 +88,11 @@ function renderHome() {
   $('#mutation-name').textContent = `MUTATION ${String(e.stage + 1).padStart(2, '0')} · ${e.name ?? ''}`;
   $('#mutation-age').textContent = e.age;
   const p = progress(e);
-  $('#progress').innerHTML = [['MADUREZ', p.maturity], ['RASTRO', p.trace], ['CAMBIO', p.change]]
+  $('#progress').innerHTML = [['MADUREZ', p.maturity], ['CAMBIO', p.change]]
     .map(([l, v]) => `<div>${l}<i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
   $('#indicators').innerHTML = indicators(S.days, S.idx).slice(0, 6).map((x) => `
     <div class="cell"><div class="lbl">${x.label}</div>
-      <div class="val">${x.value}<small>${x.unit}</small></div>
-      <div class="bar"><b style="width:${(x.progress * 100).toFixed(0)}%"></b></div></div>`).join('');
+      <div class="val">${x.value}<small>${x.unit}</small></div></div>`).join('');
   const t = traits(currentGenome());
   $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
 }
@@ -146,7 +145,7 @@ function renderData() {
     ['OURA', 'NO CONECTADO', false], ['GARMIN', 'NO CONECTADO', false],
   ].map(([n, s, on]) => `<div class="src ${on ? '' : 'off'}">${n}<div class="st">${s}</div></div>`).join('');
 
-  $('#manual').innerHTML = HABITS.filter((h) => h.kind === 'abstinence').map((h) => `
+  $('#manual').innerHTML = HABITS.map((h) => `
     <label><input type="checkbox" data-h="${h.id}" ${d.habits[h.id] ? 'checked' : ''}> ${{ sugar: 'Comí azúcar', alcohol: 'Tomé alcohol', smoking: 'Fumé' }[h.id]}</label>`).join('');
   $('#manual').querySelectorAll('input').forEach((i) => i.onchange = () => {
     const m = S.raw.manual.find((x) => x.date === d.date && x.habit === i.dataset.h);

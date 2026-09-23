@@ -50,8 +50,9 @@ ${SNOISE}
 const float TAU = 6.2831853;
 void main(){
   float u = aSeed.x, v = aSeed.y, w = aSeed.z, s = aSeed.w;
-  // aparición/desaparición gradual: sin partículas que "saltan" al cambiar la densidad
-  float visible = smoothstep(s - 0.04, s + 0.04, 0.3 + 0.7 * uDensity);
+  // Toda la materia está siempre presente: ningún dato "quita" partículas ni brillo.
+  // La densidad sólo decide cómo se distribuye (compacta ↔ dispersa).
+  float visible = 1.0;
   float t = uTime * uFlow;
 
   // bandas fijas: el filamento sólo decide cuánto se agrupan, nunca cuántas bandas hay
@@ -64,6 +65,7 @@ void main(){
   float phi = acos(1.0 - 2.0 * v);
   float k = fract(w * 7.31 + s * 3.7);
   float rad = mix(pow(k, 0.33), 0.9 + 0.1 * k, 0.3 + 0.6 * uDensity);
+  rad *= 1.0 + (1.0 - uDensity) * 0.45 * pow(fract(s * 13.7), 3.0); // halo cuando es dispersa
   // lóbulos enteros mezclados: sin costura en theta = 0 y sin saltos entre 2 y 3 lóbulos
   float l0 = floor(uLobes), lf = fract(uLobes);
   float ph = uSeedShift * 2.0 + t * 0.35;
