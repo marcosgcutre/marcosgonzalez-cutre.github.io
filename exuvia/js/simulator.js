@@ -28,6 +28,7 @@ export const PERSONAS = {
   marcos: {
     label: 'Referencia (imagen)',
     seed: 4721,
+    pins: ['sugar', 'surf', 'alcohol', 'running', 'meditation', 'diving'], // las 6 tarjetas del mockup
     days: 240,
     // dow: 0 = lunes … 6 = domingo
     behave: (ago, dow) => {

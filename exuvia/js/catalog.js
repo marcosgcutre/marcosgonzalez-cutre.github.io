@@ -18,30 +18,30 @@ const has = (type) => (d) => (d.workouts.some((w) => w.type === type) ? 1 : 0);
 
 export const CATALOG = [
   // sustancias
-  { id: 'alcohol', code: 'ALC', label: 'Alcohol', domain: 'SUS', source: 'manual' },
-  { id: 'smoking', code: 'TAB', label: 'Tabaco', domain: 'SUS', source: 'manual' },
-  { id: 'cannabis', code: 'THC', label: 'Cannabis', domain: 'SUS', source: 'manual' },
-  { id: 'cocaine', code: 'COC', label: 'Cocaína', domain: 'SUS', source: 'manual' },
-  { id: 'caffeine', code: 'CAF', label: 'Cafeína', domain: 'SUS', source: 'manual' },
-  { id: 'sugar', code: 'AZU', label: 'Azúcar', domain: 'SUS', source: 'manual' },
-  { id: 'ultra', code: 'UPF', label: 'Ultraprocesados', domain: 'SUS', source: 'manual' },
+  { id: 'alcohol', card: 'NO ALCOHOL', code: 'ALC', label: 'Alcohol', domain: 'SUS', source: 'manual' },
+  { id: 'smoking', card: 'SIN TABACO', code: 'TAB', label: 'Tabaco', domain: 'SUS', source: 'manual' },
+  { id: 'cannabis', card: 'SIN CANNABIS', code: 'THC', label: 'Cannabis', domain: 'SUS', source: 'manual' },
+  { id: 'cocaine', card: 'SIN COCAÍNA', code: 'COC', label: 'Cocaína', domain: 'SUS', source: 'manual' },
+  { id: 'caffeine', card: 'SIN CAFEÍNA', code: 'CAF', label: 'Cafeína', domain: 'SUS', source: 'manual' },
+  { id: 'sugar', card: 'SIN AZÚCAR', code: 'AZU', label: 'Azúcar', domain: 'SUS', source: 'manual' },
+  { id: 'ultra', card: 'SIN ULTRAPROCESADOS', code: 'UPF', label: 'Ultraprocesados', domain: 'SUS', source: 'manual' },
   // cuerpo
-  { id: 'running', code: 'CAR', label: 'Correr', domain: 'CUE', source: 'auto', read: (d) => (run(d).length ? 1 : 0), detail: (d) => { const km = run(d).reduce((s, w) => s + (w.km ?? 0), 0); return km ? `${km.toFixed(1)} KM` : null; } },
-  { id: 'strength', code: 'FUE', label: 'Fuerza', domain: 'CUE', source: 'auto', read: has('strength') },
-  { id: 'surf', code: 'SRF', label: 'Surf', domain: 'CUE', source: 'auto', read: has('surf') },
-  { id: 'diving', code: 'DIV', label: 'Buceo', domain: 'CUE', source: 'auto', read: has('diving') },
-  { id: 'yoga', code: 'YOG', label: 'Yoga / movilidad', domain: 'CUE', source: 'auto', read: has('yoga') },
-  { id: 'steps', code: 'PAS', label: 'Pasos', domain: 'CUE', source: 'auto', read: (d) => (d.steps == null ? null : Math.min(1, d.steps / 12000)), detail: (d) => (d.steps != null ? `${(d.steps / 1000).toFixed(1)}K` : null) },
+  { id: 'running', card: 'CORRIDAS', code: 'CAR', label: 'Correr', domain: 'CUE', source: 'auto', read: (d) => (run(d).length ? 1 : 0), detail: (d) => { const km = run(d).reduce((s, w) => s + (w.km ?? 0), 0); return km ? `${km.toFixed(1)} KM` : null; } },
+  { id: 'strength', card: 'FUERZA', code: 'FUE', label: 'Fuerza', domain: 'CUE', source: 'auto', read: has('strength') },
+  { id: 'surf', card: 'SURF SESSIONS', code: 'SRF', label: 'Surf', domain: 'CUE', source: 'auto', read: has('surf') },
+  { id: 'diving', card: 'BUCEO', code: 'DIV', label: 'Buceo', domain: 'CUE', source: 'auto', read: has('diving') },
+  { id: 'yoga', card: 'YOGA', code: 'YOG', label: 'Yoga / movilidad', domain: 'CUE', source: 'auto', read: has('yoga') },
+  { id: 'steps', card: 'PASOS', code: 'PAS', label: 'Pasos', domain: 'CUE', source: 'auto', read: (d) => (d.steps == null ? null : Math.min(1, d.steps / 12000)), detail: (d) => (d.steps != null ? `${(d.steps / 1000).toFixed(1)}K` : null) },
   // mente
-  { id: 'meditation', code: 'MED', label: 'Meditación', domain: 'MEN', source: 'auto', read: (d) => (d.mindfulMin >= 5 ? 1 : 0), detail: (d) => (d.mindfulMin ? `${d.mindfulMin} MIN` : null) },
-  { id: 'breathwork', code: 'RES', label: 'Respiración', domain: 'MEN', source: 'manual' },
-  { id: 'reading', code: 'LEC', label: 'Lectura', domain: 'MEN', source: 'manual' },
-  { id: 'screens', code: 'PAN', label: 'Pantallas +4 h', domain: 'MEN', source: 'manual' },
+  { id: 'meditation', card: 'MEDITACIÓN', code: 'MED', label: 'Meditación', domain: 'MEN', source: 'auto', read: (d) => (d.mindfulMin >= 5 ? 1 : 0), detail: (d) => (d.mindfulMin ? `${d.mindfulMin} MIN` : null) },
+  { id: 'breathwork', card: 'RESPIRACIÓN', code: 'RES', label: 'Respiración', domain: 'MEN', source: 'manual' },
+  { id: 'reading', card: 'LECTURA', code: 'LEC', label: 'Lectura', domain: 'MEN', source: 'manual' },
+  { id: 'screens', card: 'PANTALLAS +4 H', code: 'PAN', label: 'Pantallas +4 h', domain: 'MEN', source: 'manual' },
   // recuperación
-  { id: 'cold', code: 'FRI', label: 'Frío', domain: 'REC', source: 'manual' },
-  { id: 'sauna', code: 'SAU', label: 'Sauna', domain: 'REC', source: 'manual' },
+  { id: 'cold', card: 'FRÍO', code: 'FRI', label: 'Frío', domain: 'REC', source: 'manual' },
+  { id: 'sauna', card: 'SAUNA', code: 'SAU', label: 'Sauna', domain: 'REC', source: 'manual' },
   // nutrición
-  { id: 'fasting', code: 'AYU', label: 'Ayuno', domain: 'NUT', source: 'manual' },
+  { id: 'fasting', card: 'AYUNO', code: 'AYU', label: 'Ayuno', domain: 'NUT', source: 'manual' },
 ];
 export const MAX_TRACES = 24; // tamaño del arreglo en el shader
 

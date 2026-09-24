@@ -114,9 +114,15 @@ Los hábitos de cuerpo y la meditación se leen del wearable (AUTO); el resto se
 
 **Tienda de aplicaciones.** La guía 1.4.3 de Apple no permite apps que *fomenten* el consumo de tabaco, drogas ilegales o alcohol en exceso ([App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)). Registrar un consumo no es fomentarlo, y la neutralidad del diseño (ningún hábito es bueno ni malo) juega a favor, pero cómo se presenta la cocaína en la app y en la ficha de la tienda es algo a revisar antes de enviarla; no puedo asegurar cómo lo interpretaría la revisión.
 
-## 6d. Interfaz: una sola pantalla
+## 6d. Interfaz: la del mockup
 
-Todo lo principal vive en una pantalla. Arriba, el organismo con sus patrones anotados: etiquetas ancladas en 3D a cada estructura (anillo semanal, hélice, filamentos, último estrato y las barras más frecuentes del espectro), que siguen la rotación y se atenúan cuando quedan detrás del cuerpo. Debajo, un solo panel: mutación actual con latencia y deriva, SEÑALES (cada patrón detectado; tocar una aísla su estructura en la forma y atenúa el resto), HOY (registro del día con chips) y TRAZAS (28 días por hábito). Lo secundario (exuvias, fuentes, lab, reloj, compartir) está en un panel lateral que se abre con ≡ o ↗. Los hábitos de cuerpo no generan acoplamientos propios porque ya están dentro de "actividad".
+La app sigue el mockup original: cinco pestañas (HOME, MUTATIONS, ANALYTICS, EXUVIA, PROFILE).
+
+- **HOME:** el organismo limpio en su marco, CURRENT MUTATION con los días de la forma actual y seis tarjetas de hábitos (SIN AZÚCAR 124 DÍAS, SURF SESSIONS, NO ALCOHOL, CORRIDAS, MEDITACIÓN, BUCEO). En las sustancias el número es días desde el último registro; en el resto, días con ese hábito durante la forma actual.
+- **MUTATIONS:** línea de tiempo, estado de la forma en lenguaje llano ("Tu forma cambió un 91 % de lo necesario para mudar") y qué hábitos la están cambiando ("Frío: 0 → 10 días de cada 28"), más el historial de formas.
+- **ANALYTICS:** los patrones en lenguaje llano ("Tu día más activo es el domingo", "Los días después de meditar, dormís mejor"); sólo en esta pestaña las estructuras de los patrones se inscriben en la forma, con etiquetas ancladas, y tocar un patrón lo aísla. Debajo, el registro del día y los últimos 28 días por hábito.
+- **EXUVIA:** las pieles anteriores, una a una, con su duración y fechas.
+- **PROFILE:** fuentes de datos, compartir, Apple Watch, datos crudos y lab.
 
 ## 7. Compartir
 

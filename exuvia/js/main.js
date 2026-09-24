@@ -4,10 +4,11 @@ import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
 import { normalize } from './ingest.js';
 import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
-import { CATALOG, DOMAINS, dayValue } from './catalog.js';
+import { CATALOG, DOMAINS, dayValue, byId, trackedAt, daysSince, firstSeen } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
 import { detect, toUniforms, signalIds, VARS, DAYS } from './patterns.js';
+import { emptyPatterns } from './organism.js';
 
 const $ = (s) => document.querySelector(s);
 const app = $('#app');
@@ -18,6 +19,7 @@ const COUNT = +qs.get('n') || (coarse ? 40000 : 80000);
 const S = {
   persona: 'marcos', raw: null, days: [], history: null, idx: 0,
   lab: false, labFeatures: null, ghost: null, playing: false, view: 'home',
+  skin: 0,         // piel anterior seleccionada en EXUVIA
   focus: 0,        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos
   anchors: [],     // etiquetas ancladas a las estructuras (se proyectan cada frame)
 };
@@ -83,56 +85,81 @@ const currentGenome = () => (S.ghost ? S.ghost.genome : toGenome(currentFeatures
 
 function refresh(immediate = false) {
   const g = currentGenome();
-  const pu = toUniforms(currentPatterns());
+  // los patrones sólo se inscriben en la forma dentro de ANALYTICS; en el resto la forma va limpia
+  const pu = S.view === 'analytics' ? toUniforms(currentPatterns()) : emptyPatterns();
   stage.organism.setTarget(g, immediate);
   stage.organism.setPatterns(pu, immediate);
   watch?.organism.setTarget(g, immediate);
-  watch?.organism.setPatterns(pu, immediate);
-  renderHome(); renderScrub();
-  buildAnchors(g, pu);
-  if (S.view === 'exuvias') renderExuvias();
-  if (S.view === 'data') renderData();
-  if (S.view === 'lab') renderLab(false);
-  if (S.view === 'watch') renderWatch();
-  if (S.view === 'share') renderShare();
+  renderHome();
+  if (S.view === 'analytics') { renderSignals(); renderLog(); $('#indicators').innerHTML = traceRows(indicators(S.days, S.idx)); buildAnchors(g, pu); }
+  else clearAnchors();
+  if (S.view === 'mutations') { renderScrub(); renderMutations(); }
+  if (S.view === 'exuvia') renderSkins();
+  if (S.view === 'profile') { renderData(); renderShare(); renderWatch(); renderLab(false); }
 }
 
-// ---------- vistas ----------
+// ---------- HOME ----------
+const HOY = () => S.days.length - 1 - S.idx;
 function renderScrub() {
-  const ago = S.days.length - 1 - S.idx;
-  $('#scrub-label').textContent = ago === 0 ? 'T0' : `T−${ago} D`;
+  $('#scrub-label').textContent = HOY() === 0 ? 'HOY' : `HACE ${HOY()} D`;
 }
 
-function renderHome() {
+// Las 6 tarjetas del mockup: las fijadas por el perfil o, si no hay, las más presentes
+function cardHabits() {
+  const pins = PERSONAS[S.persona].pins;
+  const tracked = trackedAt(S.days, S.idx);
+  if (pins) return pins.map((id) => byId[id]).filter((h) => tracked.includes(h));
+  const sus = tracked.filter((h) => h.domain === 'SUS' && daysSince(S.days, S.idx, h) > 2).slice(0, 2);
+  const rest = indicators(S.days, S.idx).filter((x) => byId[x.id].domain !== 'SUS' && x.id !== 'steps').sort((a, b) => b.count - a.count).map((x) => byId[x.id]);
+  return [...sus, ...rest].slice(0, 6);
+}
+function cardFor(h) {
   const e = entry();
-  $('#mutation-name').textContent = `MUTATION ${String(e.stage + 1).padStart(2, '0')} · ${e.name ?? ''}`;
-  $('#mutation-age').textContent = e.age;
-  const p = progress(e);
-  $('#progress').innerHTML = [
-    ['LATENCIA', p.maturity, `${Math.min(e.age, MIN_DAYS)}/${MIN_DAYS} D`],
-    ['DERIVA', p.change, `${e.net.toFixed(3)}/${NET.toFixed(3)}`],
-  ].map(([l, v, r]) => `<div><span>${l}</span><em>${r}</em><i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
-  $('#indicators').innerHTML = traceRows(indicators(S.days, S.idx));
-  renderSignals();
-  renderLog();
-  const t = traits(currentGenome());
-  $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v.toFixed(2)}</b></div>`).join('');
-  renderHud();
+  const span = Math.max(e.age, 28);                       // período: la mutación actual (mín. 28 d)
+  const color = DOMAINS[h.domain].color;
+  if (h.domain === 'SUS') {
+    const n = daysSince(S.days, S.idx, h);
+    return { label: h.card, value: n ?? '—', unit: 'DÍAS', bar: n == null ? 0 : Math.min(1, n / span), color };
+  }
+  const win = S.days.slice(Math.max(0, S.idx - span + 1), S.idx + 1);
+  const n = win.filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
+  return { label: h.card, value: n, unit: n < 5 ? (n === 1 ? 'VEZ' : 'VECES') : 'DÍAS', bar: Math.min(1, n / span * 2), color };
+}
+function renderHome() {
+  $('#mutation-age').textContent = entry().age;
+  $('#cards').innerHTML = cardHabits().map(cardFor).map((c) => `
+    <div class="card" style="--cc:${c.color}">
+      <div class="lbl">${c.label}</div>
+      <div class="val">${c.value}<small>${c.unit}</small></div>
+      <div class="bar"><b style="width:${(c.bar * 100).toFixed(0)}%"></b></div>
+    </div>`).join('');
 }
 
-// HUD de instrumento sobre el organismo
-function renderHud() {
-  const e = entry(), g = currentGenome();
-  const mode = S.ghost ? `EXUVIA ${String(S.ghost.index).padStart(2, '0')}` : S.lab ? 'OVERRIDE' : 'LIVE';
-  const ago = S.days.length - 1 - S.idx;
-  $('#hud').innerHTML = `
-    <span class="tl">${mode}<br>M${String(e.stage + 1).padStart(2, '0')} ${e.name ?? ''}</span>
-    <span class="tr">N ${COUNT.toLocaleString('es')}<br>SEED ${g.seedShift.toFixed(3)}</span>
-    <span class="bl">${S.days[S.idx].date}<br>T${ago ? `−${ago}` : '0'}</span>
-    <span class="br">Δ ${e.net.toFixed(3)}<br>SEÑALES ${signalIds(currentPatterns()).length}</span>`;
+// ---------- MUTATIONS ----------
+// Qué está cambiando la forma, en términos de hábitos: frecuencia en 28 d al empezar la etapa vs hoy
+function drivers() {
+  const e = entry(), from = S.idx - e.age;
+  const f28 = (idx, h) => S.days.slice(Math.max(0, idx - 27), idx + 1).filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
+  return trackedAt(S.days, S.idx).filter((h) => h.id !== 'steps')
+    .map((h) => ({ h, a: f28(from, h), b: f28(S.idx, h) }))
+    .filter((x) => Math.abs(x.b - x.a) >= 4).sort((x, y) => Math.abs(y.b - y.a) - Math.abs(x.b - x.a)).slice(0, 3);
+}
+function renderMutations() {
+  const e = entry();
+  $('#mutation-name').textContent = `MUTACIÓN ${String(e.stage + 1).padStart(2, '0')} · ${e.age} DÍAS`;
+  const pct = Math.round(Math.min(1, e.net / NET) * 100);
+  const head = e.age < MIN_DAYS
+    ? `Esta forma tiene ${e.age} días. Una forma necesita al menos ${MIN_DAYS} días antes de poder mudar.`
+    : pct >= 100 ? 'Tu forma está mudando.' : `Tu forma cambió un ${pct}% de lo necesario para mudar.`;
+  const d = drivers();
+  const list = d.length
+    ? `<p>Lo que más la está cambiando desde que empezó esta forma:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
+    : '<p>Tus hábitos están estables desde que empezó esta forma.</p>';
+  $('#mutation-status').innerHTML = `<p class="lead">${head}</p><div class="meter"><b style="width:${pct}%"></b></div>${list}`;
+  renderHistory();
 }
 
-// Miniaturas de exuvias: un solo renderer reutilizado, resultado cacheado.
+// Miniaturas de exuvias// Miniaturas de exuvias: un solo renderer reutilizado, resultado cacheado.
 const thumbCache = new Map();
 let thumbStage = null;
 function thumb(genome, key, pu) {
@@ -151,27 +178,41 @@ function thumb(genome, key, pu) {
   return url;
 }
 
-function renderExuvias() {
+const pastSkins = () => S.history.exuvias.filter((x) => x.end < S.days[S.idx].date);
+const skinThumb = (x) => thumb(x.genome, `${S.persona}-${x.index}`, emptyPatterns());
+function renderHistory() {
   const e = entry();
-  const upTo = S.history.exuvias.filter((x) => x.end < S.days[S.idx].date);
-  const cur = { index: e.stage + 1, name: e.name, days: e.age, genome: e.genome, current: true, start: S.days[S.idx - e.age]?.date };
-  const list = [cur, ...upTo.slice().reverse()];
-  $('#exuvia-list').innerHTML = list.map((x, i) => `
-    <button class="exuvia ${x.current ? 'current' : ''}" data-i="${i}">
-      <img alt="Mutation ${x.index}" src="${thumb(x.genome, `${S.persona}-${x.index}-${x.current ? S.idx : 'x'}`, toUniforms(patternsAt(x.current ? S.idx : idxOf(x.end))))}">
-      <div class="lbl">M${String(x.index).padStart(2, '0')} ${x.name ?? ''} ${x.current ? '· ACTIVA' : ''}</div>
-      <div class="meta">${x.days} D</div>
-      ${x.current ? '' : `<div class="meta">${x.start} → ${x.end}</div>`}
-    </button>`).join('') || '<p class="note">SIN MUDAS REGISTRADAS</p>';
-  $('#exuvia-list').querySelectorAll('.exuvia').forEach((b) => b.onclick = () => {
-    const x = list[+b.dataset.i];
-    S.ghost = x.current ? null : x;
-    $('#ghost-label').hidden = !S.ghost;
-    if (S.ghost) $('#ghost-label').textContent = `EXUVIA M${String(x.index).padStart(2, '0')} ${x.name} · CERRAR ✕`;
-    refresh();
+  const cur = { index: e.stage + 1, days: e.age, genome: currentGenome(), current: true };
+  const list = [cur, ...pastSkins().slice().reverse()];
+  $('#history').innerHTML = list.map((x) => `
+    <button class="hist ${x.current ? 'current' : ''}" data-i="${x.index}">
+      <img alt="" src="${x.current ? thumb(x.genome, `${S.persona}-cur-${S.idx}`, emptyPatterns()) : skinThumb(x)}">
+      <div class="lbl">MUTATION ${String(x.index).padStart(2, '0')}</div>
+      <div class="meta">${x.current ? 'ACTUAL · ' : ''}${x.days} DÍAS</div>
+    </button>`).join('');
+  $('#history').querySelectorAll('.hist:not(.current)').forEach((b) => b.onclick = () => {
+    S.skin = pastSkins().findIndex((x) => x.index === +b.dataset.i);
+    go('exuvia');
   });
 }
-$('#ghost-label').onclick = () => { S.ghost = null; $('#ghost-label').hidden = true; refresh(); };
+const fmt = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('es', { day: 'numeric', month: 'short' }).toUpperCase();
+function renderSkins() {
+  const skins = pastSkins();
+  if (!skins.length) {
+    S.ghost = null;
+    $('#skin-info').innerHTML = '<p class="note">Todavía no dejaste ninguna piel atrás. Cuando tu forma mude, la anterior queda acá.</p>';
+    $('#skin-dots').innerHTML = '';
+    return;
+  }
+  S.skin = Math.max(0, Math.min(S.skin, skins.length - 1));
+  const x = skins[S.skin];
+  S.ghost = x;
+  stage.organism.setTarget(x.genome);
+  $('#skin-info').innerHTML = `<div class="eyebrow">EXUVIA ${String(x.index).padStart(2, '0')}</div><div class="big">${x.days}</div><div class="eyebrow dim">DÍAS · ${fmt(x.start)} – ${fmt(x.end)}</div>`;
+  $('#skin-dots').innerHTML = skins.map((_, i) => `<i class="${i === S.skin ? 'on' : ''}"></i>`).join('');
+}
+$('#skin-prev').onclick = () => { S.skin--; renderSkins(); };
+$('#skin-next').onclick = () => { S.skin++; renderSkins(); };
 
 // Una fila por hábito seguido: código, tira de 28 días, conteo y último registro
 function traceRows(list) {
@@ -189,7 +230,7 @@ function traceRows(list) {
 function renderLog() {
   const d = S.days[S.idx];
   const ago = S.days.length - 1 - S.idx;
-  $('#log-date').textContent = `${d.date} · ${ago ? `T−${ago}` : 'T0'} · SUSTANCIAS: PRIVADAS`;
+  $('#log-date').textContent = `${ago ? `hace ${ago} días` : 'hoy'} · las sustancias son privadas`;
   $('#log').innerHTML = `<div class="chips">${CATALOG.map((h) => {
     const v = dayValue(d, h), on = (v ?? 0) >= 0.5, detail = h.detail?.(d);
     const dc = DOMAINS[h.domain].color;
@@ -206,33 +247,34 @@ function renderLog() {
   });
 }
 
-// SEÑALES: los patrones detectados, cada uno ligado a su estructura en la forma
-function renderSignals() {
-  const p = currentPatterns();
+// PATRONES en lenguaje llano; cada uno ligado a su estructura en la forma
+const DAY_NAMES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+const VAR_NAME = (k) => ({ activity: 'tu actividad', sleep: 'tu sueño', hrv: 'tu HRV' }[k] ?? byId[k]?.label.toLowerCase() ?? k);
+function signalText(p) {
   const rows = [];
   const w = p.weekly;
-  if (w) {
-    const peak = w.profile.indexOf(Math.max(...w.profile));
-    const spark = w.profile.map((x) => `<i style="height:${(3 + x * 13).toFixed(0)}px"></i>`).join('');
-    rows.push([1, '#b3ffff', 'RITMO SEMANAL', `<span class="mini">${spark}</span> PICO ${DAYS[peak]}`, w.strength.toFixed(2), 'anillo orbital · 7 lóbulos']);
+  if (w && w.strength > 0.2) {
+    const peak = w.profile.indexOf(Math.max(...w.profile)), low = w.profile.indexOf(Math.min(...w.profile));
+    rows.push({ k: 1, c: '#b3ffff', t: `Tu día más activo es el ${DAY_NAMES[peak]}; el más tranquilo, el ${DAY_NAMES[low]}.`, s: 'Anillo alrededor de tu forma · un lóbulo por día' });
   }
-  if (p.cycle) rows.push([2, '#c79bff', `CICLO ${p.cycle.period} D`, `${p.cycle.turns.toFixed(1)} vueltas`, p.cycle.strength.toFixed(2), 'doble hélice']);
+  if (p.cycle) rows.push({ k: 2, c: '#c79bff', t: `Tu actividad sube y baja en ciclos de unas ${Math.round(p.cycle.period / 7)} semanas.`, s: `Hélice · ${p.cycle.turns.toFixed(1)} vueltas = ciclos vistos` });
   for (const c of p.couplings) {
-    rows.push([3, c.r >= 0 ? '#3ff0ff' : '#ff7a2f', `${VARS[c.a].label}${c.lag ? ' (T−1)' : ''} → ${VARS[c.b].label}`, c.r >= 0 ? 'mismo sentido' : 'sentido opuesto', `${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}`, 'filamento']);
+    const after = c.lag ? `los días después de ${VAR_NAME(c.a).replace(/^tu /, '')}` : `cuando sube ${VAR_NAME(c.a)}`;
+    const eff = c.b === 'sleep' ? (c.r > 0 ? 'dormís mejor' : 'dormís peor') : c.b === 'hrv' ? (c.r > 0 ? 'tu HRV sube' : 'tu HRV baja') : (c.r > 0 ? `sube ${VAR_NAME(c.b)}` : `baja ${VAR_NAME(c.b)}`);
+    rows.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${after[0].toUpperCase()}${after.slice(1)}, ${eff}.`, s: `Filamento · correlación ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)} en 60 días (asociación, no causa)` });
   }
-  const strata = p.strata.slice().reverse();
-  for (const x of strata.slice(0, 3)) {
-    rows.push([10, '#cfe9ff', `ESTRATO ${VARS[x.key].label} ${x.delta > 0 ? '↑' : '↓'}`, x.date, x.strength.toFixed(2), 'capa · radio = fecha']);
+  for (const x of p.strata.slice().reverse().slice(0, 3)) {
+    const what = x.key === 'activity' ? 'actividad' : x.key === 'sleep' ? 'sueño' : byId[x.key]?.label.toLowerCase();
+    rows.push({ k: 10, c: '#cfe9ff', t: `Desde el ${fmt(x.date).toLowerCase()} hay ${x.delta > 0 ? 'más' : 'menos'} ${what}.`, s: 'Capa dentro de tu forma · más adentro = más antiguo' });
   }
-  if (strata.length > 3) {
-    rows.push([10, '#cfe9ff', `+${strata.length - 3} ESTRATOS`, strata.slice(3).map((x) => `${VARS[x.key].label}${x.delta > 0 ? '↑' : '↓'}`).join(' '), '', 'capas anteriores']);
-  }
-  const tr = p.traces.filter((t) => t.freq > 0);
-  if (tr.length) rows.push([5, '#8fb4d8', `${tr.length} TRAZAS`, tr.slice().sort((a, b) => b.freq - a.freq).slice(0, 4).map((t) => t.code).join(' '), '28 D', 'espectro']);
-  $('#signals').innerHTML = rows.length ? rows.map(([k, c, a, b, v, st]) => `
-    <button class="sig ${S.focus === k ? 'on' : ''}" data-k="${k}" style="--sc:${c}">
-      <b></b><span class="a">${a}</span><span class="b">${b}</span><em>${v}</em><small>${st}</small>
-    </button>`).join('') : '<p class="note">SIN SEÑALES TODAVÍA · MÍN. 28 D DE DATOS</p>';
+  return rows;
+}
+function renderSignals() {
+  const rows = signalText(currentPatterns());
+  $('#signals').innerHTML = rows.length ? rows.map((r) => `
+    <button class="sig ${S.focus === r.k ? 'on' : ''}" data-k="${r.k}" style="--sc:${r.c}">
+      <b></b><span class="a">${r.t}</span><small>${r.s}</small>
+    </button>`).join('') : '<p class="note">Todavía no hay patrones. Hacen falta al menos 4 semanas de datos.</p>';
   $('#signals').querySelectorAll('.sig').forEach((b) => b.onclick = () => {
     const k = +b.dataset.k;
     S.focus = S.focus === k ? 0 : k;
@@ -250,33 +292,34 @@ function buildAnchors(g, pu) {
   if (p.weekly && pu.weekStr > 0.05) {
     const i = p.weekly.profile.indexOf(Math.max(...p.weekly.profile));
     const ang = ((i + 0.5) / 7) * TAU, r = 1.3 + 0.42 + 0.06;
-    A.push({ k: 1, c: '#b3ffff', t: `SEMANA · PICO ${DAYS[i]}`, v: new THREE.Vector3(Math.cos(ang) * r, 0.1, Math.sin(ang) * r) });
+    A.push({ k: 1, c: '#b3ffff', t: `SEMANA`, v: new THREE.Vector3(Math.cos(ang) * r, 0.1, Math.sin(ang) * r) });
   }
   if (p.cycle) {
     const ang = pu.cycleTurns * TAU;
-    A.push({ k: 2, c: '#c79bff', t: `CICLO ${p.cycle.period} D`, v: new THREE.Vector3(Math.cos(ang) * 1.42, 1.55, Math.sin(ang) * 1.42) });
+    A.push({ k: 2, c: '#c79bff', t: `CICLO ${Math.round(p.cycle.period / 7)} SEM`, v: new THREE.Vector3(Math.cos(ang) * 1.42, 1.55, Math.sin(ang) * 1.42) });
   }
   p.couplings.forEach((c) => {
     const a = LINK_NODE(VARS[c.a].angle), b = LINK_NODE(VARS[c.b].angle);
     const m = a.clone().add(b).multiplyScalar(0.5);
     const ctl = m.clone().add(m.clone().add(new THREE.Vector3(0, 0.6, 0)).normalize().multiplyScalar(0.9));
     const mid = a.clone().multiplyScalar(0.25).add(ctl.clone().multiplyScalar(0.5)).add(b.clone().multiplyScalar(0.25));
-    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${VARS[c.a].label}${c.lag ? '(T−1)' : ''}→${VARS[c.b].label} ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}`, v: mid });
+    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${(byId[c.a]?.label ?? VARS[c.a].label).toUpperCase()} → ${c.b === 'sleep' ? 'SUEÑO' : c.b === 'hrv' ? 'HRV' : VARS[c.b].label}`, v: mid });
   });
   const st = p.strata.at(-1);
   if (st) {
     const r = 0.3 + 0.7 * st.pos;
-    A.push({ k: 10, c: '#cfe9ff', t: `ESTRATO ${st.date.slice(5)} ${VARS[st.key].label}${st.delta > 0 ? '↑' : '↓'}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
+    A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
   }
   p.traces.filter((t) => t.freq >= 0.1).sort((a, b) => b.freq - a.freq).slice(0, S.focus === 5 ? 24 : 4).forEach((t) => {
     const c = CATALOG.findIndex((h) => h.id === t.id);
     const ang = ((c + 0.5) / 24) * TAU;
     A.push({ k: 5, c: DOMAINS[t.domain].color, t: t.code, small: true, v: new THREE.Vector3(Math.cos(ang) * 1.72, -0.95 + 0.08 + 2.4 * t.freq + 0.07, Math.sin(ang) * 1.72) });
   });
-  S.anchors = A;
-  $('#labels').innerHTML = A.map((a, i) => `<span class="lbl ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
+  S.anchors = S.focus ? A.filter((a) => a.k === S.focus) : A.filter((a) => !a.small);
+  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
   S.labelEls = [...$('#labels').children];
 }
+function clearAnchors() { S.anchors = []; S.labelEls = []; $('#labels').innerHTML = ''; }
 const _v = new THREE.Vector3(), _dir = new THREE.Vector3();
 function updateLabels() {
   if (!S.labelEls?.length) return;
@@ -386,14 +429,13 @@ const shareInclude = new Set();
 let shareSubstanceForm = false; // las trazas de sustancias no viajan en la forma compartida salvo que se active
 function renderShare() {
   const ind = shareInfo().indicators;
-  const formToggle = `<label class="toggle warn"><input type="checkbox" id="share-sus" ${shareSubstanceForm ? 'checked' : ''}> INCLUIR TRAZAS DE SUSTANCIAS EN LA FORMA</label>`;
+  const formToggle = '';
   if (!ind.length) { $('#share-opts').innerHTML = '<p class="note">EXUVIA / OVERRIDE · SALIDA: SÓLO GEOMETRÍA</p>'; return; }
   $('#share-opts').innerHTML = ind.map((x) => `
-    <label class="toggle ${DOMAINS[x.domain].sensitive ? 'warn' : ''}"><input type="checkbox" data-id="${x.id}" ${shareInclude.has(x.id) ? 'checked' : ''}> ${x.code} · ${x.label}</label>`).join('') + formToggle;
+    <label class="toggle ${DOMAINS[x.domain].sensitive ? 'warn' : ''}"><input type="checkbox" data-id="${x.id}" ${shareInclude.has(x.id) ? 'checked' : ''}> ${x.label}${DOMAINS[x.domain].sensitive ? ' · privado' : ''}</label>`).join('') + formToggle;
   $('#share-opts').querySelectorAll('input[data-id]').forEach((i) => i.onchange = () => {
     if (i.checked) shareInclude.add(i.dataset.id); else shareInclude.delete(i.dataset.id);
   });
-  $('#share-sus').onchange = (e) => { shareSubstanceForm = e.target.checked; };
 }
 // Máscara de privacidad: sin opt-in, las trazas de sustancias se envían en 0
 function maskPatterns(pu) {
@@ -403,7 +445,7 @@ function maskPatterns(pu) {
 // Se comparte exactamente lo que está en pantalla: la forma actual, una exuvia o el LAB.
 const shareInfo = () => {
   const e = entry();
-  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome(), patterns: maskPatterns(toUniforms(currentPatterns())) };
+  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome(), patterns: emptyPatterns() }; // se comparte la forma limpia, como en HOME
   if (S.ghost) return { ...base, stage: S.ghost.index - 1, name: `${S.ghost.name} · EXUVIA`, age: S.ghost.days, ageLabel: 'DURACIÓN · DÍAS', indicators: [] };
   if (S.lab) return { ...base, stage: e.stage, name: 'OVERRIDE', age: e.age, indicators: [] };
   return { ...base, stage: e.stage, name: e.name ?? '', age: e.age, indicators: indicators(S.days, S.idx) };
@@ -430,26 +472,27 @@ $('#share-link').onclick = async () => {
 };
 
 // ---------- navegación ----------
-// Pantalla única; lo secundario vive en un panel lateral que se abre encima
+// Navegación por la barra inferior, como el mockup
 function go(view) {
+  if (S.view === 'exuvia' && view !== 'exuvia') { S.ghost = null; }
   S.view = view;
-  const sheet = $('#sheet');
-  sheet.hidden = view === 'home';
-  sheet.dataset.view = view;
-  document.querySelectorAll('.sheet-nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
-  if (view === 'lab') renderLab(true);
+  app.dataset.view = view;
+  document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
+  if (view !== 'analytics') { S.focus = 0; stage.organism.material.uniforms.uFocus.value = 0; }
+  if (view === 'analytics') $('#bell-dot').hidden = true;
+  if (view === 'profile') { ensureWatch(); renderLab(true); }
   refresh();
+  window.scrollTo(0, 0);
 }
-document.querySelectorAll('.sheet-nav button').forEach((b) => (b.onclick = () => go(b.dataset.go)));
-$('#btn-share').onclick = () => go('share');
-$('#btn-menu').onclick = () => go('exuvias');
-$('#sheet-close').onclick = () => go('home');
+document.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => go(b.dataset.go)));
+$('#btn-bell').onclick = () => go('analytics');
+$('#btn-menu').onclick = () => go('profile');
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.view !== 'home') go('home'); });
 $('#persona').innerHTML = Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join('');
-$('#persona').onchange = (e) => { thumbCache.clear(); lastSignals = null; S.labFeatures = null; S.ghost = null; $('#ghost-label').hidden = true; load(e.target.value); };
+$('#persona').onchange = (e) => { thumbCache.clear(); lastSignals = null; S.labFeatures = null; S.ghost = null; S.skin = 0; load(e.target.value); };
 
 let lastStage = null;
-$('#scrub').oninput = (e) => { S.idx = +e.target.value; S.ghost = null; exitLab(); if (S.view === 'lab') renderLab(true); $('#ghost-label').hidden = true; announceMutation(); refresh(); };
+$('#scrub').oninput = (e) => { S.idx = +e.target.value; S.ghost = null; exitLab(); announceMutation(); refresh(); };
 let lastSignals = null, toastTimer = 0;
 function toast(text) {
   const t = $('#toast');
@@ -462,7 +505,7 @@ function announceMutation() {
   if (lastStage !== null && e.stage > lastStage) toast(`MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`);
   else if (lastSignals && lastStage !== null && e.stage === lastStage) {
     const fresh = ids.find((id) => !lastSignals.has(id));
-    if (fresh) toast(`SEÑAL NUEVA · ${describeSignal(fresh, p)}`);
+    if (fresh) { toast(`PATRÓN NUEVO · ${describeSignal(fresh, p)}`); $('#bell-dot').hidden = false; }
   }
   lastStage = e.stage; lastSignals = new Set(ids);
 }
@@ -477,7 +520,7 @@ function describeSignal(id, p) {
 $('#btn-play').onclick = () => {
   S.playing = !S.playing;
   $('#btn-play').textContent = S.playing ? '❚❚' : '▶';
-  if (S.playing) { S.ghost = null; $('#ghost-label').hidden = true; exitLab(); }
+  if (S.playing) { S.ghost = null; exitLab(); }
   if (S.playing && S.idx >= S.days.length - 1) { S.idx = 0; lastStage = 0; lastSignals = null; }
 };
 
@@ -497,7 +540,7 @@ function loop(now) {
   }
   stage.render(dt, t);
   updateLabels();
-  if (S.view === 'watch' && watch) {
+  if (S.view === 'profile' && watch) {
     watchAcc += dt;
     if (watchAcc > 0.05) { watch.render(watchAcc, t); watchAcc = 0; }
   }
@@ -507,7 +550,7 @@ function loop(now) {
     perf.fps = perf.frames / perf.acc; perf.frames = 0; perf.acc = 0;
     perf.slow = perf.fps < 45 ? perf.slow + 1 : 0;
     if (perf.slow >= 2 && stage.maxDpr > 1) { stage.maxDpr = Math.max(1, stage.maxDpr - 0.25); stage.resize(); perf.slow = 0; }
-    if (S.view === 'lab') {
+    if (S.view === 'profile') {
       $('#perf').innerHTML = [['Partículas', COUNT.toLocaleString('es')], ['FPS', perf.fps.toFixed(0)],
         ['Pixel ratio', stage.renderer.getPixelRatio().toFixed(2)], ['Dispositivo', coarse ? 'táctil' : 'escritorio']]
         .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
