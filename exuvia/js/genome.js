@@ -13,12 +13,7 @@
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 
-export const HABITS = [
-  // hábitos de consumo registrados a mano
-  { id: 'sugar', label: 'AZÚCAR', kind: 'consumption' },
-  { id: 'alcohol', label: 'ALCOHOL', kind: 'consumption' },
-  { id: 'smoking', label: 'TABACO', kind: 'consumption' },
-];
+import { firstSeen, trackedAt, daysSince, trace } from './catalog.js';
 
 export const FEATURES = {
   activityLoad: { label: 'Carga de actividad (28 d)', scale: 'estructura' },
@@ -60,32 +55,8 @@ export const RULES = {
 // Parámetros que describen la ESTRUCTURA (se usan para decidir una mutación).
 export const STRUCTURAL = ['coherence', 'density', 'lobes', 'lobeAmp', 'twist', 'elong', 'skirt', 'filament'];
 
-const didMeditate = (d) => d.mindfulMin >= 5;
+const didMeditate = (d) => d.mindfulMin >= 5 || d.habits.breathwork === true;
 const practiced = (d) => didMeditate(d) || d.workouts.length > 0;
-
-// Primer día en que se registró cada hábito. Un hábito sólo cuenta desde que existe
-// en la historia, y sólo con datos hasta el día evaluado: quien nunca fumó no gana
-// densidad por "no fumar", y el pasado no se reescribe con el futuro.
-const firstCache = new WeakMap();
-function firstOccurrence(days) {
-  if (!firstCache.has(days)) {
-    const first = {};
-    for (const h of HABITS) {
-      const i = days.findIndex((d) => d.habits[h.id] === true);
-      first[h.id] = i < 0 ? Infinity : i;
-    }
-    firstCache.set(days, first);
-  }
-  return firstCache.get(days);
-}
-export const trackedAt = (days, idx) => HABITS.filter((h) => firstOccurrence(days)[h.id] <= idx);
-
-// Días desde la última vez registrada. Un día sin registro no cuenta como ocurrencia:
-// olvidarse de anotar no cambia el conteo.
-export function daysSince(days, idx, id) {
-  for (let i = idx; i >= 0; i--) if (days[i].habits[id] === true) return idx - i;
-  return idx + 1;
-}
 
 export function extractFeatures(days, idx) {
   const win = (n) => days.slice(Math.max(0, idx - n + 1), idx + 1);
@@ -98,8 +69,9 @@ export function extractFeatures(days, idx) {
 
   // Consumo: proporción de días con el hábito en los últimos 90 d (desde que existe).
   // Es un dato, no una nota: más o menos consumo mueve la forma hacia un lado u otro.
-  const first = firstOccurrence(days);
-  const consumption = mean(trackedAt(days, idx).map((h) => {
+  // Sustancias seguidas: alcohol, tabaco, cannabis, cocaína, cafeína, azúcar, ultraprocesados.
+  const first = firstSeen(days);
+  const consumption = mean(trackedAt(days, idx).filter((h) => h.domain === 'SUS').map((h) => {
     const span = days.slice(Math.max(first[h.id], idx - 89), idx + 1);
     return span.filter((x) => x.habits[h.id] === true).length / span.length;
   }));
@@ -182,20 +154,15 @@ export function traits(g) {
   };
 }
 
-// Indicadores para HOME: lecturas, no rachas ni metas
+// Trazas para HOME y LOG: cada hábito seguido, con su tira de 28 días
 export function indicators(days, idx) {
-  const out = [];
-  for (const h of trackedAt(days, idx)) {
-    out.push({ id: h.id, label: `${h.label} · ÚLT. REG.`, value: `T−${daysSince(days, idx, h.id)}`, unit: 'D' });
-  }
-  const med28 = days.slice(Math.max(0, idx - 27), idx + 1).filter(didMeditate).length;
-  if (med28) out.push({ id: 'meditation', label: 'MEDITACIÓN · 28 D', value: med28, unit: 'SES' });
-  const w90 = days.slice(Math.max(0, idx - 89), idx + 1).flatMap((x) => x.workouts);
-  const km = w90.filter((w) => w.type === 'running').reduce((s, w) => s + (w.km ?? 0), 0);
-  if (km) out.push({ id: 'running', label: 'RUN · 90 D', value: Math.round(km), unit: 'KM' });
-  const surf = w90.filter((w) => w.type === 'surf').length;
-  if (surf) out.push({ id: 'surf', label: 'SURF · 90 D', value: surf, unit: 'SES' });
-  const dive = w90.filter((w) => w.type === 'diving').length;
-  if (dive) out.push({ id: 'diving', label: 'BUCEO · 90 D', value: dive, unit: 'INM' });
-  return out;
+  return trackedAt(days, idx).map((h) => {
+    const t = trace(days, idx, h);
+    const since = daysSince(days, idx, h);
+    return {
+      id: h.id, code: h.code, label: h.label, domain: h.domain,
+      freq: t.freq, vals: t.vals, count: t.vals.filter((v) => (v ?? 0) >= 0.5).length,
+      since, value: since == null ? '—' : `T−${since}`, unit: 'D',
+    };
+  });
 }

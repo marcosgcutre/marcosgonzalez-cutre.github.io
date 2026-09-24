@@ -46,9 +46,9 @@ function compose(ctx, organismCanvas, info, opts) {
     chosen.forEach((x, i) => {
       const cx = cw * i + cw / 2;
       ctx.fillStyle = '#7fa6c9'; ctx.font = '400 18px "Space Grotesk", sans-serif'; ctx.letterSpacing = '4px';
-      ctx.fillText(x.label.toUpperCase(), cx, 1240);
+      ctx.fillText(`${x.code} · ${x.label}`.toUpperCase(), cx, 1240);
       ctx.fillStyle = '#e8f6ff'; ctx.font = '300 34px Montserrat, sans-serif'; ctx.letterSpacing = '2px';
-      ctx.fillText(`${x.value} ${x.unit}`, cx, 1282);
+      ctx.fillText(`${x.count}/28 · ${x.value} ${x.unit}`, cx, 1282);
     });
   }
   ctx.fillStyle = '#ff7a2f'; ctx.font = '400 16px "Space Grotesk", sans-serif'; ctx.letterSpacing = '8px';
@@ -125,7 +125,8 @@ export function encodeGenome(genome, meta, patterns) {
   if (patterns) {
     const pb = [...patterns.week.map((x) => q(x)), q(patterns.weekStr), q(patterns.cycleTurns, 20), q(patterns.cycleStr),
       ...patterns.rings.flatMap(([a, b]) => [q(a), q(b)]),
-      ...patterns.links.flatMap(([a, b, c, d]) => [q(a, TAU), q(b, TAU), q(c), d >= 0 ? 255 : 0])];
+      ...patterns.links.flatMap(([a, b, c, d]) => [q(a, TAU), q(b, TAU), q(c), d >= 0 ? 255 : 0]),
+      ...(patterns.traces ?? []).map((x) => q(x))];
     url += `&p=${b64(pb)}`;
   }
   return url;
@@ -151,6 +152,7 @@ export function decodeGenome(hash) {
         cycleTurns: dq(b[j++], 20), cycleStr: dq(b[j++]),
         rings: Array.from({ length: 8 }, () => [dq(b[j++]), dq(b[j++])]),
         links: Array.from({ length: 3 }, () => [dq(b[j++], TAU), dq(b[j++], TAU), dq(b[j++]), b[j++] ? 1 : -1]),
+        traces: Array.from({ length: 24 }, () => (j < b.length ? dq(b[j++]) : 0)),
       };
     }
   } catch { patterns = null; }

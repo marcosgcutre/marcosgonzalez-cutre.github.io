@@ -2,7 +2,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
 import { normalize } from './ingest.js';
-import { FEATURES, RULES, toGenome, traits, indicators, HABITS } from './genome.js';
+import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
+import { CATALOG, DOMAINS, dayValue } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
 import { detect, toUniforms, signalIds, VARS, DAYS } from './patterns.js';
@@ -108,9 +109,7 @@ function renderHome() {
     ['LATENCIA', p.maturity, `${Math.min(e.age, MIN_DAYS)}/${MIN_DAYS} D`],
     ['DERIVA', p.change, `${e.net.toFixed(3)}/${NET.toFixed(3)}`],
   ].map(([l, v, r]) => `<div><span>${l}</span><em>${r}</em><i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
-  $('#indicators').innerHTML = indicators(S.days, S.idx).slice(0, 6).map((x) => `
-    <div class="cell"><div class="lbl">${x.label}</div>
-      <div class="val">${x.value}<small>${x.unit}</small></div></div>`).join('');
+  $('#indicators').innerHTML = traceRows(indicators(S.days, S.idx));
   const t = traits(currentGenome());
   $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v.toFixed(2)}</b></div>`).join('');
   renderHud();
@@ -169,22 +168,52 @@ function renderExuvias() {
 }
 $('#ghost-label').onclick = () => { S.ghost = null; $('#ghost-label').hidden = true; refresh(); };
 
+// Una fila por hábito seguido: código, tira de 28 días, conteo y último registro
+function traceRows(list) {
+  if (!list.length) return '<p class="note">SIN HÁBITOS SEGUIDOS · REGISTRAR EN LOG</p>';
+  const order = Object.keys(DOMAINS);
+  return list.slice().sort((a, b) => order.indexOf(a.domain) - order.indexOf(b.domain)).map((x) => `
+    <div class="trace" style="--dc:${DOMAINS[x.domain].color}">
+      <b>${x.code}</b><span class="nm">${x.label}</span>
+      <span class="strip">${x.vals.map((v) => `<i class="${v == null ? 'na' : v >= 0.5 ? 'on' : v > 0 ? 'mid' : ''}"></i>`).join('')}</span>
+      <em>${x.count}/28</em><em>${x.value}</em>
+    </div>`).join('');
+}
+
+// LOG: registro del día seleccionado. Lo manual se toca; lo automático viene del wearable.
+function renderLog() {
+  const d = S.days[S.idx];
+  const ago = S.days.length - 1 - S.idx;
+  $('#log-date').textContent = `${d.date} · ${ago ? `T−${ago}` : 'T0'}`;
+  $('#log').innerHTML = Object.entries(DOMAINS).map(([dk, dom]) => `
+    <div class="log-dom" style="--dc:${dom.color}">
+      <h3>${dom.label}${dom.sensitive ? ' <span>· PRIVADO · NUNCA SE COMPARTE POR DEFECTO</span>' : ''}</h3>
+      <div class="chips">${CATALOG.filter((h) => h.domain === dk).map((h) => {
+        const v = dayValue(d, h);
+        const on = (v ?? 0) >= 0.5;
+        const detail = h.detail?.(d);
+        return h.source === 'auto'
+          ? `<span class="chip auto ${on ? 'on' : ''}"><b>${h.code}</b>${h.label}<small>${detail ?? (on ? 'SÍ' : '—')} · AUTO</small></span>`
+          : `<button class="chip ${on ? 'on' : ''}" data-h="${h.id}"><b>${h.code}</b>${h.label}</button>`;
+      }).join('')}</div>
+    </div>`).join('');
+  $('#log').querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
+    const id = b.dataset.h, on = !b.classList.contains('on');
+    const m = S.raw.manual.find((x) => x.date === d.date && x.habit === id);
+    if (m) m.value = on; else S.raw.manual.push({ date: d.date, habit: id, value: on });
+    thumbCache.clear();
+    recompute(true);
+  });
+}
+
 function renderData() {
+  renderLog();
   const d = S.days[S.idx];
   const has = (s) => d.sources.includes(s);
   $('#sources').innerHTML = [
     ['WHOOP', has('whoop') ? 'SIM' : '—', has('whoop')], ['APPLE HEALTH', has('apple') ? 'SIM' : '—', has('apple')],
     ['OURA', 'OFFLINE', false], ['GARMIN', 'OFFLINE', false],
   ].map(([n, s, on]) => `<div class="src ${on ? '' : 'off'}">${n}<div class="st">${s}</div></div>`).join('');
-
-  $('#manual').innerHTML = HABITS.map((h) => `
-    <label><input type="checkbox" data-h="${h.id}" ${d.habits[h.id] ? 'checked' : ''}> ${h.label}</label>`).join('');
-  $('#manual').querySelectorAll('input').forEach((i) => i.onchange = () => {
-    const m = S.raw.manual.find((x) => x.date === d.date && x.habit === i.dataset.h);
-    if (m) m.value = i.checked; else S.raw.manual.push({ date: d.date, habit: i.dataset.h, value: i.checked });
-    thumbCache.clear();
-    recompute(true);
-  });
 
   const w = d.workouts.map((x) => `${x.type}${x.km ? ` ${x.km.toFixed(1)} km` : ''} [${x.sources.join('+')}]`).join(', ') || '—';
   const rows = [
@@ -267,19 +296,27 @@ function renderWatch() {
 
 // ---------- compartir ----------
 const shareInclude = new Set();
+let shareSubstanceForm = false; // las trazas de sustancias no viajan en la forma compartida salvo que se active
 function renderShare() {
   const ind = shareInfo().indicators;
+  const formToggle = `<label class="toggle warn"><input type="checkbox" id="share-sus" ${shareSubstanceForm ? 'checked' : ''}> INCLUIR TRAZAS DE SUSTANCIAS EN LA FORMA</label>`;
   if (!ind.length) { $('#share-opts').innerHTML = '<p class="note">EXUVIA / OVERRIDE · SALIDA: SÓLO GEOMETRÍA</p>'; return; }
   $('#share-opts').innerHTML = ind.map((x) => `
-    <label class="toggle"><input type="checkbox" data-id="${x.id}" ${shareInclude.has(x.id) ? 'checked' : ''}> ${x.label}</label>`).join('');
-  $('#share-opts').querySelectorAll('input').forEach((i) => i.onchange = () => {
+    <label class="toggle ${DOMAINS[x.domain].sensitive ? 'warn' : ''}"><input type="checkbox" data-id="${x.id}" ${shareInclude.has(x.id) ? 'checked' : ''}> ${x.code} · ${x.label}</label>`).join('') + formToggle;
+  $('#share-opts').querySelectorAll('input[data-id]').forEach((i) => i.onchange = () => {
     if (i.checked) shareInclude.add(i.dataset.id); else shareInclude.delete(i.dataset.id);
   });
+  $('#share-sus').onchange = (e) => { shareSubstanceForm = e.target.checked; };
+}
+// Máscara de privacidad: sin opt-in, las trazas de sustancias se envían en 0
+function maskPatterns(pu) {
+  if (shareSubstanceForm) return pu;
+  return { ...pu, traces: pu.traces.map((x, i) => (CATALOG[i] && DOMAINS[CATALOG[i].domain].sensitive ? 0 : x)) };
 }
 // Se comparte exactamente lo que está en pantalla: la forma actual, una exuvia o el LAB.
 const shareInfo = () => {
   const e = entry();
-  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome(), patterns: toUniforms(currentPatterns()) };
+  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome(), patterns: maskPatterns(toUniforms(currentPatterns())) };
   if (S.ghost) return { ...base, stage: S.ghost.index - 1, name: `${S.ghost.name} · EXUVIA`, age: S.ghost.days, ageLabel: 'DURACIÓN · DÍAS', indicators: [] };
   if (S.lab) return { ...base, stage: e.stage, name: 'OVERRIDE', age: e.age, indicators: [] };
   return { ...base, stage: e.stage, name: e.name ?? '', age: e.age, indicators: indicators(S.days, S.idx) };

@@ -10,6 +10,7 @@ const HK_WORKOUT = {
   HKWorkoutActivityTypeSurfingSports: 'surf',
   HKWorkoutActivityTypeUnderwaterDiving: 'diving',
   HKWorkoutActivityTypeTraditionalStrengthTraining: 'strength',
+  HKWorkoutActivityTypeYoga: 'yoga',
 };
 const WHOOP_SPORT = { running: 'running', surfing: 'surf' };
 

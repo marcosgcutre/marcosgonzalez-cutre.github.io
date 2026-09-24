@@ -10,28 +10,29 @@
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
+import { CATALOG, dayValue, trackedAt, trace, MAX_TRACES } from './catalog.js';
+
+// Variables: tres fisiológicas + todos los hábitos del catálogo. El ángulo ubica su nodo
+// alrededor del cuerpo (los filamentos de acoplamiento unen esos nodos).
 export const VARS = {
   activity: { label: 'ACTIVIDAD', angle: 0.0 },
-  sleep: { label: 'SUEÑO', angle: 1.05 },
-  hrv: { label: 'HRV', angle: 2.1 },
-  meditation: { label: 'MEDITACIÓN', angle: 3.15 },
-  alcohol: { label: 'ALCOHOL', angle: 4.2 },
-  sugar: { label: 'AZÚCAR', angle: 5.25 },
+  sleep: { label: 'SUEÑO', angle: 2.09 },
+  hrv: { label: 'HRV', angle: 4.19 },
+  ...Object.fromEntries(CATALOG.map((h, i) => [h.id, { label: h.code, angle: ((i + 0.5) / CATALOG.length) * Math.PI * 2 }])),
 };
 export const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 // Series diarias. null = sin dato (no se imputa).
 function series(days) {
   const method = days.at(-1)?.hrv?.method;
-  return {
+  const S = {
     activity: days.map((d) => d.strain != null ? d.strain / 21
       : Math.min(1, d.workouts.reduce((s, w) => s + (w.minutes ?? 45), 0) / 90)),
     sleep: days.map((d) => d.sleepPerformance != null ? d.sleepPerformance / 100 : d.sleepHours != null ? d.sleepHours / 9 : null),
     hrv: days.map((d) => (d.hrv && d.hrv.method === method ? d.hrv.value : null)),
-    meditation: days.map((d) => (d.mindfulMin >= 5 ? 1 : 0)),
-    alcohol: days.map((d) => (d.habits.alcohol ? 1 : 0)),
-    sugar: days.map((d) => (d.habits.sugar ? 1 : 0)),
   };
+  for (const h of trackedAt(days, days.length - 1)) S[h.id] = days.map((d) => dayValue(d, h));
+  return S;
 }
 
 function pearson(a, b) {
@@ -82,28 +83,36 @@ function cycle(days, act) {
   return { period: best.period, strength, turns: x.length / best.period };
 }
 
-// Acoplamientos: correlaciones en 60 días, con retardo de un día donde tiene sentido.
-const PAIRS = [
-  ['sleep', 'hrv', 0], ['activity', 'sleep', 0], ['alcohol', 'hrv', 1], ['alcohol', 'sleep', 1],
-  ['meditation', 'sleep', 0], ['activity', 'hrv', 1], ['sugar', 'sleep', 0], ['meditation', 'hrv', 0],
-];
+// Acoplamientos: correlaciones en 60 días. Cada hábito seguido se prueba contra el sueño
+// y la HRV del día siguiente; además un par de relaciones entre señales fisiológicas.
+function pairs(S) {
+  const out = [['sleep', 'hrv', 0], ['activity', 'sleep', 0], ['activity', 'hrv', 1]];
+  for (const k of Object.keys(S)) {
+    if (k === 'activity' || k === 'sleep' || k === 'hrv' || k === 'steps') continue;
+    out.push([k, 'sleep', 1], [k, 'hrv', 1]);
+  }
+  return out;
+}
 function couplings(S) {
   const out = [];
-  for (const [a, b, lag] of PAIRS) {
+  for (const [a, b, lag] of pairs(S)) {
+    if (!S[a] || !S[b]) continue;
     const A = S[a].slice(-60 - lag, S[a].length - lag), B = S[b].slice(-60);
     if (A.length !== B.length) continue;
+    if (A.filter((v) => (v ?? 0) > 0).length < 4) continue; // un hábito casi ausente no tiene correlación
     const r = pearson(A, B);
     if (r != null && Math.abs(r) >= 0.2) out.push({ a, b, lag, r });
   }
-  return out.sort((x, y) => Math.abs(y.r) - Math.abs(x.r)).slice(0, 3);
+  // un mismo hábito no ocupa los tres filamentos
+  const seen = new Set();
+  return out.sort((x, y) => Math.abs(y.r) - Math.abs(x.r)).filter((c) => (seen.has(c.a) ? false : seen.add(c.a))).slice(0, 3);
 }
 
 // Estratos: días en que el nivel medio de un hábito cambió (28 d antes vs hasta 28 d después).
-const STRATA_VARS = ['activity', 'meditation', 'alcohol', 'sugar', 'sleep'];
 function strata(days, S) {
   const found = [];
   const n = days.length;
-  for (const k of STRATA_VARS) {
+  for (const k of Object.keys(S).filter((k) => k !== 'hrv' && k !== 'steps')) {
     const x = S[k];
     const scores = [];
     for (let t = 28; t <= n - 14; t++) {
@@ -136,6 +145,7 @@ export function detect(allDays, idx) {
   const days = allDays.slice(0, idx + 1);
   const S = series(days);
   return {
+    traces: trackedAt(days, idx).map((h) => ({ id: h.id, code: h.code, domain: h.domain, freq: trace(days, idx, h).freq })),
     weekly: weekly(days, S.activity),
     cycle: cycle(days, S.activity),
     couplings: couplings(S),
@@ -159,6 +169,8 @@ export function toUniforms(p) {
     cycleTurns: p.cycle?.turns ?? 0,
     cycleStr: p.cycle?.strength ?? 0,
     rings, links,
+    // una traza por hábito del catálogo (posición fija), frecuencia 28 d; 0 = no seguido
+    traces: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.freq ?? 0),
   };
 }
 

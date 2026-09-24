@@ -15,6 +15,11 @@ export function mulberry32(a) {
 }
 
 const DAY = 86400000;
+// hábitos extra que las personas pueden tener, y los que se registran a mano.
+// Efectos fisiológicos simulados (alcohol, cocaína, pantallas → HRV/sueño) son
+// SUPUESTOS DE LA SIMULACIÓN para ejercitar el detector, no datos.
+const EXTRA = ['caffeine', 'cannabis', 'cocaine', 'ultra', 'breathwork', 'reading', 'screens', 'cold', 'sauna', 'fasting', 'yoga', 'smoking'];
+const MANUAL = ['alcohol', 'smoking', 'cannabis', 'cocaine', 'caffeine', 'sugar', 'ultra', 'breathwork', 'reading', 'screens', 'cold', 'sauna', 'fasting'];
 export const isoDay = (d) => new Date(d).toISOString().slice(0, 10);
 
 // Cada persona describe conductas por día relativo a "hoy" (0 = hoy, 240 = hace 240 días).
@@ -37,6 +42,13 @@ export const PERSONAS = {
         surf: ago <= 120 ? (weekend ? 0.6 : 0.08) : 0.02,
         diving: ago <= 90 ? (weekend ? 0.08 : 0) : 0,
         strength: dow === 0 || dow === 2 ? 0.45 : 0.02,
+        extra: {
+          caffeine: 0.9, reading: 0.45, screens: ago > 60 ? 0.6 : 0.25,
+          yoga: ago <= 60 && dow === 3 ? 0.8 : 0, breathwork: ago <= 51 ? 0.3 : 0,
+          cold: ago <= 40 && (dow === 0 || dow === 2 || dow === 4) ? 0.8 : 0,
+          sauna: dow === 6 ? 0.4 : 0, fasting: ago <= 90 && dow === 1 ? 0.7 : 0,
+          ultra: ago > 123 ? 0.4 : 0.05,
+        },
       };
     },
   },
@@ -60,6 +72,10 @@ export const PERSONAS = {
       runKm: [2, 5],
       surf: 0, diving: 0,
       strength: ago < 60 ? 0.2 : 0.02,
+      extra: {
+        caffeine: 0.95, ultra: ago > 60 ? 0.75 : 0.35, screens: ago > 45 ? 0.85 : 0.5,
+        cannabis: ago > 100 ? 0.3 : 0, breathwork: ago < 20 ? 0.3 : 0, reading: ago < 45 ? 0.3 : 0.05,
+      },
     }),
   },
   steady: {
@@ -70,6 +86,7 @@ export const PERSONAS = {
       alcohol: 0.25, sugar: 0.4, smoking: 0,
       meditation: 0, run: 0.35, runKm: [6, 9],
       surf: 0, diving: 0, strength: 0.15,
+      extra: { caffeine: 0.85, cannabis: 0.15, reading: 0.4, screens: 0.4, ultra: 0.3 },
     }),
   },
   chaotic: {
@@ -85,6 +102,10 @@ export const PERSONAS = {
         run: wave ? 0.75 : 0.05, runKm: [8, 22],
         surf: wave ? 0.1 : 0, diving: 0.01,
         strength: wave ? 0.5 : 0,
+        extra: {
+          caffeine: 0.9, smoking: wave ? 0 : 0.4, screens: wave ? 0.2 : 0.75, ultra: wave ? 0.1 : 0.6,
+          cocaine: wave ? 0 : 0.12, sauna: wave ? 0.3 : 0, cold: wave ? 0.3 : 0,
+        },
       };
     },
   },
@@ -103,7 +124,7 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
 
   let fitness = 0.2;      // estado latente, no observable directamente
   let abstEffect = 0;     // efecto fisiológico acumulado de no consumir (suposición de la simulación)
-  let prevAlcohol = false, prevStrain = 8;
+  let prevAlcohol = false, prevCoc = false, prevStrain = 8;
   let hrvBase = 48, rhrBase = 62;
 
   for (let i = 0; i <= P.days; i++) {
@@ -117,11 +138,12 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
       meditation: rnd() < b.meditation, run: rnd() < b.run, surf: rnd() < b.surf,
       diving: rnd() < b.diving, strength: rnd() < b.strength,
     };
+    for (const k of EXTRA) did[k] = rnd() < (b.extra?.[k] ?? 0) || (k === 'smoking' && did.smoking);
     const km = did.run ? +(b.runKm[0] + rnd() * (b.runKm[1] - b.runKm[0])).toFixed(1) : 0;
 
     // registro manual: lo que ningún wearable sabe. Las ocurrencias se anotan;
     // los días "limpios" sólo a veces se confirman — hay días sin registro.
-    for (const habit of ['alcohol', 'sugar', 'smoking']) {
+    for (const habit of MANUAL) {
       const confirm = rnd() < 0.6;
       if (did[habit]) manual.push({ date, habit, value: true });
       else if (confirm) manual.push({ date, habit, value: false });
@@ -132,9 +154,9 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
     fitness += (Math.min(load, 16) / 16 - fitness) * 0.03;
     abstEffect += ((did.alcohol ? 0 : 0.6) + (did.smoking ? 0 : 0.4) - abstEffect) * 0.02;
     const hrvTrue = hrvBase + 14 * fitness + 8 * abstEffect;
-    const hrv = Math.max(15, hrvTrue * (1 - (prevAlcohol ? 0.18 : 0) - (prevStrain > 15 ? 0.07 : 0)) * (1 + gauss() * 0.07));
-    const rhr = rhrBase - 7 * fitness + (prevAlcohol ? 4 : 0) + gauss() * 1.5;
-    const sleepPerf = Math.max(35, Math.min(100, 76 + (did.meditation ? 7 : 0) - (prevAlcohol ? 14 : 0) + gauss() * 7));
+    const hrv = Math.max(15, hrvTrue * (1 - (prevAlcohol ? 0.18 : 0) - (prevCoc ? 0.25 : 0) - (prevStrain > 15 ? 0.07 : 0)) * (1 + gauss() * 0.07));
+    const rhr = rhrBase - 7 * fitness + (prevAlcohol ? 4 : 0) + (prevCoc ? 6 : 0) + gauss() * 1.5;
+    const sleepPerf = Math.max(35, Math.min(100, 76 + (did.meditation ? 7 : 0) - (prevAlcohol ? 14 : 0) - (prevCoc ? 22 : 0) - (did.screens ? 4 : 0) + gauss() * 7));
     const sleepHours = +(5.8 + sleepPerf / 100 * 2.4 + gauss() * 0.3).toFixed(2);
     const recovery = Math.round(Math.max(1, Math.min(99,
       55 + (hrv - hrvTrue) / hrvTrue * 120 + (sleepPerf - 78) * 0.7 - (rhr - (rhrBase - 7 * fitness)) * 2.5)));
@@ -172,9 +194,10 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
     if (did.run) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeRunning', startDate: wStart, duration: Math.round(km * 5.8), totalDistance: km * 1000 });
     if (did.surf) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeSurfingSports', startDate: new Date(t0 + 10 * 3600e3 + 120e3).toISOString(), duration: 95, totalDistance: null });
     if (did.diving) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeUnderwaterDiving', startDate: new Date(t0 + 11 * 3600e3).toISOString(), duration: 50, totalDistance: null });
+    if (did.yoga) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeYoga', startDate: new Date(t0 + 19 * 3600e3).toISOString(), duration: 50, totalDistance: null });
     if (did.strength) appleHealth.workouts.push({ workoutActivityType: 'HKWorkoutActivityTypeTraditionalStrengthTraining', startDate: new Date(t0 + 18 * 3600e3).toISOString(), duration: 45, totalDistance: null });
 
-    prevAlcohol = did.alcohol; prevStrain = strain;
+    prevAlcohol = did.alcohol; prevCoc = did.cocaine; prevStrain = strain;
   }
   const src = P.sources ?? ['whoop', 'apple', 'manual'];
   if (!src.includes('whoop')) for (const k of Object.keys(whoop)) whoop[k] = [];

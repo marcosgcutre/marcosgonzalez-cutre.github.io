@@ -51,7 +51,8 @@
           <div class="eyebrow dim">CICLO ACTUAL · DÍAS</div>
         </div>
         <div class="progress" id="progress" title="Condiciones de muda: latencia mínima y deriva estructural"></div>
-        <div class="grid" id="indicators"></div>
+        <h2>TRAZAS <span class="dim">28 días · un hábito por fila</span></h2>
+        <div class="traces" id="indicators"></div>
         <div class="traits" id="traits"></div>
       </div>
 
@@ -59,6 +60,12 @@
       <div class="view" data-for="patterns">
         <h2>PATRONES <span class="dim">detectados · inscritos en la forma</span></h2>
         <p class="note">CADA SEÑAL SE MATERIALIZA COMO ESTRUCTURA EN EL ORGANISMO</p>
+        <div class="pat">
+          <h3><b class="sw sw-trace"></b>TRAZAS <span>→ ESPECTRO · UNA BARRA POR HÁBITO · ALTURA = FRECUENCIA 28 D</span></h3>
+          <div class="legend">
+            <span style="--dc:#ff7a2f">SUSTANCIAS</span><span style="--dc:#3ff0ff">CUERPO</span><span style="--dc:#8a4dff">MENTE</span><span style="--dc:#2f6bff">RECUPERACIÓN</span><span style="--dc:#e8f6ff">NUTRICIÓN</span>
+          </div>
+        </div>
         <div class="pat">
           <h3><b class="sw sw-week"></b>RITMO SEMANAL <span>→ ANILLO ORBITAL · 7 LÓBULOS</span></h3>
           <div id="pat-week"></div>
@@ -86,13 +93,14 @@
 
       <!-- DATOS -->
       <div class="view" data-for="data">
+        <h2>LOG <span class="dim" id="log-date"></span></h2>
+        <p class="note">TOCAR PARA REGISTRAR · AUTO = WEARABLE · MOVER LA LÍNEA DE TIEMPO PARA OTRO DÍA</p>
+        <div id="log"></div>
         <h2>FUENTES <span class="dim">simuladas</span></h2>
         <div class="sources" id="sources"></div>
         <label class="field">PERFIL SIMULADO
           <select id="persona"></select>
         </label>
-        <h2>REGISTRO MANUAL <span class="dim">día seleccionado</span></h2>
-        <div class="manual" id="manual"></div>
         <h2>RESUMEN CANÓNICO</h2>
         <div class="kv" id="canonical"></div>
         <h2>VECTOR DE ENTRADA</h2>
@@ -150,7 +158,7 @@
       <button data-go="home" class="on">HOME</button>
       <button data-go="patterns">PATRONES</button>
       <button data-go="exuvias">EXUVIAS</button>
-      <button data-go="data">DATOS</button>
+      <button data-go="data">LOG</button>
       <button data-go="lab">LAB</button>
       <button data-go="watch">WATCH</button>
     </nav>

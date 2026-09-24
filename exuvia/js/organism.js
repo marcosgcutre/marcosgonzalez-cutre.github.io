@@ -5,6 +5,9 @@
 // decenas de miles de partículas en un teléfono.
 
 import * as THREE from 'three';
+import { CATALOG, DOMAINS, MAX_TRACES } from './catalog.js';
+
+const TRACE_DOMAINS = Array.from({ length: MAX_TRACES }, (_, i) => (CATALOG[i] ? DOMAINS[CATALOG[i].domain].idx : 0));
 
 export const PARAMS = [
   'expansion', 'coherence', 'density', 'flow', 'lobes', 'lobeAmp', 'twist',
@@ -50,6 +53,8 @@ uniform float uWeekStr;   // fuerza del ritmo semanal
 uniform float uCycleTurns, uCycleStr;
 uniform vec2 uRings[8];   // estratos: x = posición temporal 0–1, y = intensidad
 uniform vec4 uLinks[3];   // acoplamientos: ángulo A, ángulo B, intensidad, signo
+uniform float uTrace[24];    // TRAZAS: frecuencia 28 d de cada hábito del catálogo (0 = no seguido)
+uniform float uTraceDom[24]; // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
 varying vec3 vColor;
 varying float vAlpha;
 ${SNOISE}
@@ -148,6 +153,18 @@ void main(){
     vec3 c = m + normalize(m + vec3(0.0, 0.6, 0.0)) * 0.9;
     sp = mix(mix(A, c, v), mix(c, B, v), v) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.03;
     structAmt = L.z; kind = L.w < 0.0 ? 4.0 : 3.0;
+  } else if (role < 0.30) {
+    // TRAZAS: espectro de barras verticales alrededor del cuerpo, una por hábito.
+    // Altura = frecuencia en 28 días. Every habit leaves a trace.
+    float c = floor(fract(s * 23.7) * 24.0);
+    float f = 0.0, dom = 0.0;
+    for (int i = 0; i < 24; i++) { if (float(i) == c) { f = uTrace[i]; dom = uTraceDom[i]; } }
+    float ang = (c + 0.5) / 24.0 * TAU;
+    float jt = (fract(w * 61.0) - 0.5) * 0.035;
+    float rr = 1.72 + (fract(w * 83.0) - 0.5) * 0.02;
+    vec3 tangent = vec3(-sin(ang), 0.0, cos(ang));
+    sp = vec3(cos(ang) * rr, -0.95 + v * (0.08 + 2.4 * f), sin(ang) * rr) + tangent * jt;
+    structAmt = smoothstep(0.0, 0.03, f); kind = 5.0 + dom;
   }
   p = mix(p, sp, structAmt);
 
@@ -183,6 +200,10 @@ void main(){
   else if (kind == 2.0) col = mix(col, vec3(0.78, 0.6, 1.0), 0.85 * structAmt);
   else if (kind == 3.0) col = mix(col, CY, 0.75 * structAmt);
   else if (kind == 4.0) col = mix(col, OR, 0.75 * structAmt);
+  else if (kind >= 5.0) {
+    vec3 dc = kind < 5.5 ? OR : kind < 6.5 ? CY : kind < 7.5 ? VI * 1.3 : kind < 8.5 ? BL * 1.4 : vec3(0.92, 0.97, 1.0);
+    col = mix(col, dc, 0.9 * structAmt);
+  }
   col = mix(col, vec3(0.8, 0.95, 1.0), ringGlow * 0.45 * (1.0 - structAmt));
   vColor = col;
   vAlpha = visible * (0.35 + 0.75 * uGlow) * (0.5 + 0.5 * fract(s * 71.0));
@@ -204,6 +225,7 @@ export function emptyPatterns() {
   return {
     week: Array(7).fill(0), weekStr: 0, cycleTurns: 0, cycleStr: 0,
     rings: Array.from({ length: 8 }, () => [0, 0]), links: Array.from({ length: 3 }, () => [0, 0, 0, 1]),
+    traces: Array(MAX_TRACES).fill(0),
   };
 }
 
@@ -236,6 +258,8 @@ export class Organism {
       uCycleTurns: { value: 0 }, uCycleStr: { value: 0 },
       uRings: { value: Array.from({ length: 8 }, () => new THREE.Vector2()) },
       uLinks: { value: Array.from({ length: 3 }, () => new THREE.Vector4(0, 0, 0, 1)) },
+      uTrace: { value: new Array(24).fill(0) },
+      uTraceDom: { value: TRACE_DOMAINS },
     };
     this.pat = emptyPatterns();
     this.patTarget = emptyPatterns();
@@ -251,6 +275,7 @@ export class Organism {
 
   // patrones en forma compacta (patterns.toUniforms); se interpolan igual que el genoma
   setPatterns(p, immediate = false) {
+    p = { ...emptyPatterns(), ...p };
     this.patTarget = structuredClone(p);
     // los ángulos de un acoplamiento que aparece no deben barrer desde otro par
     this.patTarget.links.forEach((l, i) => { if (this.pat.links[i][2] < 0.02) this.pat.links[i] = [l[0], l[1], 0, l[3]]; });
@@ -275,6 +300,7 @@ export class Organism {
     P.cycleStr = lerp(P.cycleStr, T.cycleStr);
     P.rings = P.rings.map((r, i) => r.map((x, j) => lerp(x, T.rings[i][j])));
     P.links = P.links.map((l, i) => l.map((x, j) => (j === 3 ? T.links[i][3] : lerp(x, T.links[i][j]))));
+    P.traces = P.traces.map((x, i) => lerp(x, T.traces?.[i] ?? 0));
     this.material.uniforms.uTime.value = time;
     this._apply();
     this._applyPatterns();
@@ -288,6 +314,7 @@ export class Organism {
     u.uCycleStr.value = P.cycleStr;
     P.rings.forEach((r, i) => u.uRings.value[i].set(r[0], r[1]));
     P.links.forEach((l, i) => u.uLinks.value[i].set(l[0], l[1], l[2], l[3]));
+    P.traces.forEach((x, i) => (u.uTrace.value[i] = x));
   }
 
   _apply() {

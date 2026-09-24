@@ -208,3 +208,30 @@ input[type="checkbox"] { accent-color: var(--cyan); width: 16px; height: 16px; }
 .read { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--dim); padding: 3px 0; }
 .read em { font-style: normal; color: var(--ink); }
 .read em.pos { color: var(--cyan); } .read em.neg { color: var(--orange); }
+
+/* TRAZAS (HOME) */
+.traces { display: grid; gap: 2px; }
+.trace { display: grid; grid-template-columns: 34px 1fr auto 40px 46px; gap: 8px; align-items: center; font-family: var(--mono); font-size: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.trace b { color: var(--dc); font-weight: 500; letter-spacing: 0.08em; }
+.trace .nm { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trace .strip { display: grid; grid-template-columns: repeat(28, 3px); gap: 1px; }
+.trace .strip i { height: 10px; background: rgba(120,190,255,0.10); }
+.trace .strip i.on { background: var(--dc); } .trace .strip i.mid { background: color-mix(in srgb, var(--dc) 45%, transparent); }
+.trace .strip i.na { background: transparent; outline: 1px dotted rgba(120,190,255,0.15); }
+.trace em { font-style: normal; text-align: right; color: var(--ink); }
+@media (max-width: 380px) { .trace { grid-template-columns: 34px auto 40px 46px; } .trace .nm { display: none; } }
+
+/* LOG */
+.log-dom { margin-top: 14px; }
+.log-dom h3 { font-family: var(--mono); font-weight: 400; font-size: 10px; letter-spacing: 0.2em; color: var(--dc); margin-bottom: 8px; }
+.log-dom h3 span { color: var(--dim); letter-spacing: 0.08em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 92px; padding: 8px 10px; border: 1px solid var(--line); background: transparent; font-family: var(--mono); font-size: 10px; color: var(--dim); text-align: left; cursor: pointer; }
+.chip b { color: var(--dc); font-weight: 500; letter-spacing: 0.1em; }
+.chip small { font-size: 8px; letter-spacing: 0.1em; }
+.chip.on { border-color: var(--dc); color: var(--ink); background: color-mix(in srgb, var(--dc) 12%, transparent); }
+.chip.auto { cursor: default; border-style: dashed; }
+.toggle.warn { color: var(--orange); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--dim); }
+.legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 6px; background: var(--dc); vertical-align: -1px; }
+.sw-trace { background: linear-gradient(90deg, #ff7a2f 0 20%, #3ff0ff 20% 40%, #8a4dff 40% 60%, #2f6bff 60% 80%, #e8f6ff 80%); }

@@ -96,6 +96,24 @@ Cuando aparece una señal nueva, la app la anuncia ("SEÑAL NUEVA · CICLO 56 D"
 
 Límite a tener presente: en la simulación, los acoplamientos que se detectan son los que el simulador codificó (por ejemplo, que el alcohol baja la HRV del día siguiente). Con datos reales serían hallazgos; aquí sólo prueban que el detector funciona. Además, una correlación en 60 días es una asociación, no una causa, y con series cortas puede ser azar: el umbral de 0,20 es deliberadamente bajo para un prototipo visual y habría que endurecerlo (y corregir por comparaciones múltiples) si alguna vez se muestra como información.
 
+## 6c. Catálogo de hábitos, LOG y trazas
+
+Implementado en `js/catalog.js`. Veinte hábitos concretos en cinco dominios, cada uno con un código de tres letras:
+
+- **Sustancias:** ALC alcohol, TAB tabaco, THC cannabis, COC cocaína, CAF cafeína, AZU azúcar, UPF ultraprocesados.
+- **Cuerpo:** CAR correr, FUE fuerza, SRF surf, DIV buceo, YOG yoga/movilidad, PAS pasos.
+- **Mente:** MED meditación, RES respiración, LEC lectura, PAN pantallas más de 4 h.
+- **Recuperación:** FRI frío, SAU sauna.
+- **Nutrición:** AYU ayuno.
+
+Los hábitos de cuerpo y la meditación se leen del wearable (AUTO); el resto se registra en la pestaña LOG tocando chips del día seleccionado. Un hábito se sigue desde el primer día en que aparece.
+
+**Trazas.** Cada hábito seguido deja una traza propia en el organismo: una barra vertical en un espectro que rodea al cuerpo, en una posición fija por hábito, con altura igual a su frecuencia en 28 días y color según el dominio. En HOME, cada hábito tiene una fila con su tira de 28 días, el conteo y el último registro (T−n). Las sustancias alimentan además el rasgo de frecuencia de consumo, y todos los hábitos entran al detector de patrones: por ejemplo, en la simulación del atleta irregular aparece el acoplamiento COC (día anterior) ↔ SUEÑO, que es un supuesto programado en el simulador, no un dato.
+
+**Privacidad de las sustancias.** Son los datos más sensibles de la app. Nunca se incluyen por defecto en lo que se comparte: ni como indicador en la tarjeta ni como traza en la forma (las barras de sustancias se envían en cero salvo que se active "incluir trazas de sustancias en la forma"). En producción deberían quedar sólo en el dispositivo.
+
+**Tienda de aplicaciones.** La guía 1.4.3 de Apple no permite apps que *fomenten* el consumo de tabaco, drogas ilegales o alcohol en exceso ([App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)). Registrar un consumo no es fomentarlo, y la neutralidad del diseño (ningún hábito es bueno ni malo) juega a favor, pero cómo se presenta la cocaína en la app y en la ficha de la tienda es algo a revisar antes de enviarla; no puedo asegurar cómo lo interpretaría la revisión.
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.
