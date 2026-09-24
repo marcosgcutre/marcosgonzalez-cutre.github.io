@@ -14,10 +14,10 @@ const clamp01 = (x) => Math.max(0, Math.min(1, x));
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 
 export const HABITS = [
-  // hábitos de consumo registrados a mano; label = cómo se muestra el conteo de días
-  { id: 'sugar', label: 'Sin azúcar', kind: 'consumption' },
-  { id: 'alcohol', label: 'Sin alcohol', kind: 'consumption' },
-  { id: 'smoking', label: 'Sin fumar', kind: 'consumption' },
+  // hábitos de consumo registrados a mano
+  { id: 'sugar', label: 'AZÚCAR', kind: 'consumption' },
+  { id: 'alcohol', label: 'ALCOHOL', kind: 'consumption' },
+  { id: 'smoking', label: 'TABACO', kind: 'consumption' },
 ];
 
 export const FEATURES = {
@@ -62,12 +62,6 @@ export const STRUCTURAL = ['coherence', 'density', 'lobes', 'lobeAmp', 'twist', 
 
 const didMeditate = (d) => d.mindfulMin >= 5;
 const practiced = (d) => didMeditate(d) || d.workouts.length > 0;
-
-export function streak(days, idx, test) {
-  let n = 0;
-  for (let i = idx; i >= 0 && test(days[i]); i--) n++;
-  return n;
-}
 
 // Primer día en que se registró cada hábito. Un hábito sólo cuenta desde que existe
 // en la historia, y sólo con datos hasta el día evaluado: quien nunca fumó no gana
@@ -176,34 +170,32 @@ export function structuralDistance(a, b) {
   return mean(STRUCTURAL.map((k) => Math.abs(normalizedParam(a, k) - normalizedParam(b, k))));
 }
 
+// Lecturas de la forma: ejes geométricos, 0.00–1.00, sin adjetivos.
 export function traits(g) {
-  const n = (k) => normalizedParam(g, k);
-  const pct = (x) => Math.round(clamp01(x) * 100);
+  const n = (k) => clamp01(normalizedParam(g, k));
   return {
-    ESTABLE: pct(n('coherence')),
-    EXPANSIVO: pct(n('expansion') * 0.6 + n('lobeAmp') * 0.4),
-    'CAÓTICO': pct((1 - n('coherence')) * 0.6 + n('flow') * 0.4),
-    DENSO: pct(n('density')),
-    'LÚCIDO': pct(n('elong') * 0.5 + n('coherence') * 0.5),
+    'ENTROPÍA': 1 - n('coherence'),
+    'DISPERSIÓN': 1 - n('density'),
+    'TORSIÓN': n('twist'),
+    'ELONGACIÓN': n('elong'),
+    'VELOCIDAD': n('flow'),
   };
 }
 
-// Indicadores para HOME: hechos, sin barra hacia una meta
+// Indicadores para HOME: lecturas, no rachas ni metas
 export function indicators(days, idx) {
   const out = [];
   for (const h of trackedAt(days, idx)) {
-    const n = daysSince(days, idx, h.id);
-    if (n >= 3) out.push({ id: h.id, label: h.label, value: n, unit: 'días' });
+    out.push({ id: h.id, label: `${h.label} · ÚLT. REG.`, value: `T−${daysSince(days, idx, h.id)}`, unit: 'D' });
   }
-  const med = streak(days, idx, didMeditate);
   const med28 = days.slice(Math.max(0, idx - 27), idx + 1).filter(didMeditate).length;
-  if (med28) out.push({ id: 'meditation', label: 'Meditación', value: med, unit: 'días seguidos' });
+  if (med28) out.push({ id: 'meditation', label: 'MEDITACIÓN · 28 D', value: med28, unit: 'SES' });
   const w90 = days.slice(Math.max(0, idx - 89), idx + 1).flatMap((x) => x.workouts);
   const km = w90.filter((w) => w.type === 'running').reduce((s, w) => s + (w.km ?? 0), 0);
-  if (km) out.push({ id: 'running', label: 'Running · 90 d', value: Math.round(km), unit: 'km' });
+  if (km) out.push({ id: 'running', label: 'RUN · 90 D', value: Math.round(km), unit: 'KM' });
   const surf = w90.filter((w) => w.type === 'surf').length;
-  if (surf) out.push({ id: 'surf', label: 'Surf · 90 d', value: surf, unit: 'sesiones' });
+  if (surf) out.push({ id: 'surf', label: 'SURF · 90 D', value: surf, unit: 'SES' });
   const dive = w90.filter((w) => w.type === 'diving').length;
-  if (dive) out.push({ id: 'diving', label: 'Buceo · 90 d', value: dive, unit: dive === 1 ? 'vez' : 'veces' });
+  if (dive) out.push({ id: 'diving', label: 'BUCEO · 90 D', value: dive, unit: 'INM' });
   return out;
 }

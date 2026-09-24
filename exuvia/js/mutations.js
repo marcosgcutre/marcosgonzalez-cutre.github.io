@@ -14,13 +14,13 @@ export const WARMUP = 28;  // las ventanas de 28–90 días necesitan datos ante
 export const MIN_DAYS = 21;
 export const NET = 0.1;    // distancia estructural media desde el inicio de la etapa
 
-// Nombre de la etapa según el parámetro que más cambió y en qué dirección.
-// Nombres provisorios: son una decisión de autor, no del sistema.
-const NAMES = {
-  coherence: ['DISCIPLINE', 'FLUX'], density: ['CORE', 'DRIFT'], lobes: ['BLOOM', 'FOLD'],
-  lobeAmp: ['BLOOM', 'FOLD'], twist: ['SPIRAL', 'UNWIND'], elong: ['ASCENT', 'REST'],
-  skirt: ['ROOT', 'LIFT'], filament: ['LATTICE', 'MIST'],
+// Designación de la etapa: código del parámetro que más cambió + signo del cambio.
+// Descriptivo, no narrativo: DNS− significa "la densidad bajó", nada más.
+export const CODES = {
+  coherence: 'COH', density: 'DNS', lobes: 'LOB', lobeAmp: 'LOB',
+  twist: 'TRS', elong: 'AXL', skirt: 'BSE', filament: 'FIL',
 };
+export const ORIGIN = 'Ø';
 
 const seedFor = (userSeed, stage) => ((userSeed % 97) / 97) * 6.28 + stage * 1.37;
 
@@ -48,17 +48,17 @@ export function runHistory(days, userSeed) {
       const prevGenome = timeline[i - 1]?.genome ?? g;
       exuvias.push({
         index: stage + 1,
-        name: timeline[i - 1]?.name ?? 'INITIATION',
+        name: timeline[i - 1]?.name ?? ORIGIN,
         start: days[stageStart].date, end: days[i - 1]?.date ?? days[i].date,
         days: age, genome: prevGenome, traits: traits(prevGenome),
       });
       stage += 1; stageStart = i;
       const g2 = toGenome(f, seedFor(userSeed, stage));
       stageGenome = g2;
-      timeline.push({ features: f, genome: g2, stage, age: 0, net: 0, name: NAMES[best][bestDelta >= 0 ? 0 : 1], mutatedToday: true });
+      timeline.push({ features: f, genome: g2, stage, age: 0, net: 0, name: CODES[best] + (bestDelta >= 0 ? '+' : '−'), mutatedToday: true });
       continue;
     }
-    timeline.push({ features: f, genome: g, stage, age, net, name: stage === 0 ? 'INITIATION' : timeline[i - 1]?.name, mutatedToday: false });
+    timeline.push({ features: f, genome: g, stage, age, net, name: stage === 0 ? ORIGIN : timeline[i - 1]?.name, mutatedToday: false });
   }
   return { timeline, exuvias };
 }

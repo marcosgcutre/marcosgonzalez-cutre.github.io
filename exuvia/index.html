@@ -31,6 +31,7 @@
 
     <section class="stage-wrap">
       <canvas id="stage" aria-label="Organismo MUTANT, arrastrá para rotar"></canvas>
+      <div class="hud" id="hud" aria-hidden="true"></div>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <div class="ghost-label" id="ghost-label" hidden></div>
     </section>
@@ -38,7 +39,7 @@
     <section class="timeline" id="timeline">
       <button class="icon-btn small" id="btn-play" aria-label="Reproducir historia">▶</button>
       <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Día de la historia">
-      <span class="scrub-label" id="scrub-label">HOY</span>
+      <span class="scrub-label" id="scrub-label">T0</span>
     </section>
 
     <main class="panel">
@@ -47,17 +48,17 @@
         <div class="current">
           <div class="eyebrow" id="mutation-name">CURRENT MUTATION</div>
           <div class="big" id="mutation-age">0</div>
-          <div class="eyebrow dim">DÍAS EN ESTA FORMA</div>
+          <div class="eyebrow dim">CICLO ACTUAL · DÍAS</div>
         </div>
-        <div class="progress" id="progress" title="Condiciones para la próxima muda"></div>
+        <div class="progress" id="progress" title="Condiciones de muda: latencia mínima y deriva estructural"></div>
         <div class="grid" id="indicators"></div>
         <div class="traits" id="traits"></div>
       </div>
 
       <!-- EXUVIAS -->
       <div class="view" data-for="exuvias">
-        <h2>EXUVIAS <span class="dim">pieles anteriores</span></h2>
-        <p class="note">Cada forma que el organismo dejó atrás. Tocá una para observarla.</p>
+        <h2>EXUVIAS <span class="dim">archivo de mudas</span></h2>
+        <p class="note">SELECCIONAR PARA RENDERIZAR</p>
         <div class="exuvia-list" id="exuvia-list"></div>
       </div>
 
@@ -65,23 +66,23 @@
       <div class="view" data-for="data">
         <h2>FUENTES <span class="dim">simuladas</span></h2>
         <div class="sources" id="sources"></div>
-        <label class="field">Perfil simulado
+        <label class="field">PERFIL SIMULADO
           <select id="persona"></select>
         </label>
-        <h2>REGISTRO <span class="dim">del día seleccionado</span></h2>
+        <h2>REGISTRO MANUAL <span class="dim">día seleccionado</span></h2>
         <div class="manual" id="manual"></div>
         <h2>RESUMEN CANÓNICO</h2>
         <div class="kv" id="canonical"></div>
-        <h2>RASGOS <span class="dim">entrada del motor</span></h2>
+        <h2>VECTOR DE ENTRADA</h2>
         <div class="bars" id="features"></div>
-        <details class="raw"><summary>Payloads crudos del día</summary><pre id="raw"></pre></details>
+        <details class="raw"><summary>PAYLOADS CRUDOS</summary><pre id="raw"></pre></details>
       </div>
 
       <!-- LAB -->
       <div class="view" data-for="lab">
         <h2>LAB <span class="dim">motor generativo</span></h2>
-        <p class="note">Mové los rasgos para ver cómo las reglas los traducen en forma. No altera la historia.</p>
-        <label class="toggle"><input type="checkbox" id="lab-on"> Usar valores del laboratorio</label>
+        <p class="note">SOBRESCRIBE EL VECTOR DE ENTRADA · LA HISTORIA NO SE MODIFICA</p>
+        <label class="toggle"><input type="checkbox" id="lab-on"> OVERRIDE</label>
         <div class="sliders" id="lab-sliders"></div>
         <h2>REGLAS</h2>
         <div class="rules" id="rules"></div>
@@ -91,7 +92,7 @@
 
       <!-- WATCH -->
       <div class="view" data-for="watch">
-        <h2>APPLE WATCH <span class="dim">vista simplificada</span></h2>
+        <h2>APPLE WATCH <span class="dim">vista reducida</span></h2>
         <div class="watch-row">
           <div class="watch">
             <div class="watch-screen">
@@ -103,7 +104,7 @@
           <div class="complication">
             <svg viewBox="0 0 100 100" id="complication"></svg>
             <div class="comp-days" id="comp-days">0</div>
-            <div class="eyebrow dim">DÍAS</div>
+            <div class="eyebrow dim">D</div>
           </div>
         </div>
         <p class="note" id="watch-note"></p>
@@ -112,7 +113,7 @@
       <!-- SHARE -->
       <div class="view" data-for="share">
         <h2>SHARE MUTATION</h2>
-        <p class="note">Por defecto sólo se comparte el organismo. Elegí qué indicadores agregar.</p>
+        <p class="note">SALIDA POR DEFECTO: SÓLO GEOMETRÍA · INDICADORES OPCIONALES</p>
         <div class="share-opts" id="share-opts"></div>
         <div class="actions">
           <button class="btn" id="share-img">IMAGEN</button>

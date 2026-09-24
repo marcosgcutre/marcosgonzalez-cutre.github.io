@@ -3,7 +3,7 @@ import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
 import { normalize } from './ingest.js';
 import { FEATURES, RULES, toGenome, traits, indicators, HABITS } from './genome.js';
-import { runHistory, progress } from './mutations.js';
+import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
 
 const $ = (s) => document.querySelector(s);
@@ -80,7 +80,7 @@ function refresh(immediate = false) {
 // ---------- vistas ----------
 function renderScrub() {
   const ago = S.days.length - 1 - S.idx;
-  $('#scrub-label').textContent = ago === 0 ? 'HOY' : `HACE ${ago} D`;
+  $('#scrub-label').textContent = ago === 0 ? 'T0' : `T−${ago} D`;
 }
 
 function renderHome() {
@@ -88,13 +88,28 @@ function renderHome() {
   $('#mutation-name').textContent = `MUTATION ${String(e.stage + 1).padStart(2, '0')} · ${e.name ?? ''}`;
   $('#mutation-age').textContent = e.age;
   const p = progress(e);
-  $('#progress').innerHTML = [['MADUREZ', p.maturity], ['CAMBIO', p.change]]
-    .map(([l, v]) => `<div>${l}<i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
+  $('#progress').innerHTML = [
+    ['LATENCIA', p.maturity, `${Math.min(e.age, MIN_DAYS)}/${MIN_DAYS} D`],
+    ['DERIVA', p.change, `${e.net.toFixed(3)}/${NET.toFixed(3)}`],
+  ].map(([l, v, r]) => `<div><span>${l}</span><em>${r}</em><i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
   $('#indicators').innerHTML = indicators(S.days, S.idx).slice(0, 6).map((x) => `
     <div class="cell"><div class="lbl">${x.label}</div>
       <div class="val">${x.value}<small>${x.unit}</small></div></div>`).join('');
   const t = traits(currentGenome());
-  $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
+  $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v.toFixed(2)}</b></div>`).join('');
+  renderHud();
+}
+
+// HUD de instrumento sobre el organismo
+function renderHud() {
+  const e = entry(), g = currentGenome();
+  const mode = S.ghost ? `EXUVIA ${String(S.ghost.index).padStart(2, '0')}` : S.lab ? 'OVERRIDE' : 'LIVE';
+  const ago = S.days.length - 1 - S.idx;
+  $('#hud').innerHTML = `
+    <span class="tl">${mode}<br>M${String(e.stage + 1).padStart(2, '0')} ${e.name ?? ''}</span>
+    <span class="tr">N ${COUNT.toLocaleString('es')}<br>SEED ${g.seedShift.toFixed(3)}</span>
+    <span class="bl">${S.days[S.idx].date}<br>T${ago ? `−${ago}` : '0'}</span>
+    <span class="br">Δ ${e.net.toFixed(3)}<br>LOB ${g.lobes.toFixed(2)}</span>`;
 }
 
 // Miniaturas de exuvias: un solo renderer reutilizado, resultado cacheado.
@@ -122,16 +137,16 @@ function renderExuvias() {
   const list = [cur, ...upTo.slice().reverse()];
   $('#exuvia-list').innerHTML = list.map((x, i) => `
     <button class="exuvia ${x.current ? 'current' : ''}" data-i="${i}">
-      <img alt="Forma ${x.index}" src="${thumb(x.genome, `${S.persona}-${x.index}-${x.current ? S.idx : 'x'}`)}">
-      <div class="lbl">MUTATION ${String(x.index).padStart(2, '0')} ${x.current ? '· ACTUAL' : ''}</div>
-      <div class="meta">${x.name ?? ''} · ${x.days} días</div>
+      <img alt="Mutation ${x.index}" src="${thumb(x.genome, `${S.persona}-${x.index}-${x.current ? S.idx : 'x'}`)}">
+      <div class="lbl">M${String(x.index).padStart(2, '0')} ${x.name ?? ''} ${x.current ? '· ACTIVA' : ''}</div>
+      <div class="meta">${x.days} D</div>
       ${x.current ? '' : `<div class="meta">${x.start} → ${x.end}</div>`}
-    </button>`).join('') || '<p class="note">Todavía no hubo mudas.</p>';
+    </button>`).join('') || '<p class="note">SIN MUDAS REGISTRADAS</p>';
   $('#exuvia-list').querySelectorAll('.exuvia').forEach((b) => b.onclick = () => {
     const x = list[+b.dataset.i];
     S.ghost = x.current ? null : x;
     $('#ghost-label').hidden = !S.ghost;
-    if (S.ghost) $('#ghost-label').textContent = `EXUVIA ${String(x.index).padStart(2, '0')} · ${x.name} · VOLVER ✕`;
+    if (S.ghost) $('#ghost-label').textContent = `EXUVIA M${String(x.index).padStart(2, '0')} ${x.name} · CERRAR ✕`;
     refresh();
   });
 }
@@ -141,12 +156,12 @@ function renderData() {
   const d = S.days[S.idx];
   const has = (s) => d.sources.includes(s);
   $('#sources').innerHTML = [
-    ['WHOOP', has('whoop') ? 'SIMULADO' : '—', has('whoop')], ['APPLE HEALTH', has('apple') ? 'SIMULADO' : '—', has('apple')],
-    ['OURA', 'NO CONECTADO', false], ['GARMIN', 'NO CONECTADO', false],
+    ['WHOOP', has('whoop') ? 'SIM' : '—', has('whoop')], ['APPLE HEALTH', has('apple') ? 'SIM' : '—', has('apple')],
+    ['OURA', 'OFFLINE', false], ['GARMIN', 'OFFLINE', false],
   ].map(([n, s, on]) => `<div class="src ${on ? '' : 'off'}">${n}<div class="st">${s}</div></div>`).join('');
 
   $('#manual').innerHTML = HABITS.map((h) => `
-    <label><input type="checkbox" data-h="${h.id}" ${d.habits[h.id] ? 'checked' : ''}> ${{ sugar: 'Comí azúcar', alcohol: 'Tomé alcohol', smoking: 'Fumé' }[h.id]}</label>`).join('');
+    <label><input type="checkbox" data-h="${h.id}" ${d.habits[h.id] ? 'checked' : ''}> ${h.label}</label>`).join('');
   $('#manual').querySelectorAll('input').forEach((i) => i.onchange = () => {
     const m = S.raw.manual.find((x) => x.date === d.date && x.habit === i.dataset.h);
     if (m) m.value = i.checked; else S.raw.manual.push({ date: d.date, habit: i.dataset.h, value: i.checked });
@@ -184,7 +199,7 @@ function renderData() {
 function featureBars(f) {
   return Object.entries(FEATURES).map(([k, m]) => `
     <div class="row"><span>${m.label} <span class="tag ${m.scale}">${m.scale}</span></span>
-      <div class="track"><b style="width:${((f[k] ?? 0) * 100).toFixed(0)}%"></b></div><span>${f[k] == null ? 'sin dato' : (f[k] * 100).toFixed(0)}</span></div>`).join('');
+      <div class="track"><b style="width:${((f[k] ?? 0) * 100).toFixed(0)}%"></b></div><span>${f[k] == null ? 'N/D' : f[k].toFixed(2)}</span></div>`).join('');
 }
 
 const labFrom = (f) => Object.fromEntries(Object.keys(FEATURES).map((k) => [k, f[k] ?? 0.5]));
@@ -194,10 +209,10 @@ function renderLab(rebuild = true) {
   if (!S.labFeatures) S.labFeatures = labFrom(entry().features);
   if (rebuild || !$('#lab-sliders').children.length) {
     $('#lab-sliders').innerHTML = Object.entries(FEATURES).map(([k, m]) => `
-      <label>${m.label}<input type="range" min="0" max="1" step="0.01" data-f="${k}" value="${S.labFeatures[k]}"><span>${Math.round(S.labFeatures[k] * 100)}</span></label>`).join('');
+      <label>${m.label}<input type="range" min="0" max="1" step="0.01" data-f="${k}" value="${S.labFeatures[k]}"><span>${S.labFeatures[k].toFixed(2)}</span></label>`).join('');
     $('#lab-sliders').querySelectorAll('input').forEach((i) => i.oninput = () => {
       S.labFeatures[i.dataset.f] = +i.value;
-      i.nextElementSibling.textContent = Math.round(i.value * 100);
+      i.nextElementSibling.textContent = (+i.value).toFixed(2);
       if (!S.lab) { S.lab = true; $('#lab-on').checked = true; }
       refresh();
     });
@@ -229,14 +244,14 @@ function renderWatch() {
     dots += `<circle cx="${50 + Math.cos(a) * r}" cy="${50 + Math.sin(a) * r}" r="${1 + g.density}" fill="${col}"/>`;
   }
   $('#complication').innerHTML = dots;
-  $('#watch-note').textContent = `Vista previa en navegador con ${watch.organism.points.geometry.attributes.aSeed.count.toLocaleString('es')} partículas a 20 fps (el teléfono usa ${COUNT.toLocaleString('es')}). En watchOS real la estrategia recomendada es otra: ver docs/ARQUITECTURA.md.`;
+  $('#watch-note').textContent = `PREVIEW · N ${watch.organism.points.geometry.attributes.aSeed.count.toLocaleString('es')} · 20 FPS · TELÉFONO N ${COUNT.toLocaleString('es')} · watchOS: ver docs/ARQUITECTURA.md §8`;
 }
 
 // ---------- compartir ----------
 const shareInclude = new Set();
 function renderShare() {
   const ind = shareInfo().indicators;
-  if (!ind.length) { $('#share-opts').innerHTML = '<p class="note">Estás viendo una exuvia o el LAB: se comparte sólo la forma.</p>'; return; }
+  if (!ind.length) { $('#share-opts').innerHTML = '<p class="note">EXUVIA / OVERRIDE · SALIDA: SÓLO GEOMETRÍA</p>'; return; }
   $('#share-opts').innerHTML = ind.map((x) => `
     <label class="toggle"><input type="checkbox" data-id="${x.id}" ${shareInclude.has(x.id) ? 'checked' : ''}> ${x.label}</label>`).join('');
   $('#share-opts').querySelectorAll('input').forEach((i) => i.onchange = () => {
@@ -247,28 +262,28 @@ function renderShare() {
 const shareInfo = () => {
   const e = entry();
   const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome() };
-  if (S.ghost) return { ...base, stage: S.ghost.index - 1, name: `${S.ghost.name} · EXUVIA`, age: S.ghost.days, ageLabel: 'DÍAS QUE DURÓ ESTA FORMA', indicators: [] };
-  if (S.lab) return { ...base, stage: e.stage, name: 'LAB', age: e.age, indicators: [] };
+  if (S.ghost) return { ...base, stage: S.ghost.index - 1, name: `${S.ghost.name} · EXUVIA`, age: S.ghost.days, ageLabel: 'DURACIÓN · DÍAS', indicators: [] };
+  if (S.lab) return { ...base, stage: e.stage, name: 'OVERRIDE', age: e.age, indicators: [] };
   return { ...base, stage: e.stage, name: e.name ?? '', age: e.age, indicators: indicators(S.days, S.idx) };
 };
 const status = (t) => ($('#share-status').textContent = t);
 const busy = (on) => document.querySelectorAll('.actions .btn').forEach((b) => (b.disabled = on));
 $('#share-img').onclick = async () => {
-  busy(true); status('Renderizando 1080×1350…');
-  try { const r = await shareImage(shareInfo().genome, shareInfo(), { include: shareInclude }); status(r === 'shared' ? 'Compartido.' : r === 'cancelled' ? '' : 'Imagen descargada.'); }
+  busy(true); status('RENDER 1080×1350…');
+  try { const r = await shareImage(shareInfo().genome, shareInfo(), { include: shareInclude }); status(r === 'shared' ? 'TRANSMITIDO' : r === 'cancelled' ? '' : 'PNG EXPORTADO'); }
   catch (e) { status(e.message); } finally { busy(false); }
 };
 $('#share-vid').onclick = async () => {
   busy(true);
   try {
-    const r = await shareVideo(shareInfo().genome, shareInfo(), { include: shareInclude }, 4, (p) => status(`Grabando ${Math.round(p * 100)}%`));
-    status(r === 'shared' ? 'Compartido.' : r === 'cancelled' ? '' : 'Animación descargada.');
+    const r = await shareVideo(shareInfo().genome, shareInfo(), { include: shareInclude }, 4, (p) => status(`REC ${Math.round(p * 100)}%`));
+    status(r === 'shared' ? 'TRANSMITIDO' : r === 'cancelled' ? '' : 'VIDEO EXPORTADO');
   } catch (e) { status(e.message); } finally { busy(false); }
 };
 $('#share-link').onclick = async () => {
   const i = shareInfo();
   const url = encodeGenome(i.genome, { stage: i.stage, name: i.name, mutantId: i.mutantId });
-  try { await navigator.clipboard.writeText(url); status('Enlace copiado. Sólo contiene la forma, no tus datos.'); }
+  try { await navigator.clipboard.writeText(url); status('ENLACE COPIADO · CONTIENE SÓLO GEOMETRÍA'); }
   catch { status(url); }
 };
 
@@ -292,7 +307,7 @@ function announceMutation() {
   const e = entry();
   if (lastStage !== null && e.stage > lastStage) {
     const t = $('#toast');
-    t.textContent = `NUEVA MUTATION · ${e.name}`;
+    t.textContent = `MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`;
     t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600);
   }
   lastStage = e.stage;

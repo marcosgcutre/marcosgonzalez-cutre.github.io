@@ -29,7 +29,7 @@ function compose(ctx, organismCanvas, info, opts) {
   ctx.letterSpacing = '6px';
   ctx.font = '400 22px "Space Grotesk", sans-serif';
   ctx.fillStyle = '#3ff0ff';
-  ctx.fillText(`MUTANT ${info.mutantId} · MUTATION ${String(info.stage + 1).padStart(2, '0')} ${info.name}`, W / 2, 152);
+  ctx.fillText(`SPECIMEN ${info.mutantId} · M${String(info.stage + 1).padStart(2, '0')} ${info.name}`, W / 2, 152);
   ctx.fillStyle = '#e8f6ff';
   ctx.font = '200 96px Montserrat, sans-serif';
   ctx.letterSpacing = '4px';
@@ -37,7 +37,7 @@ function compose(ctx, organismCanvas, info, opts) {
   ctx.font = '400 20px "Space Grotesk", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillStyle = '#7fa6c9';
-  ctx.fillText(info.ageLabel ?? 'DÍAS EN ESTA FORMA', W / 2, 1182);
+  ctx.fillText(info.ageLabel ?? 'CICLO ACTUAL · DÍAS', W / 2, 1182);
 
   const chosen = info.indicators.filter((x) => opts.include.has(x.id));
   if (chosen.length) {
