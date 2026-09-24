@@ -3,11 +3,11 @@
 // mutación. Cada indicador se agrega explícitamente.
 
 import { Stage, PARAMS } from './organism.js';
-import { RULES } from './genome.js';
+import { RULES, GLOW } from './genome.js';
 
 const W = 1080, H = 1350;
 
-function makeStage(genome, size, count, seed) {
+function makeStage(genome, size, count, seed, patterns) {
   const c = document.createElement('canvas');
   c.width = size; c.height = size;
   const st = new Stage(c, { count, maxDpr: 1, seed, preserve: true });
@@ -15,6 +15,7 @@ function makeStage(genome, size, count, seed) {
   st.renderer.setSize(size, size, false);
   st.organism.material.uniforms.uPixelRatio.value = size / 700;
   st.organism.setTarget(genome, true);
+  if (patterns) st.organism.setPatterns(patterns, true);
   return st;
 }
 
@@ -57,7 +58,7 @@ function compose(ctx, organismCanvas, info, opts) {
 
 export async function shareImage(genome, info, opts) {
   await document.fonts?.ready; // sin esto el texto de la tarjeta sale en la fuente de sistema
-  const st = makeStage(genome, W, 70000, info.seed);
+  const st = makeStage(genome, W, 70000, info.seed, info.patterns);
   st.render(0, info.time);
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   compose(out.getContext('2d'), st.renderer.domElement, info, opts);
@@ -68,7 +69,7 @@ export async function shareImage(genome, info, opts) {
 
 export async function shareVideo(genome, info, opts, seconds = 4, onProgress) {
   await document.fonts?.ready;
-  const st = makeStage(genome, W, 60000, info.seed);
+  const st = makeStage(genome, W, 60000, info.seed, info.patterns);
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const ctx = out.getContext('2d');
   const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
@@ -108,25 +109,50 @@ async function deliver(blob, filename) {
   return 'downloaded';
 }
 
-// ---- Enlace: sólo el genoma cuantizado (1 byte por parámetro), sin datos ----
-export function encodeGenome(genome, meta) {
+// ---- Enlace: sólo geometría cuantizada (1 byte por valor), sin datos ----
+const b64 = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64 = (str) => [...atob(str.replace(/-/g, '+').replace(/_/g, '/'))].map((c) => c.charCodeAt(0));
+const q = (x, max = 1) => Math.max(0, Math.min(255, Math.round((x / max) * 255)));
+const dq = (b, max = 1) => (b / 255) * max;
+const TAU = Math.PI * 2;
+
+export function encodeGenome(genome, meta, patterns) {
   const bytes = PARAMS.filter((k) => RULES[k]).map((k) => {
-    const r = RULES[k]; return Math.round(((genome[k] - r.min) / (r.max - r.min)) * 255);
+    const r = RULES[k]; return q(genome[k] - r.min, r.max - r.min);
   });
-  bytes.push(Math.round(((genome.seedShift % 64) / 64) * 255), meta.stage & 255);
-  const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  return `${location.origin}${location.pathname}#m=${b64}&n=${encodeURIComponent(meta.name)}&id=${meta.mutantId}`;
+  bytes.push(q(genome.seedShift % 64, 64), meta.stage & 255);
+  let url = `${location.origin}${location.pathname}#m=${b64(bytes)}&n=${encodeURIComponent(meta.name)}&id=${meta.mutantId}`;
+  if (patterns) {
+    const pb = [...patterns.week.map((x) => q(x)), q(patterns.weekStr), q(patterns.cycleTurns, 20), q(patterns.cycleStr),
+      ...patterns.rings.flatMap(([a, b]) => [q(a), q(b)]),
+      ...patterns.links.flatMap(([a, b, c, d]) => [q(a, TAU), q(b, TAU), q(c), d >= 0 ? 255 : 0])];
+    url += `&p=${b64(pb)}`;
+  }
+  return url;
 }
 
 export function decodeGenome(hash) {
   const p = new URLSearchParams(hash.replace(/^#/, ''));
   if (!p.get('m')) return null;
-  let bin;
-  try { bin = atob(p.get('m').replace(/-/g, '+').replace(/_/g, '/')); } catch { return null; } // enlace roto → app normal
-  if (bin.length < PARAMS.filter((k) => RULES[k]).length + 1) return null;
-  const bytes = [...bin].map((c) => c.charCodeAt(0));
-  const g = {}; let i = 0;
-  for (const k of PARAMS.filter((k) => RULES[k])) { const r = RULES[k]; g[k] = r.min + (bytes[i++] / 255) * (r.max - r.min); }
-  g.seedShift = (bytes[i++] / 255) * 64;
-  return { genome: g, stage: bytes[i] ?? 0, name: p.get('n') ?? '', mutantId: p.get('id') ?? '' };
+  let bytes;
+  try { bytes = unb64(p.get('m')); } catch { return null; } // enlace roto → app normal
+  const keys = PARAMS.filter((k) => RULES[k]);
+  if (bytes.length < keys.length + 1) return null;
+  const g = { glow: GLOW }; let i = 0;
+  for (const k of keys) { const r = RULES[k]; g[k] = r.min + dq(bytes[i++], r.max - r.min); }
+  g.seedShift = dq(bytes[i++], 64);
+  let patterns = null;
+  try {
+    const b = p.get('p') ? unb64(p.get('p')) : null;
+    if (b && b.length >= 38) {
+      let j = 0;
+      patterns = {
+        week: Array.from({ length: 7 }, () => dq(b[j++])), weekStr: dq(b[j++]),
+        cycleTurns: dq(b[j++], 20), cycleStr: dq(b[j++]),
+        rings: Array.from({ length: 8 }, () => [dq(b[j++]), dq(b[j++])]),
+        links: Array.from({ length: 3 }, () => [dq(b[j++], TAU), dq(b[j++], TAU), dq(b[j++]), b[j++] ? 1 : -1]),
+      };
+    }
+  } catch { patterns = null; }
+  return { genome: g, stage: bytes[i] ?? 0, name: p.get('n') ?? '', mutantId: p.get('id') ?? '', patterns };
 }

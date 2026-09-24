@@ -44,6 +44,12 @@ uniform float uTime, uPixelRatio, uPointSize;
 uniform float uExpansion, uCoherence, uDensity, uFlow, uLobes, uLobeAmp, uTwist;
 uniform float uElong, uSkirt, uFilament, uPulse, uPulseAmp, uGlow, uSeedShift;
 uniform vec4 uPalette; // cyan, blue, violet, orange
+// patrones detectados en los datos (ver patterns.js)
+uniform float uWeek[7];   // perfil semanal L..D, 0–1
+uniform float uWeekStr;   // fuerza del ritmo semanal
+uniform float uCycleTurns, uCycleStr;
+uniform vec2 uRings[8];   // estratos: x = posición temporal 0–1, y = intensidad
+uniform vec4 uLinks[3];   // acoplamientos: ángulo A, ángulo B, intensidad, signo
 varying vec3 vColor;
 varying float vAlpha;
 ${SNOISE}
@@ -66,6 +72,20 @@ void main(){
   float k = fract(w * 7.31 + s * 3.7);
   float rad = mix(pow(k, 0.33), 0.9 + 0.1 * k, 0.3 + 0.6 * uDensity);
   rad *= 1.0 + (1.0 - uDensity) * 0.45 * pow(fract(s * 13.7), 3.0); // halo cuando es dispersa
+
+  // ESTRATOS: parte de la materia se deposita en capas concéntricas, una por cambio de
+  // hábito detectado. El radio codifica la fecha: centro = pasado, superficie = presente.
+  float ringGlow = 0.0;
+  if (fract(s * 91.7) < 0.4) {
+    float jf = floor(fract(s * 17.3) * 8.0);
+    for (int i = 0; i < 8; i++) {
+      if (float(i) == jf && uRings[i].y > 0.0) {
+        float target = mix(0.3, 1.0, uRings[i].x) + (fract(s * 431.0) - 0.5) * 0.012;
+        rad = mix(rad, target, uRings[i].y);
+        ringGlow = uRings[i].y;
+      }
+    }
+  }
   // lóbulos enteros mezclados: sin costura en theta = 0 y sin saltos entre 2 y 3 lóbulos
   float l0 = floor(uLobes), lf = fract(uLobes);
   float ph = uSeedShift * 2.0 + t * 0.35;
@@ -92,13 +112,52 @@ void main(){
   float ca = cos(a), sa = sin(a);
   p.xz = vec2(ca * p.x - sa * p.z, sa * p.x + ca * p.z);
 
+  // ESTRUCTURAS: una fracción fija de partículas se reorganiza según los patrones.
+  // Con intensidad 0 vuelven al cuerpo; nunca aparecen ni desaparecen de golpe.
+  float role = fract(s * 53.13 + v * 3.7);
+  float structAmt = 0.0, kind = 0.0;
+  vec3 sp = p;
+  if (role < 0.07) {
+    // RITMO SEMANAL: anillo orbital, un lóbulo por día; el radio es la actividad de ese día
+    float d = u * 7.0, i0 = floor(d), f0 = fract(d);
+    float w0 = 0.0, w1 = 0.0;
+    for (int i = 0; i < 7; i++) {
+      if (float(i) == i0) w0 = uWeek[i];
+      if (float(i) == mod(i0 + 1.0, 7.0)) w1 = uWeek[i];
+    }
+    float wv = mix(w0, w1, smoothstep(0.4, 0.6, f0));
+    float tick = step(f0, 0.012);
+    float rr = 1.3 + 0.42 * wv + (fract(w * 59.0) - 0.5) * 0.06 * (0.3 + wv);
+    float yy = 0.1 + (fract(w * 37.0) - 0.5) * (0.035 + 0.3 * tick);
+    sp = vec3(cos(u * TAU) * rr, yy, sin(u * TAU) * rr);
+    structAmt = smoothstep(0.03, 0.2, uWeekStr); kind = 1.0;
+  } else if (role < 0.13) {
+    // CICLO: doble hélice; cada vuelta es un ciclo observado
+    float ang = v * uCycleTurns * TAU + step(0.5, fract(s * 7.0)) * 3.14159 + t * 0.05;
+    float rr = 1.42 + (fract(w * 71.0) - 0.5) * 0.035;
+    sp = vec3(cos(ang) * rr, mix(-0.95, 1.55, v), sin(ang) * rr);
+    structAmt = uCycleStr; kind = 2.0;
+  } else if (role < 0.19) {
+    // ACOPLAMIENTOS: arco entre los nodos de dos variables que se mueven juntas
+    float jf = floor(fract(s * 11.0) * 3.0);
+    vec4 L = vec4(0.0);
+    for (int i = 0; i < 3; i++) { if (float(i) == jf) L = uLinks[i]; }
+    vec3 A = vec3(cos(L.x) * 0.95, 0.35 + 0.45 * sin(L.x * 2.0), sin(L.x) * 0.95);
+    vec3 B = vec3(cos(L.y) * 0.95, 0.35 + 0.45 * sin(L.y * 2.0), sin(L.y) * 0.95);
+    vec3 m = (A + B) * 0.5;
+    vec3 c = m + normalize(m + vec3(0.0, 0.6, 0.0)) * 0.9;
+    sp = mix(mix(A, c, v), mix(c, B, v), v) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.03;
+    structAmt = L.z; kind = L.w < 0.0 ? 4.0 : 3.0;
+  }
+  p = mix(p, sp, structAmt);
+
   float chaos = mix(0.34, 0.035, uCoherence);
   vec3 q = p * 1.5 + vec3(uSeedShift * 3.1);
   float tt = t * 0.25;
   vec3 disp = vec3(snoise(q + vec3(0.0, 0.0, tt)),
                    snoise(q + vec3(31.4, 0.0, tt)),
                    snoise(q + vec3(0.0, 47.2, tt)));
-  p += disp * chaos;
+  p += disp * chaos * (1.0 - 0.8 * structAmt); // las estructuras se leen nítidas
 
   p *= uExpansion * (1.0 + uPulseAmp * 0.035 * sin(uTime * uPulse * TAU));
 
@@ -118,6 +177,13 @@ void main(){
   col = mix(col, VI, smoothstep(wgt.x + wgt.y - e, wgt.x + wgt.y + e, pick));
   col = mix(col, OR, smoothstep(1.0 - wgt.w - e, 1.0 - wgt.w + e, pick));
   col = mix(col, vec3(1.0), step(0.985, fract(s * 211.0)) * 0.8);
+  // color por estructura: anillo semanal cian-blanco, hélice violeta, acoplamientos
+  // cian (se mueven en el mismo sentido) u naranja (en sentido opuesto), estratos claros
+  if (kind == 1.0) col = mix(col, vec3(0.7, 1.0, 1.0), 0.65 * structAmt);
+  else if (kind == 2.0) col = mix(col, vec3(0.78, 0.6, 1.0), 0.85 * structAmt);
+  else if (kind == 3.0) col = mix(col, CY, 0.75 * structAmt);
+  else if (kind == 4.0) col = mix(col, OR, 0.75 * structAmt);
+  col = mix(col, vec3(0.8, 0.95, 1.0), ringGlow * 0.45 * (1.0 - structAmt));
   vColor = col;
   vAlpha = visible * (0.35 + 0.75 * uGlow) * (0.5 + 0.5 * fract(s * 71.0));
 }`;
@@ -133,6 +199,13 @@ void main(){
 }`;
 
 const UNIFORM_OF = (k) => 'u' + k[0].toUpperCase() + k.slice(1);
+
+export function emptyPatterns() {
+  return {
+    week: Array(7).fill(0), weekStr: 0, cycleTurns: 0, cycleStr: 0,
+    rings: Array.from({ length: 8 }, () => [0, 0]), links: Array.from({ length: 3 }, () => [0, 0, 0, 1]),
+  };
+}
 
 export function defaultGenome() {
   return {
@@ -159,7 +232,13 @@ export class Organism {
     const uniforms = {
       uTime: { value: 0 }, uPixelRatio: { value: 1 }, uPointSize: { value: 5.5 },
       uPalette: { value: new THREE.Vector4() },
+      uWeek: { value: new Array(7).fill(0) }, uWeekStr: { value: 0 },
+      uCycleTurns: { value: 0 }, uCycleStr: { value: 0 },
+      uRings: { value: Array.from({ length: 8 }, () => new THREE.Vector2()) },
+      uLinks: { value: Array.from({ length: 3 }, () => new THREE.Vector4(0, 0, 0, 1)) },
     };
+    this.pat = emptyPatterns();
+    this.patTarget = emptyPatterns();
     for (const k of PARAMS) uniforms[UNIFORM_OF(k)] = { value: this.genome[k] };
     this.material = new THREE.ShaderMaterial({
       uniforms, vertexShader: VERT, fragmentShader: FRAG,
@@ -168,6 +247,16 @@ export class Organism {
     this.points = new THREE.Points(geo, this.material);
     this.points.frustumCulled = false;
     this._apply();
+  }
+
+  // patrones en forma compacta (patterns.toUniforms); se interpolan igual que el genoma
+  setPatterns(p, immediate = false) {
+    this.patTarget = structuredClone(p);
+    // los ángulos de un acoplamiento que aparece no deben barrer desde otro par
+    this.patTarget.links.forEach((l, i) => { if (this.pat.links[i][2] < 0.02) this.pat.links[i] = [l[0], l[1], 0, l[3]]; });
+    this.patTarget.rings.forEach((r, i) => { if (this.pat.rings[i][1] < 0.02) this.pat.rings[i] = [r[0], 0]; });
+    if (immediate) this.pat = structuredClone(p);
+    this._applyPatterns();
   }
 
   setTarget(genome, immediate = false) {
@@ -179,8 +268,26 @@ export class Organism {
   update(dt, time, rate = 1.2) {
     const f = 1 - Math.exp(-rate * dt);
     for (const k of PARAMS) this.genome[k] += (this.target[k] - this.genome[k]) * f;
+    const P = this.pat, T = this.patTarget, lerp = (a, b) => a + (b - a) * f;
+    P.week = P.week.map((x, i) => lerp(x, T.week[i]));
+    P.weekStr = lerp(P.weekStr, T.weekStr);
+    P.cycleTurns = lerp(P.cycleTurns, T.cycleTurns);
+    P.cycleStr = lerp(P.cycleStr, T.cycleStr);
+    P.rings = P.rings.map((r, i) => r.map((x, j) => lerp(x, T.rings[i][j])));
+    P.links = P.links.map((l, i) => l.map((x, j) => (j === 3 ? T.links[i][3] : lerp(x, T.links[i][j]))));
     this.material.uniforms.uTime.value = time;
     this._apply();
+    this._applyPatterns();
+  }
+
+  _applyPatterns() {
+    const u = this.material.uniforms, P = this.pat;
+    P.week.forEach((x, i) => (u.uWeek.value[i] = x));
+    u.uWeekStr.value = P.weekStr;
+    u.uCycleTurns.value = P.cycleTurns;
+    u.uCycleStr.value = P.cycleStr;
+    P.rings.forEach((r, i) => u.uRings.value[i].set(r[0], r[1]));
+    P.links.forEach((l, i) => u.uLinks.value[i].set(l[0], l[1], l[2], l[3]));
   }
 
   _apply() {

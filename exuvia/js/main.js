@@ -5,6 +5,7 @@ import { normalize } from './ingest.js';
 import { FEATURES, RULES, toGenome, traits, indicators, HABITS } from './genome.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
+import { detect, toUniforms, signalIds, VARS, DAYS } from './patterns.js';
 
 const $ = (s) => document.querySelector(s);
 const app = $('#app');
@@ -51,6 +52,7 @@ function load(persona, keepIdx = false) {
   recompute(keepIdx);
 }
 function recompute(keepIdx = true) {
+  patCache.clear();
   S.days = normalize(S.raw);
   S.history = runHistory(S.days, PERSONAS[S.persona].seed);
   const last = S.days.length - 1;
@@ -62,14 +64,28 @@ function recompute(keepIdx = true) {
 }
 
 const entry = () => S.history.timeline[S.idx];
+
+// Patrones: detectados con datos hasta el día visto (o hasta el final de la exuvia vista)
+const patCache = new Map();
+function patternsAt(idx) {
+  const key = `${S.persona}|${idx}`;
+  if (!patCache.has(key)) patCache.set(key, detect(S.days, idx));
+  return patCache.get(key);
+}
+const idxOf = (date) => Math.max(0, S.days.findIndex((d) => d.date === date));
+const currentPatterns = () => patternsAt(S.ghost ? idxOf(S.ghost.end) : S.idx);
 const currentFeatures = () => (S.lab && S.labFeatures ? S.labFeatures : entry().features);
 const currentGenome = () => (S.ghost ? S.ghost.genome : toGenome(currentFeatures(), entry().genome.seedShift));
 
 function refresh(immediate = false) {
   const g = currentGenome();
+  const pu = toUniforms(currentPatterns());
   stage.organism.setTarget(g, immediate);
+  stage.organism.setPatterns(pu, immediate);
   watch?.organism.setTarget(g, immediate);
+  watch?.organism.setPatterns(pu, immediate);
   renderHome(); renderScrub();
+  if (S.view === 'patterns') renderPatterns();
   if (S.view === 'exuvias') renderExuvias();
   if (S.view === 'data') renderData();
   if (S.view === 'lab') renderLab(false);
@@ -109,13 +125,13 @@ function renderHud() {
     <span class="tl">${mode}<br>M${String(e.stage + 1).padStart(2, '0')} ${e.name ?? ''}</span>
     <span class="tr">N ${COUNT.toLocaleString('es')}<br>SEED ${g.seedShift.toFixed(3)}</span>
     <span class="bl">${S.days[S.idx].date}<br>T${ago ? `−${ago}` : '0'}</span>
-    <span class="br">Δ ${e.net.toFixed(3)}<br>LOB ${g.lobes.toFixed(2)}</span>`;
+    <span class="br">Δ ${e.net.toFixed(3)}<br>SEÑALES ${signalIds(currentPatterns()).length}</span>`;
 }
 
 // Miniaturas de exuvias: un solo renderer reutilizado, resultado cacheado.
 const thumbCache = new Map();
 let thumbStage = null;
-function thumb(genome, key) {
+function thumb(genome, key, pu) {
   if (thumbCache.has(key)) return thumbCache.get(key);
   if (!thumbStage) {
     const c = document.createElement('canvas'); c.width = c.height = 320;
@@ -124,6 +140,7 @@ function thumb(genome, key) {
     thumbStage.organism.material.uniforms.uPixelRatio.value = 320 / 700;
   }
   thumbStage.organism.setTarget(genome, true);
+  thumbStage.organism.setPatterns(pu, true);
   thumbStage.render(0, 12);
   const url = thumbStage.renderer.domElement.toDataURL('image/png');
   thumbCache.set(key, url);
@@ -137,7 +154,7 @@ function renderExuvias() {
   const list = [cur, ...upTo.slice().reverse()];
   $('#exuvia-list').innerHTML = list.map((x, i) => `
     <button class="exuvia ${x.current ? 'current' : ''}" data-i="${i}">
-      <img alt="Mutation ${x.index}" src="${thumb(x.genome, `${S.persona}-${x.index}-${x.current ? S.idx : 'x'}`)}">
+      <img alt="Mutation ${x.index}" src="${thumb(x.genome, `${S.persona}-${x.index}-${x.current ? S.idx : 'x'}`, toUniforms(patternsAt(x.current ? S.idx : idxOf(x.end))))}">
       <div class="lbl">M${String(x.index).padStart(2, '0')} ${x.name ?? ''} ${x.current ? '· ACTIVA' : ''}</div>
       <div class="meta">${x.days} D</div>
       ${x.current ? '' : `<div class="meta">${x.start} → ${x.end}</div>`}
@@ -231,6 +248,7 @@ $('#lab-on').onchange = (e) => {
 function renderWatch() {
   ensureWatch();
   watch.organism.setTarget(currentGenome(), true);
+  watch.organism.setPatterns(toUniforms(currentPatterns()), true);
   const e = entry();
   $('#watch-days').textContent = `${e.age} D`;
   $('#comp-days').textContent = e.age;
@@ -261,7 +279,7 @@ function renderShare() {
 // Se comparte exactamente lo que está en pantalla: la forma actual, una exuvia o el LAB.
 const shareInfo = () => {
   const e = entry();
-  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome() };
+  const base = { mutantId: String(PERSONAS[S.persona].seed).padStart(6, '0'), seed: 4721, time: performance.now() / 1000, genome: currentGenome(), patterns: toUniforms(currentPatterns()) };
   if (S.ghost) return { ...base, stage: S.ghost.index - 1, name: `${S.ghost.name} · EXUVIA`, age: S.ghost.days, ageLabel: 'DURACIÓN · DÍAS', indicators: [] };
   if (S.lab) return { ...base, stage: e.stage, name: 'OVERRIDE', age: e.age, indicators: [] };
   return { ...base, stage: e.stage, name: e.name ?? '', age: e.age, indicators: indicators(S.days, S.idx) };
@@ -282,7 +300,7 @@ $('#share-vid').onclick = async () => {
 };
 $('#share-link').onclick = async () => {
   const i = shareInfo();
-  const url = encodeGenome(i.genome, { stage: i.stage, name: i.name, mutantId: i.mutantId });
+  const url = encodeGenome(i.genome, { stage: i.stage, name: i.name, mutantId: i.mutantId }, i.patterns);
   try { await navigator.clipboard.writeText(url); status('ENLACE COPIADO · CONTIENE SÓLO GEOMETRÍA'); }
   catch { status(url); }
 };
@@ -299,24 +317,57 @@ document.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => go(b
 $('#btn-share').onclick = () => go('share');
 $('#btn-persona').onclick = () => go('data');
 $('#persona').innerHTML = Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join('');
-$('#persona').onchange = (e) => { thumbCache.clear(); S.labFeatures = null; S.ghost = null; $('#ghost-label').hidden = true; load(e.target.value); };
+$('#persona').onchange = (e) => { thumbCache.clear(); lastSignals = null; S.labFeatures = null; S.ghost = null; $('#ghost-label').hidden = true; load(e.target.value); };
 
 let lastStage = null;
 $('#scrub').oninput = (e) => { S.idx = +e.target.value; S.ghost = null; exitLab(); if (S.view === 'lab') renderLab(true); $('#ghost-label').hidden = true; announceMutation(); refresh(); };
+let lastSignals = null, toastTimer = 0;
+function toast(text) {
+  const t = $('#toast');
+  t.textContent = text; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
 function announceMutation() {
   const e = entry();
-  if (lastStage !== null && e.stage > lastStage) {
-    const t = $('#toast');
-    t.textContent = `MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`;
-    t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600);
+  const p = patternsAt(S.idx), ids = signalIds(p);
+  if (lastStage !== null && e.stage > lastStage) toast(`MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`);
+  else if (lastSignals && lastStage !== null && e.stage === lastStage) {
+    const fresh = ids.find((id) => !lastSignals.has(id));
+    if (fresh) toast(`SEÑAL NUEVA · ${describeSignal(fresh, p)}`);
   }
-  lastStage = e.stage;
+  lastStage = e.stage; lastSignals = new Set(ids);
+}
+function describeSignal(id, p) {
+  if (id === 'W') return 'RITMO SEMANAL';
+  if (id === 'C') return `CICLO ${p.cycle.period} D`;
+  if (id[0] === 'K') { const c = p.couplings.find((x) => id === `K${x.a}${x.b}`); return `${VARS[c.a].label} ↔ ${VARS[c.b].label}`; }
+  const st = p.strata.find((x) => id === `S${x.key}${x.delta > 0 ? '+' : '-'}${Math.round(x.t / 28)}`);
+  return `ESTRATO · ${VARS[st.key].label} ${st.delta > 0 ? '↑' : '↓'}`;
+}
+
+// ---------- vista PATRONES ----------
+function renderPatterns() {
+  const p = currentPatterns();
+  const w = p.weekly;
+  const bars = w ? w.profile.map((x, i) => `<div class="wk"><i style="height:${(8 + x * 52).toFixed(0)}px"></i><span>${DAYS[i]}</span></div>`).join('') : '';
+  $('#pat-week').innerHTML = w
+    ? `<div class="wk-row">${bars}</div><div class="read">AMPLITUD <em>${w.strength.toFixed(2)}</em></div>`
+    : '<p class="note">DATOS INSUFICIENTES · MÍN. 28 D</p>';
+  $('#pat-cycle').innerHTML = p.cycle
+    ? `<div class="read">PERÍODO <em>${p.cycle.period} D</em></div><div class="read">INTENSIDAD <em>${p.cycle.strength.toFixed(2)}</em></div><div class="read">VUELTAS DE HÉLICE <em>${p.cycle.turns.toFixed(1)}</em></div>`
+    : '<p class="note">SIN PERIODICIDAD DETECTADA · 10–75 D</p>';
+  $('#pat-links').innerHTML = p.couplings.length
+    ? p.couplings.map((c) => `<div class="read">${VARS[c.a].label}${c.lag ? ' (T−1)' : ''} ↔ ${VARS[c.b].label} <em class="${c.r >= 0 ? 'pos' : 'neg'}">${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}</em></div>`).join('')
+    : '<p class="note">SIN ACOPLAMIENTOS · |r| < 0.20</p>';
+  $('#pat-strata').innerHTML = p.strata.length
+    ? p.strata.map((x) => `<div class="read">${x.date} · ${VARS[x.key].label} ${x.delta > 0 ? '↑' : '↓'} <em>${x.strength.toFixed(2)}</em></div>`).join('')
+    : '<p class="note">SIN CAMBIOS DE NIVEL DETECTADOS</p>';
 }
 $('#btn-play').onclick = () => {
   S.playing = !S.playing;
   $('#btn-play').textContent = S.playing ? '❚❚' : '▶';
   if (S.playing) { S.ghost = null; $('#ghost-label').hidden = true; exitLab(); }
-  if (S.playing && S.idx >= S.days.length - 1) { S.idx = 0; lastStage = 0; }
+  if (S.playing && S.idx >= S.days.length - 1) { S.idx = 0; lastStage = 0; lastSignals = null; }
 };
 
 // ---------- bucle ----------
@@ -359,6 +410,7 @@ if (shared) {
   app.classList.add('visitor');
   $('#mutant-id').textContent = `MUTANT ${shared.mutantId} · MUTATION ${String(shared.stage + 1).padStart(2, '0')} ${shared.name}`;
   stage.organism.setTarget(shared.genome, true);
+  if (shared.patterns) stage.organism.setPatterns(shared.patterns, true);
   stage.resize();
 } else {
   load('marcos');

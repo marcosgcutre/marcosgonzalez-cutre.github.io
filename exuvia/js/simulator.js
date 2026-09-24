@@ -24,24 +24,28 @@ export const PERSONAS = {
     label: 'Referencia (imagen)',
     seed: 4721,
     days: 240,
-    behave: (ago) => ({
-      alcohol: ago > 67 ? 0.3 : 0,
-      sugar: ago > 123 ? 0.7 : 0,
-      smoking: 0,
-      meditation: ago <= 51 ? 0.92 : 0.05,
-      run: ago <= 150 ? 0.4 : 0.08,
-      runKm: [5, 11],
-      surf: ago <= 120 ? 0.22 : 0.02,
-      diving: ago <= 90 ? 0.035 : 0,
-      strength: 0.15,
-    }),
+    // dow: 0 = lunes … 6 = domingo
+    behave: (ago, dow) => {
+      const weekend = dow >= 5;
+      return {
+        alcohol: ago > 67 ? (dow === 4 || dow === 5 ? 0.7 : 0.12) : 0,
+        sugar: ago > 123 ? 0.7 : 0,
+        smoking: 0,
+        meditation: ago <= 51 ? 0.92 : 0.05,
+        run: ago <= 150 ? (dow === 6 ? 0.85 : dow === 1 || dow === 3 ? 0.6 : 0.1) : 0.08,
+        runKm: dow === 6 ? [12, 18] : [5, 9],
+        surf: ago <= 120 ? (weekend ? 0.6 : 0.08) : 0.02,
+        diving: ago <= 90 ? (weekend ? 0.08 : 0) : 0,
+        strength: dow === 0 || dow === 2 ? 0.45 : 0.02,
+      };
+    },
   },
   appleOnly: {
     label: 'Sólo Apple Watch (sin WHOOP)',
     seed: 3310,
     days: 240,
     sources: ['apple', 'manual'],
-    behave: (ago) => PERSONAS.marcos.behave(ago),
+    behave: (ago, dow) => PERSONAS.marcos.behave(ago, dow),
   },
   starter: {
     label: 'Empieza desde cero',
@@ -106,7 +110,8 @@ export function simulate(personaKey, { today = Date.now() } = {}) {
     const ago = P.days - i;
     const t0 = start + i * DAY;
     const date = isoDay(t0);
-    const b = P.behave(ago);
+    const dow = (new Date(t0).getUTCDay() + 6) % 7;
+    const b = P.behave(ago, dow);
     const did = {
       alcohol: rnd() < b.alcohol, sugar: rnd() < b.sugar, smoking: rnd() < b.smoking,
       meditation: rnd() < b.meditation, run: rnd() < b.run, surf: rnd() < b.surf,

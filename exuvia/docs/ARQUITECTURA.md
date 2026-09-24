@@ -83,13 +83,26 @@ Empezar a correr produce una muda; dejar de correr también. Dejar de tomar alco
 
 Punto abierto: con los umbrales actuales, el perfil de referencia (que cambió varios hábitos en los últimos cinco meses) muda tres veces en 240 días. El umbral del 10 % define cuánto cambio es una muda; es una decisión de ritmo de la experiencia más que técnica.
 
+## 6b. Patrones: de los datos a estructuras
+
+Implementado en `js/patterns.js`. Además del genoma (que da la forma general), un detector busca estructura real en la historia y cada patrón encontrado se inscribe como una estructura visible. Una fracción fija de partículas (6–7 % por estructura) se reorganiza; con intensidad cero vuelven al cuerpo, así que nada aparece ni desaparece de golpe. Todo se calcula con datos hasta el día visto.
+
+- **Ritmo semanal → anillo orbital de 7 lóbulos.** Perfil de actividad por día de la semana en 8 semanas; el radio de cada lóbulo es la actividad de ese día y la intensidad del anillo es la amplitud del perfil (desvío/media).
+- **Ciclo → doble hélice.** Autocorrelación de la actividad entre 10 y 75 días, después de quitar la tendencia (media móvil de 28 d) y el componente semanal; sin ese paso, cualquier rutina semanal produce "ciclos" falsos de 56 o 63 días (múltiplos de 7). Cada vuelta de la hélice es un ciclo observado.
+- **Acoplamientos → filamentos entre nodos.** Correlación de Pearson en 60 días entre pares de variables (con retardo de un día donde tiene sentido, por ejemplo alcohol de ayer ↔ HRV de hoy). Se muestran los tres con |r| ≥ 0,20. Cian si se mueven en el mismo sentido, naranja si en sentido opuesto: el color indica dirección, no valor.
+- **Estratos → capas concéntricas.** Detección de cambios de nivel: para cada día se compara la media de 28 días antes con la de hasta 28 días después mediante un estadístico z; los picos con z ≥ 3,5, separados por al menos 28 días, son estratos. El radio de la capa codifica la fecha (centro = pasado, superficie = presente), como los anillos de un árbol. En el perfil de referencia caen exactamente en los días programados en la simulación (23/05 azúcar, 18/07 alcohol, 03/08 meditación).
+
+Cuando aparece una señal nueva, la app la anuncia ("SEÑAL NUEVA · CICLO 56 D"). Lo que motiva es descubrir la propia estructura, no un puntaje.
+
+Límite a tener presente: en la simulación, los acoplamientos que se detectan son los que el simulador codificó (por ejemplo, que el alcohol baja la HRV del día siguiente). Con datos reales serían hallazgos; aquí sólo prueban que el detector funciona. Además, una correlación en 60 días es una asociación, no una causa, y con series cortas puede ser azar: el umbral de 0,20 es deliberadamente bajo para un prototipo visual y habría que endurecerlo (y corregir por comparaciones múltiples) si alguna vez se muestra como información.
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.
 
 **Privacidad por defecto:** la tarjeta sólo lleva el organismo, el número de mutación y los días en la forma actual. Cada indicador (días sin alcohol, kilómetros…) se agrega de a uno y explícitamente.
 
-El enlace codifica el genoma cuantizado a un byte por parámetro, en total unos 26 caracteres, dentro del fragmento `#` de la URL (que el navegador no envía al servidor). Quien lo abre ve el organismo vivo y rotable, sin datos. Una advertencia que conviene no pasar por alto: **el genoma no es anónimo respecto de los hábitos.** Como las reglas son públicas y casi lineales, alguien que las conozca puede estimar, por ejemplo, la densidad y deducir aproximadamente la frecuencia de consumo que hay detrás. Si eso importa, las opciones son compartir sólo la semilla de forma y la etapa, o agregar ruido al genoma compartido.
+El enlace codifica el genoma y los patrones cuantizados a un byte por valor (unos 130 caracteres de enlace en total), dentro del fragmento `#` de la URL (que el navegador no envía al servidor). Quien lo abre ve el organismo vivo y rotable, sin datos. Una advertencia que conviene no pasar por alto: **el genoma no es anónimo respecto de los hábitos.** Como las reglas son públicas y casi lineales, alguien que las conozca puede estimar, por ejemplo, la densidad y deducir aproximadamente la frecuencia de consumo que hay detrás. Si eso importa, las opciones son compartir sólo la semilla de forma y la etapa, o agregar ruido al genoma compartido.
 
 ## 8. Apple Watch
 

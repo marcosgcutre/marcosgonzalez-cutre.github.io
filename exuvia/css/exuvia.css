@@ -65,6 +65,7 @@ button, input, select { font: inherit; color: inherit; }
 .view { display: none; }
 .app[data-view="home"] .view[data-for="home"],
 .app[data-view="exuvias"] .view[data-for="exuvias"],
+.app[data-view="patterns"] .view[data-for="patterns"],
 .app[data-view="data"] .view[data-for="data"],
 .app[data-view="lab"] .view[data-for="lab"],
 .app[data-view="watch"] .view[data-for="watch"],
@@ -158,7 +159,7 @@ input[type="checkbox"] { accent-color: var(--cyan); width: 16px; height: 16px; }
 
 .tabs {
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px;
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); z-index: 10;
 }
@@ -193,3 +194,17 @@ input[type="checkbox"] { accent-color: var(--cyan); width: 16px; height: 16px; }
 .scrub-label, .traits b, .cell .val, .bars .row span:last-child, .sliders span, .kv dd { font-family: var(--mono); }
 .traits b { font-size: 14px; }
 .note { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; }
+
+/* PATRONES */
+.pat { border-top: 1px solid var(--line); padding: 14px 0 6px; margin-top: 12px; }
+.pat h3 { font-family: var(--display); font-weight: 400; font-size: 10px; letter-spacing: 0.25em; color: var(--ink); margin-bottom: 10px; }
+.pat h3 span { display: block; font-family: var(--mono); font-weight: 300; font-size: 9px; letter-spacing: 0.1em; color: var(--dim); margin-top: 4px; }
+.sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.sw-week { background: #b3ffff; } .sw-cycle { background: var(--violet); }
+.sw-link { background: linear-gradient(90deg, var(--cyan) 50%, var(--orange) 50%); } .sw-strata { background: #cfe9ff; }
+.wk-row { display: flex; gap: 6px; align-items: flex-end; height: 72px; }
+.wk { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--mono); font-size: 9px; color: var(--dim); }
+.wk i { display: block; width: 100%; background: linear-gradient(180deg, #b3ffff, rgba(63,240,255,0.15)); }
+.read { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--dim); padding: 3px 0; }
+.read em { font-style: normal; color: var(--ink); }
+.read em.pos { color: var(--cyan); } .read em.neg { color: var(--orange); }
