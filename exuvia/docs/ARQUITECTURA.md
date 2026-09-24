@@ -114,6 +114,10 @@ Los hábitos de cuerpo y la meditación se leen del wearable (AUTO); el resto se
 
 **Tienda de aplicaciones.** La guía 1.4.3 de Apple no permite apps que *fomenten* el consumo de tabaco, drogas ilegales o alcohol en exceso ([App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)). Registrar un consumo no es fomentarlo, y la neutralidad del diseño (ningún hábito es bueno ni malo) juega a favor, pero cómo se presenta la cocaína en la app y en la ficha de la tienda es algo a revisar antes de enviarla; no puedo asegurar cómo lo interpretaría la revisión.
 
+## 6d. Interfaz: una sola pantalla
+
+Todo lo principal vive en una pantalla. Arriba, el organismo con sus patrones anotados: etiquetas ancladas en 3D a cada estructura (anillo semanal, hélice, filamentos, último estrato y las barras más frecuentes del espectro), que siguen la rotación y se atenúan cuando quedan detrás del cuerpo. Debajo, un solo panel: mutación actual con latencia y deriva, SEÑALES (cada patrón detectado; tocar una aísla su estructura en la forma y atenúa el resto), HOY (registro del día con chips) y TRAZAS (28 días por hábito). Lo secundario (exuvias, fuentes, lab, reloj, compartir) está en un panel lateral que se abre con ≡ o ↗. Los hábitos de cuerpo no generan acoplamientos propios porque ya están dentro de "actividad".
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.

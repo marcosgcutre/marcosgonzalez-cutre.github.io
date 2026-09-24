@@ -54,7 +54,8 @@ uniform float uCycleTurns, uCycleStr;
 uniform vec2 uRings[8];   // estratos: x = posición temporal 0–1, y = intensidad
 uniform vec4 uLinks[3];   // acoplamientos: ángulo A, ángulo B, intensidad, signo
 uniform float uTrace[24];    // TRAZAS: frecuencia 28 d de cada hábito del catálogo (0 = no seguido)
-uniform float uTraceDom[24]; // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
+uniform float uTraceDom[24];
+uniform float uFocus;        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
 varying vec3 vColor;
 varying float vAlpha;
 ${SNOISE}
@@ -207,6 +208,14 @@ void main(){
   col = mix(col, vec3(0.8, 0.95, 1.0), ringGlow * 0.45 * (1.0 - structAmt));
   vColor = col;
   vAlpha = visible * (0.35 + 0.75 * uGlow) * (0.5 + 0.5 * fract(s * 71.0));
+  if (uFocus > 0.5) {
+    float isStrata = step(0.01, ringGlow) * (1.0 - step(0.01, structAmt));
+    float inF = uFocus > 9.5 ? isStrata
+      : uFocus > 4.5 ? step(4.5, kind) * step(0.01, structAmt)
+      : uFocus > 2.5 ? step(2.5, kind) * step(kind, 4.5) * step(0.01, structAmt)
+      : (1.0 - step(0.1, abs(kind - uFocus))) * step(0.01, structAmt);
+    vAlpha *= mix(0.1, 1.4, inF);
+  }
 }`;
 
 const FRAG = /* glsl */`
@@ -259,6 +268,7 @@ export class Organism {
       uRings: { value: Array.from({ length: 8 }, () => new THREE.Vector2()) },
       uLinks: { value: Array.from({ length: 3 }, () => new THREE.Vector4(0, 0, 0, 1)) },
       uTrace: { value: new Array(24).fill(0) },
+      uFocus: { value: 0 },
       uTraceDom: { value: TRACE_DOMAINS },
     };
     this.pat = emptyPatterns();

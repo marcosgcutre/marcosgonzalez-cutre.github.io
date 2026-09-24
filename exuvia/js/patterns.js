@@ -88,7 +88,8 @@ function cycle(days, act) {
 function pairs(S) {
   const out = [['sleep', 'hrv', 0], ['activity', 'sleep', 0], ['activity', 'hrv', 1]];
   for (const k of Object.keys(S)) {
-    if (k === 'activity' || k === 'sleep' || k === 'hrv' || k === 'steps') continue;
+    if (k === 'activity' || k === 'sleep' || k === 'hrv') continue;
+    if (CATALOG.find((h) => h.id === k)?.domain === 'CUE') continue; // ya están dentro de "actividad"
     out.push([k, 'sleep', 1], [k, 'hrv', 1]);
   }
   return out;

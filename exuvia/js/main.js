@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
@@ -17,6 +18,8 @@ const COUNT = +qs.get('n') || (coarse ? 40000 : 80000);
 const S = {
   persona: 'marcos', raw: null, days: [], history: null, idx: 0,
   lab: false, labFeatures: null, ghost: null, playing: false, view: 'home',
+  focus: 0,        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos
+  anchors: [],     // etiquetas ancladas a las estructuras (se proyectan cada frame)
 };
 
 // ---------- escena principal ----------
@@ -86,7 +89,7 @@ function refresh(immediate = false) {
   watch?.organism.setTarget(g, immediate);
   watch?.organism.setPatterns(pu, immediate);
   renderHome(); renderScrub();
-  if (S.view === 'patterns') renderPatterns();
+  buildAnchors(g, pu);
   if (S.view === 'exuvias') renderExuvias();
   if (S.view === 'data') renderData();
   if (S.view === 'lab') renderLab(false);
@@ -110,6 +113,8 @@ function renderHome() {
     ['DERIVA', p.change, `${e.net.toFixed(3)}/${NET.toFixed(3)}`],
   ].map(([l, v, r]) => `<div><span>${l}</span><em>${r}</em><i><b style="width:${(v * 100).toFixed(0)}%"></b></i></div>`).join('');
   $('#indicators').innerHTML = traceRows(indicators(S.days, S.idx));
+  renderSignals();
+  renderLog();
   const t = traits(currentGenome());
   $('#traits').innerHTML = Object.entries(t).map(([k, v]) => `<div>${k}<b>${v.toFixed(2)}</b></div>`).join('');
   renderHud();
@@ -180,23 +185,18 @@ function traceRows(list) {
     </div>`).join('');
 }
 
-// LOG: registro del día seleccionado. Lo manual se toca; lo automático viene del wearable.
+// HOY: registro del día seleccionado. Lo manual se toca; lo automático viene del wearable.
 function renderLog() {
   const d = S.days[S.idx];
   const ago = S.days.length - 1 - S.idx;
-  $('#log-date').textContent = `${d.date} · ${ago ? `T−${ago}` : 'T0'}`;
-  $('#log').innerHTML = Object.entries(DOMAINS).map(([dk, dom]) => `
-    <div class="log-dom" style="--dc:${dom.color}">
-      <h3>${dom.label}${dom.sensitive ? ' <span>· PRIVADO · NUNCA SE COMPARTE POR DEFECTO</span>' : ''}</h3>
-      <div class="chips">${CATALOG.filter((h) => h.domain === dk).map((h) => {
-        const v = dayValue(d, h);
-        const on = (v ?? 0) >= 0.5;
-        const detail = h.detail?.(d);
-        return h.source === 'auto'
-          ? `<span class="chip auto ${on ? 'on' : ''}"><b>${h.code}</b>${h.label}<small>${detail ?? (on ? 'SÍ' : '—')} · AUTO</small></span>`
-          : `<button class="chip ${on ? 'on' : ''}" data-h="${h.id}"><b>${h.code}</b>${h.label}</button>`;
-      }).join('')}</div>
-    </div>`).join('');
+  $('#log-date').textContent = `${d.date} · ${ago ? `T−${ago}` : 'T0'} · SUSTANCIAS: PRIVADAS`;
+  $('#log').innerHTML = `<div class="chips">${CATALOG.map((h) => {
+    const v = dayValue(d, h), on = (v ?? 0) >= 0.5, detail = h.detail?.(d);
+    const dc = DOMAINS[h.domain].color;
+    return h.source === 'auto'
+      ? `<span class="chip auto ${on ? 'on' : ''}" style="--dc:${dc}" title="${h.label} · automático"><b>${h.code}</b><small>${detail ?? 'AUTO'}</small></span>`
+      : `<button class="chip ${on ? 'on' : ''}" style="--dc:${dc}" data-h="${h.id}" title="${h.label}"><b>${h.code}</b><small>${h.label}</small></button>`;
+  }).join('')}</div>`;
   $('#log').querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
     const id = b.dataset.h, on = !b.classList.contains('on');
     const m = S.raw.manual.find((x) => x.date === d.date && x.habit === id);
@@ -206,8 +206,95 @@ function renderLog() {
   });
 }
 
+// SEÑALES: los patrones detectados, cada uno ligado a su estructura en la forma
+function renderSignals() {
+  const p = currentPatterns();
+  const rows = [];
+  const w = p.weekly;
+  if (w) {
+    const peak = w.profile.indexOf(Math.max(...w.profile));
+    const spark = w.profile.map((x) => `<i style="height:${(3 + x * 13).toFixed(0)}px"></i>`).join('');
+    rows.push([1, '#b3ffff', 'RITMO SEMANAL', `<span class="mini">${spark}</span> PICO ${DAYS[peak]}`, w.strength.toFixed(2), 'anillo orbital · 7 lóbulos']);
+  }
+  if (p.cycle) rows.push([2, '#c79bff', `CICLO ${p.cycle.period} D`, `${p.cycle.turns.toFixed(1)} vueltas`, p.cycle.strength.toFixed(2), 'doble hélice']);
+  for (const c of p.couplings) {
+    rows.push([3, c.r >= 0 ? '#3ff0ff' : '#ff7a2f', `${VARS[c.a].label}${c.lag ? ' (T−1)' : ''} → ${VARS[c.b].label}`, c.r >= 0 ? 'mismo sentido' : 'sentido opuesto', `${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}`, 'filamento']);
+  }
+  const strata = p.strata.slice().reverse();
+  for (const x of strata.slice(0, 3)) {
+    rows.push([10, '#cfe9ff', `ESTRATO ${VARS[x.key].label} ${x.delta > 0 ? '↑' : '↓'}`, x.date, x.strength.toFixed(2), 'capa · radio = fecha']);
+  }
+  if (strata.length > 3) {
+    rows.push([10, '#cfe9ff', `+${strata.length - 3} ESTRATOS`, strata.slice(3).map((x) => `${VARS[x.key].label}${x.delta > 0 ? '↑' : '↓'}`).join(' '), '', 'capas anteriores']);
+  }
+  const tr = p.traces.filter((t) => t.freq > 0);
+  if (tr.length) rows.push([5, '#8fb4d8', `${tr.length} TRAZAS`, tr.slice().sort((a, b) => b.freq - a.freq).slice(0, 4).map((t) => t.code).join(' '), '28 D', 'espectro']);
+  $('#signals').innerHTML = rows.length ? rows.map(([k, c, a, b, v, st]) => `
+    <button class="sig ${S.focus === k ? 'on' : ''}" data-k="${k}" style="--sc:${c}">
+      <b></b><span class="a">${a}</span><span class="b">${b}</span><em>${v}</em><small>${st}</small>
+    </button>`).join('') : '<p class="note">SIN SEÑALES TODAVÍA · MÍN. 28 D DE DATOS</p>';
+  $('#signals').querySelectorAll('.sig').forEach((b) => b.onclick = () => {
+    const k = +b.dataset.k;
+    S.focus = S.focus === k ? 0 : k;
+    stage.organism.material.uniforms.uFocus.value = S.focus;
+    renderSignals();
+    buildAnchors(currentGenome(), toUniforms(currentPatterns()));
+  });
+}
+
+// ETIQUETAS: puntos de anclaje en coordenadas del shader (antes de la expansión)
+const LINK_NODE = (a) => new THREE.Vector3(Math.cos(a) * 0.95, 0.35 + 0.45 * Math.sin(a * 2), Math.sin(a) * 0.95);
+function buildAnchors(g, pu) {
+  const p = currentPatterns(), A = [];
+  const TAU = Math.PI * 2;
+  if (p.weekly && pu.weekStr > 0.05) {
+    const i = p.weekly.profile.indexOf(Math.max(...p.weekly.profile));
+    const ang = ((i + 0.5) / 7) * TAU, r = 1.3 + 0.42 + 0.06;
+    A.push({ k: 1, c: '#b3ffff', t: `SEMANA · PICO ${DAYS[i]}`, v: new THREE.Vector3(Math.cos(ang) * r, 0.1, Math.sin(ang) * r) });
+  }
+  if (p.cycle) {
+    const ang = pu.cycleTurns * TAU;
+    A.push({ k: 2, c: '#c79bff', t: `CICLO ${p.cycle.period} D`, v: new THREE.Vector3(Math.cos(ang) * 1.42, 1.55, Math.sin(ang) * 1.42) });
+  }
+  p.couplings.forEach((c) => {
+    const a = LINK_NODE(VARS[c.a].angle), b = LINK_NODE(VARS[c.b].angle);
+    const m = a.clone().add(b).multiplyScalar(0.5);
+    const ctl = m.clone().add(m.clone().add(new THREE.Vector3(0, 0.6, 0)).normalize().multiplyScalar(0.9));
+    const mid = a.clone().multiplyScalar(0.25).add(ctl.clone().multiplyScalar(0.5)).add(b.clone().multiplyScalar(0.25));
+    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${VARS[c.a].label}${c.lag ? '(T−1)' : ''}→${VARS[c.b].label} ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}`, v: mid });
+  });
+  const st = p.strata.at(-1);
+  if (st) {
+    const r = 0.3 + 0.7 * st.pos;
+    A.push({ k: 10, c: '#cfe9ff', t: `ESTRATO ${st.date.slice(5)} ${VARS[st.key].label}${st.delta > 0 ? '↑' : '↓'}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
+  }
+  p.traces.filter((t) => t.freq >= 0.1).sort((a, b) => b.freq - a.freq).slice(0, S.focus === 5 ? 24 : 4).forEach((t) => {
+    const c = CATALOG.findIndex((h) => h.id === t.id);
+    const ang = ((c + 0.5) / 24) * TAU;
+    A.push({ k: 5, c: DOMAINS[t.domain].color, t: t.code, small: true, v: new THREE.Vector3(Math.cos(ang) * 1.72, -0.95 + 0.08 + 2.4 * t.freq + 0.07, Math.sin(ang) * 1.72) });
+  });
+  S.anchors = A;
+  $('#labels').innerHTML = A.map((a, i) => `<span class="lbl ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
+  S.labelEls = [...$('#labels').children];
+}
+const _v = new THREE.Vector3(), _dir = new THREE.Vector3();
+function updateLabels() {
+  if (!S.labelEls?.length) return;
+  const cam = stage.camera, el = stage.renderer.domElement;
+  const w = el.clientWidth, h = el.clientHeight, ex = stage.organism.genome.expansion;
+  cam.getWorldDirection(_dir);
+  S.anchors.forEach((a, i) => {
+    const node = S.labelEls[i];
+    _v.copy(a.v).multiplyScalar(ex);
+    const depth = _v.clone().sub(cam.position).dot(_dir) - cam.position.length(); // >0: detrás del centro
+    _v.project(cam);
+    const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;
+    const focus = S.focus === 0 || S.focus === a.k;
+    node.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    node.style.opacity = !focus ? 0.12 : depth > 0 ? 0.35 : 1;
+  });
+}
 function renderData() {
-  renderLog();
   const d = S.days[S.idx];
   const has = (s) => d.sources.includes(s);
   $('#sources').innerHTML = [
@@ -343,16 +430,21 @@ $('#share-link').onclick = async () => {
 };
 
 // ---------- navegación ----------
+// Pantalla única; lo secundario vive en un panel lateral que se abre encima
 function go(view) {
   S.view = view;
-  app.dataset.view = view;
-  document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
+  const sheet = $('#sheet');
+  sheet.hidden = view === 'home';
+  sheet.dataset.view = view;
+  document.querySelectorAll('.sheet-nav button').forEach((b) => b.classList.toggle('on', b.dataset.go === view));
   if (view === 'lab') renderLab(true);
   refresh();
 }
-document.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => go(b.dataset.go)));
+document.querySelectorAll('.sheet-nav button').forEach((b) => (b.onclick = () => go(b.dataset.go)));
 $('#btn-share').onclick = () => go('share');
-$('#btn-persona').onclick = () => go('data');
+$('#btn-menu').onclick = () => go('exuvias');
+$('#sheet-close').onclick = () => go('home');
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && S.view !== 'home') go('home'); });
 $('#persona').innerHTML = Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}">${p.label}</option>`).join('');
 $('#persona').onchange = (e) => { thumbCache.clear(); lastSignals = null; S.labFeatures = null; S.ghost = null; $('#ghost-label').hidden = true; load(e.target.value); };
 
@@ -382,24 +474,6 @@ function describeSignal(id, p) {
   return `ESTRATO · ${VARS[st.key].label} ${st.delta > 0 ? '↑' : '↓'}`;
 }
 
-// ---------- vista PATRONES ----------
-function renderPatterns() {
-  const p = currentPatterns();
-  const w = p.weekly;
-  const bars = w ? w.profile.map((x, i) => `<div class="wk"><i style="height:${(8 + x * 52).toFixed(0)}px"></i><span>${DAYS[i]}</span></div>`).join('') : '';
-  $('#pat-week').innerHTML = w
-    ? `<div class="wk-row">${bars}</div><div class="read">AMPLITUD <em>${w.strength.toFixed(2)}</em></div>`
-    : '<p class="note">DATOS INSUFICIENTES · MÍN. 28 D</p>';
-  $('#pat-cycle').innerHTML = p.cycle
-    ? `<div class="read">PERÍODO <em>${p.cycle.period} D</em></div><div class="read">INTENSIDAD <em>${p.cycle.strength.toFixed(2)}</em></div><div class="read">VUELTAS DE HÉLICE <em>${p.cycle.turns.toFixed(1)}</em></div>`
-    : '<p class="note">SIN PERIODICIDAD DETECTADA · 10–75 D</p>';
-  $('#pat-links').innerHTML = p.couplings.length
-    ? p.couplings.map((c) => `<div class="read">${VARS[c.a].label}${c.lag ? ' (T−1)' : ''} ↔ ${VARS[c.b].label} <em class="${c.r >= 0 ? 'pos' : 'neg'}">${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)}</em></div>`).join('')
-    : '<p class="note">SIN ACOPLAMIENTOS · |r| < 0.20</p>';
-  $('#pat-strata').innerHTML = p.strata.length
-    ? p.strata.map((x) => `<div class="read">${x.date} · ${VARS[x.key].label} ${x.delta > 0 ? '↑' : '↓'} <em>${x.strength.toFixed(2)}</em></div>`).join('')
-    : '<p class="note">SIN CAMBIOS DE NIVEL DETECTADOS</p>';
-}
 $('#btn-play').onclick = () => {
   S.playing = !S.playing;
   $('#btn-play').textContent = S.playing ? '❚❚' : '▶';
@@ -422,6 +496,7 @@ function loop(now) {
     }
   }
   stage.render(dt, t);
+  updateLabels();
   if (S.view === 'watch' && watch) {
     watchAcc += dt;
     if (watchAcc > 0.05) { watch.render(watchAcc, t); watchAcc = 0; }

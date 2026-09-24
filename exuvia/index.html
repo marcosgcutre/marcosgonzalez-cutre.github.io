@@ -21,7 +21,7 @@
 <body>
   <div class="app" id="app" data-view="home">
     <header class="top">
-      <button class="icon-btn" id="btn-persona" aria-label="Cambiar perfil simulado">≡</button>
+      <button class="icon-btn" id="btn-menu" aria-label="Abrir panel: exuvias, fuentes, lab, reloj">≡</button>
       <div class="brand">
         <div class="wordmark">EXUVIA</div>
         <div class="mutant-id" id="mutant-id">MUTANT 004721</div>
@@ -30,7 +30,8 @@
     </header>
 
     <section class="stage-wrap">
-      <canvas id="stage" aria-label="Organismo MUTANT, arrastrá para rotar"></canvas>
+      <canvas id="stage" aria-label="Organismo MUTANT con sus patrones, arrastrá para rotar"></canvas>
+      <div class="labels" id="labels" aria-hidden="true"></div>
       <div class="hud" id="hud" aria-hidden="true"></div>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <div class="ghost-label" id="ghost-label" hidden></div>
@@ -43,126 +44,102 @@
     </section>
 
     <main class="panel">
-      <!-- HOME -->
-      <div class="view" data-for="home">
-        <div class="current">
-          <div class="eyebrow" id="mutation-name">CURRENT MUTATION</div>
-          <div class="big" id="mutation-age">0</div>
-          <div class="eyebrow dim">CICLO ACTUAL · DÍAS</div>
-        </div>
+      <div class="status">
+        <div><span class="eyebrow" id="mutation-name">M01 Ø</span><b id="mutation-age">0</b><small>DÍAS EN ESTA FORMA</small></div>
         <div class="progress" id="progress" title="Condiciones de muda: latencia mínima y deriva estructural"></div>
-        <h2>TRAZAS <span class="dim">28 días · un hábito por fila</span></h2>
-        <div class="traces" id="indicators"></div>
-        <div class="traits" id="traits"></div>
       </div>
 
-      <!-- PATRONES -->
-      <div class="view" data-for="patterns">
-        <h2>PATRONES <span class="dim">detectados · inscritos en la forma</span></h2>
-        <p class="note">CADA SEÑAL SE MATERIALIZA COMO ESTRUCTURA EN EL ORGANISMO</p>
-        <div class="pat">
-          <h3><b class="sw sw-trace"></b>TRAZAS <span>→ ESPECTRO · UNA BARRA POR HÁBITO · ALTURA = FRECUENCIA 28 D</span></h3>
-          <div class="legend">
-            <span style="--dc:#ff7a2f">SUSTANCIAS</span><span style="--dc:#3ff0ff">CUERPO</span><span style="--dc:#8a4dff">MENTE</span><span style="--dc:#2f6bff">RECUPERACIÓN</span><span style="--dc:#e8f6ff">NUTRICIÓN</span>
-          </div>
-        </div>
-        <div class="pat">
-          <h3><b class="sw sw-week"></b>RITMO SEMANAL <span>→ ANILLO ORBITAL · 7 LÓBULOS</span></h3>
-          <div id="pat-week"></div>
-        </div>
-        <div class="pat">
-          <h3><b class="sw sw-cycle"></b>CICLO <span>→ DOBLE HÉLICE · 1 VUELTA = 1 CICLO</span></h3>
-          <div id="pat-cycle"></div>
-        </div>
-        <div class="pat">
-          <h3><b class="sw sw-link"></b>ACOPLAMIENTOS · 60 D <span>→ FILAMENTOS ENTRE NODOS</span></h3>
-          <div id="pat-links"></div>
-        </div>
-        <div class="pat">
-          <h3><b class="sw sw-strata"></b>ESTRATOS <span>→ CAPAS · CENTRO = PASADO, SUPERFICIE = PRESENTE</span></h3>
-          <div id="pat-strata"></div>
-        </div>
-      </div>
+      <h2>SEÑALES <span class="dim">tocá una para aislarla en la forma</span></h2>
+      <div class="signals" id="signals"></div>
 
-      <!-- EXUVIAS -->
-      <div class="view" data-for="exuvias">
-        <h2>EXUVIAS <span class="dim">archivo de mudas</span></h2>
-        <p class="note">SELECCIONAR PARA RENDERIZAR</p>
-        <div class="exuvia-list" id="exuvia-list"></div>
-      </div>
+      <h2>HOY <span class="dim" id="log-date"></span></h2>
+      <div id="log"></div>
 
-      <!-- DATOS -->
-      <div class="view" data-for="data">
-        <h2>LOG <span class="dim" id="log-date"></span></h2>
-        <p class="note">TOCAR PARA REGISTRAR · AUTO = WEARABLE · MOVER LA LÍNEA DE TIEMPO PARA OTRO DÍA</p>
-        <div id="log"></div>
-        <h2>FUENTES <span class="dim">simuladas</span></h2>
-        <div class="sources" id="sources"></div>
-        <label class="field">PERFIL SIMULADO
-          <select id="persona"></select>
-        </label>
-        <h2>RESUMEN CANÓNICO</h2>
-        <div class="kv" id="canonical"></div>
-        <h2>VECTOR DE ENTRADA</h2>
-        <div class="bars" id="features"></div>
-        <details class="raw"><summary>PAYLOADS CRUDOS</summary><pre id="raw"></pre></details>
-      </div>
+      <h2>TRAZAS <span class="dim">28 días · una barra del espectro por hábito</span></h2>
+      <div class="traces" id="indicators"></div>
 
-      <!-- LAB -->
-      <div class="view" data-for="lab">
-        <h2>LAB <span class="dim">motor generativo</span></h2>
-        <p class="note">SOBRESCRIBE EL VECTOR DE ENTRADA · LA HISTORIA NO SE MODIFICA</p>
-        <label class="toggle"><input type="checkbox" id="lab-on"> OVERRIDE</label>
-        <div class="sliders" id="lab-sliders"></div>
-        <h2>REGLAS</h2>
-        <div class="rules" id="rules"></div>
-        <h2>RENDIMIENTO</h2>
-        <div class="kv" id="perf"></div>
-      </div>
-
-      <!-- WATCH -->
-      <div class="view" data-for="watch">
-        <h2>APPLE WATCH <span class="dim">vista reducida</span></h2>
-        <div class="watch-row">
-          <div class="watch">
-            <div class="watch-screen">
-              <div class="watch-title">EXUVIA</div>
-              <canvas id="watch-canvas" width="184" height="150"></canvas>
-              <div class="watch-days" id="watch-days">0 D</div>
-            </div>
-          </div>
-          <div class="complication">
-            <svg viewBox="0 0 100 100" id="complication"></svg>
-            <div class="comp-days" id="comp-days">0</div>
-            <div class="eyebrow dim">D</div>
-          </div>
-        </div>
-        <p class="note" id="watch-note"></p>
-      </div>
-
-      <!-- SHARE -->
-      <div class="view" data-for="share">
-        <h2>SHARE MUTATION</h2>
-        <p class="note">SALIDA POR DEFECTO: SÓLO GEOMETRÍA · INDICADORES OPCIONALES</p>
-        <div class="share-opts" id="share-opts"></div>
-        <div class="actions">
-          <button class="btn" id="share-img">IMAGEN</button>
-          <button class="btn" id="share-vid">ANIMACIÓN</button>
-          <button class="btn" id="share-link">ENLACE</button>
-        </div>
-        <p class="note" id="share-status"></p>
-      </div>
+      <div class="traits" id="traits"></div>
     </main>
-
-    <nav class="tabs">
-      <button data-go="home" class="on">HOME</button>
-      <button data-go="patterns">PATRONES</button>
-      <button data-go="exuvias">EXUVIAS</button>
-      <button data-go="data">LOG</button>
-      <button data-go="lab">LAB</button>
-      <button data-go="watch">WATCH</button>
-    </nav>
   </div>
+
+  <aside class="sheet" id="sheet" hidden>
+    <header class="sheet-top">
+      <nav class="sheet-nav">
+        <button data-go="exuvias">EXUVIAS</button>
+        <button data-go="data">FUENTES</button>
+        <button data-go="lab">LAB</button>
+        <button data-go="watch">WATCH</button>
+        <button data-go="share">SHARE</button>
+      </nav>
+      <button class="icon-btn small" id="sheet-close" aria-label="Cerrar panel">✕</button>
+    </header>
+
+    <!-- EXUVIAS -->
+    <div class="view" data-for="exuvias">
+      <h2>EXUVIAS <span class="dim">archivo de mudas</span></h2>
+      <p class="note">SELECCIONAR PARA RENDERIZAR</p>
+      <div class="exuvia-list" id="exuvia-list"></div>
+    </div>
+
+    <!-- FUENTES -->
+    <div class="view" data-for="data">
+      <h2>FUENTES <span class="dim">simuladas</span></h2>
+      <div class="sources" id="sources"></div>
+      <label class="field">PERFIL SIMULADO
+        <select id="persona"></select>
+      </label>
+      <h2>RESUMEN CANÓNICO</h2>
+      <div class="kv" id="canonical"></div>
+      <h2>VECTOR DE ENTRADA</h2>
+      <div class="bars" id="features"></div>
+      <details class="raw"><summary>PAYLOADS CRUDOS</summary><pre id="raw"></pre></details>
+    </div>
+
+    <!-- LAB -->
+    <div class="view" data-for="lab">
+      <h2>LAB <span class="dim">motor generativo</span></h2>
+      <p class="note">SOBRESCRIBE EL VECTOR DE ENTRADA · LA HISTORIA NO SE MODIFICA</p>
+      <label class="toggle"><input type="checkbox" id="lab-on"> OVERRIDE</label>
+      <div class="sliders" id="lab-sliders"></div>
+      <h2>REGLAS</h2>
+      <div class="rules" id="rules"></div>
+      <h2>RENDIMIENTO</h2>
+      <div class="kv" id="perf"></div>
+    </div>
+
+    <!-- WATCH -->
+    <div class="view" data-for="watch">
+      <h2>APPLE WATCH <span class="dim">vista reducida</span></h2>
+      <div class="watch-row">
+        <div class="watch">
+          <div class="watch-screen">
+            <div class="watch-title">EXUVIA</div>
+            <canvas id="watch-canvas" width="184" height="150"></canvas>
+            <div class="watch-days" id="watch-days">0 D</div>
+          </div>
+        </div>
+        <div class="complication">
+          <svg viewBox="0 0 100 100" id="complication"></svg>
+          <div class="comp-days" id="comp-days">0</div>
+          <div class="eyebrow dim">D</div>
+        </div>
+      </div>
+      <p class="note" id="watch-note"></p>
+    </div>
+
+    <!-- SHARE -->
+    <div class="view" data-for="share">
+      <h2>SHARE MUTATION</h2>
+      <p class="note">SALIDA POR DEFECTO: SÓLO GEOMETRÍA · INDICADORES OPCIONALES</p>
+      <div class="share-opts" id="share-opts"></div>
+      <div class="actions">
+        <button class="btn" id="share-img">IMAGEN</button>
+        <button class="btn" id="share-vid">ANIMACIÓN</button>
+        <button class="btn" id="share-link">ENLACE</button>
+      </div>
+      <p class="note" id="share-status"></p>
+    </div>
+  </aside>
 
   <noscript>EXUVIA necesita JavaScript y WebGL.</noscript>
   <script type="module" src="js/main.js"></script>
