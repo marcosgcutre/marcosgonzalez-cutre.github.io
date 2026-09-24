@@ -86,7 +86,9 @@ const currentGenome = () => (S.ghost ? S.ghost.genome : toGenome(currentFeatures
 function refresh(immediate = false) {
   const g = currentGenome();
   // los patrones sólo se inscriben en la forma dentro de ANALYTICS; en el resto la forma va limpia
-  const pu = S.view === 'analytics' ? toUniforms(currentPatterns()) : emptyPatterns();
+  // la anatomía de hábitos (miembros + frescura) está siempre; las demás estructuras sólo en ANALYTICS
+  const full = toUniforms(currentPatterns());
+  const pu = S.view === 'analytics' ? full : { ...emptyPatterns(), traces: full.traces, fresh: full.fresh };
   stage.organism.setTarget(g, immediate);
   stage.organism.setPatterns(pu, immediate);
   watch?.organism.setTarget(g, immediate);
@@ -127,12 +129,14 @@ function cardFor(h) {
 }
 function renderHome() {
   $('#mutation-age').textContent = entry().age;
-  $('#cards').innerHTML = cardHabits().map(cardFor).map((c) => `
-    <div class="card" style="--cc:${c.color}">
+  const hs = cardHabits();
+  $('#cards').innerHTML = hs.map(cardFor).map((c, i) => `
+    <div class="card" data-h="${hs[i].id}" style="--cc:${c.color}">
       <div class="lbl">${c.label}</div>
       <div class="val">${c.value}<small>${c.unit}</small></div>
       <div class="bar"><b style="width:${(c.bar * 100).toFixed(0)}%"></b></div>
     </div>`).join('');
+  $('#cards').querySelectorAll('.card').forEach((el) => el.onclick = () => { showLimb(byId[el.dataset.h]); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
 // ---------- MUTATIONS ----------
@@ -227,25 +231,56 @@ function traceRows(list) {
 }
 
 // HOY: registro del día seleccionado. Lo manual se toca; lo automático viene del wearable.
-function renderLog() {
+function renderLog(sel = '#log') {
+  const box = $(sel);
+  if (!box) return;
   const d = S.days[S.idx];
   const ago = S.days.length - 1 - S.idx;
-  $('#log-date').textContent = `${ago ? `hace ${ago} días` : 'hoy'} · las sustancias son privadas`;
-  $('#log').innerHTML = `<div class="chips">${CATALOG.map((h) => {
+  if (sel === '#log') $('#log-date').textContent = `${ago ? `hace ${ago} días` : 'hoy'} · las sustancias son privadas`;
+  box.innerHTML = `<div class="chips">${CATALOG.map((h) => {
     const v = dayValue(d, h), on = (v ?? 0) >= 0.5, detail = h.detail?.(d);
     const dc = DOMAINS[h.domain].color;
     return h.source === 'auto'
-      ? `<span class="chip auto ${on ? 'on' : ''}" style="--dc:${dc}" title="${h.label} · automático"><b>${h.code}</b><small>${detail ?? 'AUTO'}</small></span>`
-      : `<button class="chip ${on ? 'on' : ''}" style="--dc:${dc}" data-h="${h.id}" title="${h.label}"><b>${h.code}</b><small>${h.label}</small></button>`;
+      ? `<span class="chip auto ${on ? 'on' : ''}" style="--dc:${dc}" title="${h.label} · automático"><b>${h.label}</b><small>${detail ?? 'automático'}</small></span>`
+      : `<button class="chip ${on ? 'on' : ''}" style="--dc:${dc}" data-h="${h.id}"><b>${h.label}</b><small>${on ? 'registrado' : 'tocar'}</small></button>`;
   }).join('')}</div>`;
-  $('#log').querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
+  box.querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
     const id = b.dataset.h, on = !b.classList.contains('on');
     const m = S.raw.manual.find((x) => x.date === d.date && x.habit === id);
     if (m) m.value = on; else S.raw.manual.push({ date: d.date, habit: id, value: on });
     thumbCache.clear();
     recompute(true);
+    renderLog(sel);
+    // la forma responde al instante: se enciende la punta de ese miembro
+    if (on) { toast(`TU FORMA REGISTRÓ · ${byId[id].label.toUpperCase()}`); showLimb(byId[id]); }
   });
 }
+
+// REGISTRO RÁPIDO desde HOME
+$('#fab').onclick = () => {
+  const ago = S.days.length - 1 - S.idx;
+  $('#quick-date').textContent = ago ? `hace ${ago} días` : 'hoy';
+  renderLog('#quick-log');
+  $('#quick').hidden = false;
+};
+$('#quick-close').onclick = () => { $('#quick').hidden = true; };
+
+// GÉNESIS: la primera vez, el organismo crece desde tu historia
+function genesis() {
+  S.idx = 0; S.genesis = true; S.playing = true; lastStage = 0; lastSignals = null;
+  $('#genesis').hidden = false;
+  refresh(true);
+}
+function endGenesis() {
+  S.genesis = false; S.playing = false;
+  S.idx = S.days.length - 1; $('#scrub').value = S.idx;
+  $('#genesis').hidden = true;
+  $('#btn-play').textContent = '▶';
+  try { localStorage.setItem('exuvia.genesis', '1'); } catch { /* sin almacenamiento: se repite, no pasa nada */ }
+  refresh();
+}
+$('#genesis-skip').onclick = endGenesis;
+$('#replay-genesis').onclick = () => { go('home'); genesis(); };
 
 // PATRONES en lenguaje llano; cada uno ligado a su estructura en la forma
 const DAY_NAMES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
@@ -311,15 +346,61 @@ function buildAnchors(g, pu) {
     A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
   }
   p.traces.filter((t) => t.freq >= 0.1).sort((a, b) => b.freq - a.freq).slice(0, S.focus === 5 ? 24 : 4).forEach((t) => {
-    const c = CATALOG.findIndex((h) => h.id === t.id);
-    const ang = ((c + 0.5) / 24) * TAU;
-    A.push({ k: 5, c: DOMAINS[t.domain].color, t: t.code, small: true, v: new THREE.Vector3(Math.cos(ang) * 1.72, -0.95 + 0.08 + 2.4 * t.freq + 0.07, Math.sin(ang) * 1.72) });
+    A.push({ k: 5, c: DOMAINS[t.domain].color, t: byId[t.id].label.toUpperCase(), small: true, v: limbTip(CATALOG.findIndex((h) => h.id === t.id), t.freq) });
   });
   S.anchors = S.focus ? A.filter((a) => a.k === S.focus) : A.filter((a) => !a.small);
+  if (S.tap) S.anchors.push(S.tap);
   $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
   S.labelEls = [...$('#labels').children];
 }
-function clearAnchors() { S.anchors = []; S.labelEls = []; $('#labels').innerHTML = ''; }
+// Punta del miembro de un hábito: mismo cálculo que el shader (sin la ondulación)
+function limbTip(c, f) {
+  const yb = 0.8 + (-0.45 - 0.8) * ((c + 0.5) / 24), az = c * 2.39996, rxz = Math.sqrt(1 - yb * yb);
+  const dir = new THREE.Vector3(Math.cos(az) * rxz, yb, Math.sin(az) * rxz).normalize();
+  return dir.multiplyScalar(0.8 + 0.15 + 1.05 * f + 0.08);
+}
+
+// TOCAR PARA LEER: tocás un miembro (o una tarjeta) y dice qué hábito es
+let tapTimer = 0;
+function showLimb(h) {
+  const t = currentPatterns().traces.find((x) => x.id === h.id);
+  if (!t) return;
+  const n28 = indicators(S.days, S.idx).find((x) => x.id === h.id)?.count ?? 0;
+  const since = daysSince(S.days, S.idx, h);
+  const when = since === 0 ? 'hoy' : since === 1 ? 'ayer' : since == null ? '—' : `hace ${since} días`;
+  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${n28} de 28 días · última: ${when}`, v: limbTip(CATALOG.indexOf(h), t.freq) };
+  clearTimeout(tapTimer); tapTimer = setTimeout(() => { S.tap = null; renderTapTag(); }, 3200);
+  renderTapTag();
+}
+function renderTapTag() {
+  const base = S.view === 'analytics' ? S.anchors.filter((a) => a.k !== -1) : [];
+  S.anchors = S.tap ? [...base, S.tap] : base;
+  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.k === -1 ? 'tap' : a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
+  S.labelEls = [...$('#labels').children];
+}
+{
+  const cv = $('#stage');
+  let down = null;
+  cv.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
+  cv.addEventListener('pointerup', (e) => {
+    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
+    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+    const ex = stage.organism.genome.expansion;
+    let best = null, bd = 48;
+    for (const t of currentPatterns().traces) {
+      if (t.freq < 0.03) continue;
+      const c = CATALOG.findIndex((h) => h.id === t.id);
+      for (const k of [0.55, 1]) { // a lo largo del miembro
+        const v = limbTip(c, t.freq * k).multiplyScalar(ex).project(stage.camera);
+        const d = Math.hypot((v.x * 0.5 + 0.5) * r.width - mx, (-v.y * 0.5 + 0.5) * r.height - my);
+        if (d < bd) { bd = d; best = byId[t.id]; }
+      }
+    }
+    if (best) showLimb(best);
+  });
+}
+
+function clearAnchors() { S.anchors = []; S.labelEls = []; $('#labels').innerHTML = ''; if (S.tap) renderTapTag(); }
 const _v = new THREE.Vector3(), _dir = new THREE.Vector3();
 function updateLabels() {
   if (!S.labelEls?.length) return;
@@ -328,12 +409,15 @@ function updateLabels() {
   cam.getWorldDirection(_dir);
   S.anchors.forEach((a, i) => {
     const node = S.labelEls[i];
+    if (!node) return;
     _v.copy(a.v).multiplyScalar(ex);
     const depth = _v.clone().sub(cam.position).dot(_dir) - cam.position.length(); // >0: detrás del centro
     _v.project(cam);
     const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;
-    const focus = S.focus === 0 || S.focus === a.k;
-    node.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    const focus = S.focus === 0 || S.focus === a.k || a.k === -1;
+    // la etiqueta nunca se sale del marco
+    const cx = Math.max(6, Math.min(x, w - node.offsetWidth - 6));
+    node.style.transform = `translate(${cx.toFixed(1)}px, ${y.toFixed(1)}px)`;
     node.style.opacity = !focus ? 0.12 : depth > 0 ? 0.35 : 1;
   });
 }
@@ -532,9 +616,11 @@ function loop(now) {
   const t = now / 1000;
   if (S.playing) {
     playAcc += dt;
-    if (playAcc > 0.09) {
+    if (playAcc > (S.genesis ? 0.03 : 0.09)) {
       playAcc = 0;
+      if (S.genesis) $('#genesis-text').textContent = `${S.days[S.idx].date} · ${S.history.timeline[S.idx].stage} pieles dejadas`;
       if (S.idx < S.days.length - 1) { S.idx++; $('#scrub').value = S.idx; announceMutation(); refresh(); }
+      else if (S.genesis) endGenesis();
       else { S.playing = false; $('#btn-play').textContent = '▶'; }
     }
   }
@@ -570,6 +656,9 @@ if (shared) {
 } else {
   load('marcos');
   lastStage = entry().stage;
+  let seen = false;
+  try { seen = localStorage.getItem('exuvia.genesis') === '1'; } catch { /* nada */ }
+  if (!seen && !qs.has('nogenesis')) genesis();
 }
 requestAnimationFrame(loop);
 window.__exuviaReady = true;

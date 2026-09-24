@@ -55,6 +55,7 @@ uniform vec2 uRings[8];   // estratos: x = posición temporal 0–1, y = intensi
 uniform vec4 uLinks[3];   // acoplamientos: ángulo A, ángulo B, intensidad, signo
 uniform float uTrace[24];    // TRAZAS: frecuencia 28 d de cada hábito del catálogo (0 = no seguido)
 uniform float uTraceDom[24];
+uniform float uFresh[24];   // cuán reciente es cada hábito: 1 = hoy, se apaga en días
 uniform float uFocus;        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
 varying vec3 vColor;
 varying float vAlpha;
@@ -121,7 +122,7 @@ void main(){
   // ESTRUCTURAS: una fracción fija de partículas se reorganiza según los patrones.
   // Con intensidad 0 vuelven al cuerpo; nunca aparecen ni desaparecen de golpe.
   float role = fract(s * 53.13 + v * 3.7);
-  float structAmt = 0.0, kind = 0.0;
+  float structAmt = 0.0, kind = 0.0, tipGlow = 0.0;
   vec3 sp = p;
   if (role < 0.07) {
     // RITMO SEMANAL: anillo orbital, un lóbulo por día; el radio es la actividad de ese día
@@ -154,18 +155,48 @@ void main(){
     vec3 c = m + normalize(m + vec3(0.0, 0.6, 0.0)) * 0.9;
     sp = mix(mix(A, c, v), mix(c, B, v), v) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.03;
     structAmt = L.z; kind = L.w < 0.0 ? 4.0 : 3.0;
-  } else if (role < 0.30) {
-    // TRAZAS: espectro de barras verticales alrededor del cuerpo, una por hábito.
-    // Altura = frecuencia en 28 días. Every habit leaves a trace.
+  } else if (role < 0.42) {
+    // ANATOMÍA DE HÁBITOS: cada hábito seguido es un miembro del organismo.
+    // Posición fija por hábito (espiral áurea), largo = frecuencia en 28 días,
+    // morfología según dominio. La punta brilla si el hábito es reciente.
     float c = floor(fract(s * 23.7) * 24.0);
-    float f = 0.0, dom = 0.0;
-    for (int i = 0; i < 24; i++) { if (float(i) == c) { f = uTrace[i]; dom = uTraceDom[i]; } }
-    float ang = (c + 0.5) / 24.0 * TAU;
-    float jt = (fract(w * 61.0) - 0.5) * 0.035;
-    float rr = 1.72 + (fract(w * 83.0) - 0.5) * 0.02;
-    vec3 tangent = vec3(-sin(ang), 0.0, cos(ang));
-    sp = vec3(cos(ang) * rr, -0.95 + v * (0.08 + 2.4 * f), sin(ang) * rr) + tangent * jt;
+    float f = 0.0, dom = 0.0, fr = 0.0;
+    for (int i = 0; i < 24; i++) { if (float(i) == c) { f = uTrace[i]; dom = uTraceDom[i]; fr = uFresh[i]; } }
+    float yb = mix(0.8, -0.45, (c + 0.5) / 24.0);
+    float az = c * 2.39996;
+    float rxz = sqrt(1.0 - yb * yb);
+    vec3 dir = normalize(vec3(cos(az) * rxz, yb, sin(az) * rxz));
+    vec3 side = normalize(cross(dir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
+    vec3 up2 = cross(side, dir);
+    float L = 0.15 + 1.05 * f;
+    float x = v;
+    float curl = sin(x * 3.0 + t * 0.6 + c) * 0.22 * x;
+    vec3 axis = dir * (0.8 + L * x) + side * curl + up2 * 0.18 * x * x;
+    float a2 = u * TAU;
+    float fill = sqrt(fract(w * 97.0));
+    float r0;
+    if (dom < 0.5) {
+      // sustancias: tallo fino y bulbo en la punta
+      float db = (x - 0.86) / 0.13;
+      r0 = 0.025 + (0.13 + 0.12 * f) * exp(-db * db);
+    } else if (dom < 1.5) {
+      // cuerpo: tentáculo que se afina, con segmentos que viajan hacia la punta
+      r0 = (0.1 + 0.06 * f) * (1.0 - 0.75 * x) * (0.7 + 0.3 * step(0.5, fract(x * 7.0 - t * 0.7)));
+    } else if (dom < 2.5) {
+      // mente: doble espiral alrededor del eje
+      a2 = x * 22.0 + t * 0.8 + step(0.5, fract(w * 13.0)) * 3.14159;
+      r0 = 0.1 * (1.0 - 0.4 * x); fill = 1.0;
+    } else if (dom < 3.5) {
+      // recuperación: abanico plano que se abre
+      a2 = (u - 0.5) * 1.6; r0 = 0.32 * x;
+    } else {
+      // nutrición: anillo en la punta
+      x = mix(0.85, 1.0, fract(w * 3.0)); axis = dir * (0.8 + L * x);
+      r0 = 0.16; fill = 1.0;
+    }
+    sp = axis + (side * cos(a2) + up2 * sin(a2)) * r0 * fill;
     structAmt = smoothstep(0.0, 0.03, f); kind = 5.0 + dom;
+    tipGlow = fr * smoothstep(0.55, 1.0, x) * structAmt;
   }
   p = mix(p, sp, structAmt);
 
@@ -182,7 +213,7 @@ void main(){
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
   float sz = uPointSize * (0.55 + 1.4 * pow(fract(s * 113.0), 4.0));
-  gl_PointSize = visible * sz * uPixelRatio * (3.2 / -mv.z);
+  gl_PointSize = visible * sz * (1.0 + 1.3 * tipGlow) * uPixelRatio * (3.2 / -mv.z);
 
   vec3 CY = vec3(0.25, 0.94, 1.0), BL = vec3(0.16, 0.40, 1.0);
   vec3 VI = vec3(0.56, 0.30, 1.0), OR = vec3(1.0, 0.47, 0.16);
@@ -204,10 +235,12 @@ void main(){
   else if (kind >= 5.0) {
     vec3 dc = kind < 5.5 ? OR : kind < 6.5 ? CY : kind < 7.5 ? VI * 1.3 : kind < 8.5 ? BL * 1.4 : vec3(0.92, 0.97, 1.0);
     col = mix(col, dc, 0.9 * structAmt);
+    col = mix(col, vec3(1.0), tipGlow * 0.55);
   }
   col = mix(col, vec3(0.8, 0.95, 1.0), ringGlow * 0.45 * (1.0 - structAmt));
   vColor = col;
   vAlpha = visible * (0.35 + 0.75 * uGlow) * (0.5 + 0.5 * fract(s * 71.0));
+  vAlpha *= 1.0 + 1.5 * tipGlow;
   if (uFocus > 0.5) {
     float isStrata = step(0.01, ringGlow) * (1.0 - step(0.01, structAmt));
     float inF = uFocus > 9.5 ? isStrata
@@ -235,6 +268,7 @@ export function emptyPatterns() {
     week: Array(7).fill(0), weekStr: 0, cycleTurns: 0, cycleStr: 0,
     rings: Array.from({ length: 8 }, () => [0, 0]), links: Array.from({ length: 3 }, () => [0, 0, 0, 1]),
     traces: Array(MAX_TRACES).fill(0),
+    fresh: Array(MAX_TRACES).fill(0),
   };
 }
 
@@ -269,6 +303,7 @@ export class Organism {
       uLinks: { value: Array.from({ length: 3 }, () => new THREE.Vector4(0, 0, 0, 1)) },
       uTrace: { value: new Array(24).fill(0) },
       uFocus: { value: 0 },
+      uFresh: { value: new Array(24).fill(0) },
       uTraceDom: { value: TRACE_DOMAINS },
     };
     this.pat = emptyPatterns();
@@ -311,6 +346,7 @@ export class Organism {
     P.rings = P.rings.map((r, i) => r.map((x, j) => lerp(x, T.rings[i][j])));
     P.links = P.links.map((l, i) => l.map((x, j) => (j === 3 ? T.links[i][3] : lerp(x, T.links[i][j]))));
     P.traces = P.traces.map((x, i) => lerp(x, T.traces?.[i] ?? 0));
+    P.fresh = P.fresh.map((x, i) => lerp(x, T.fresh?.[i] ?? 0));
     this.material.uniforms.uTime.value = time;
     this._apply();
     this._applyPatterns();
@@ -325,6 +361,7 @@ export class Organism {
     P.rings.forEach((r, i) => u.uRings.value[i].set(r[0], r[1]));
     P.links.forEach((l, i) => u.uLinks.value[i].set(l[0], l[1], l[2], l[3]));
     P.traces.forEach((x, i) => (u.uTrace.value[i] = x));
+    P.fresh.forEach((x, i) => (u.uFresh.value[i] = x));
   }
 
   _apply() {

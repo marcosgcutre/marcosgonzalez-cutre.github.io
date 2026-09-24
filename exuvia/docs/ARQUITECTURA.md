@@ -124,6 +124,14 @@ La app sigue el mockup original: cinco pestañas (HOME, MUTATIONS, ANALYTICS, EX
 - **EXUVIA:** las pieles anteriores, una a una, con su duración y fechas.
 - **PROFILE:** fuentes de datos, compartir, Apple Watch, datos crudos y lab.
 
+## 6e. Anatomía de hábitos, respuesta inmediata y génesis
+
+Tres cambios para que el organismo comunique en vez de decorar:
+
+- **Anatomía de hábitos.** El organismo está hecho de tus hábitos. Cada hábito seguido le hace crecer un miembro propio en una posición fija (espiral áurea sobre el cuerpo); su largo es la frecuencia en 28 días y su morfología depende del dominio: tentáculo segmentado (cuerpo), tallo con bulbo (sustancias), doble espiral (mente), abanico (recuperación), anillo (nutrición). Dos personas con hábitos distintos tienen siluetas distintas, y la forma se puede leer: tocás un miembro, o una tarjeta, y aparece qué hábito es, cuántos días de los últimos 28 y cuándo fue la última vez. Reemplaza al espectro de barras, que era un gráfico pegado al organismo, no parte de él.
+- **Respuesta inmediata.** La punta de cada miembro brilla según cuán reciente es el hábito (hoy al máximo, se apaga en unos días). Con el botón + de HOME registrás el día y el miembro se enciende al instante; si el hábito es nuevo, el miembro crece. La forma cambia el mismo día, no sólo cada semanas.
+- **Génesis.** La primera vez, el organismo crece desde la historia disponible: recorre todos los días en unos segundos, deja sus pieles en el camino y termina en hoy. Con datos reales, la historia de Apple Health permite que la app arranque con una forma ya vivida en lugar de esperar semanas. Se puede volver a ver desde PROFILE.
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.

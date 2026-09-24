@@ -35,6 +35,13 @@
       <div class="labels" id="labels" aria-hidden="true"></div>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <div class="ghost-label" id="ghost-label" hidden></div>
+      <button class="fab" id="fab" aria-label="Registrar el día">+</button>
+      <div class="genesis" id="genesis" hidden>
+        <div class="eyebrow">GÉNESIS</div>
+        <p>Tu forma está creciendo desde tu historia.</p>
+        <p class="gt" id="genesis-text"></p>
+        <button class="btn" id="genesis-skip">SALTAR</button>
+      </div>
     </section>
 
     <main class="panel">
@@ -116,6 +123,8 @@
         </div>
         <p class="note" id="watch-note"></p>
 
+        <button class="btn" id="replay-genesis" style="margin-top:18px">VER GÉNESIS DE NUEVO</button>
+
         <details class="raw"><summary>DATOS DEL DÍA</summary>
           <div class="kv" id="canonical"></div>
           <h2>VECTOR DE ENTRADA</h2>
@@ -130,6 +139,14 @@
         </details>
       </div>
     </main>
+
+    <div class="quick" id="quick" hidden>
+      <div class="quick-card">
+        <header><div><div class="eyebrow">¿QUÉ PASÓ?</div><small id="quick-date"></small></div><button class="icon-btn small" id="quick-close" aria-label="Cerrar">✕</button></header>
+        <p class="note">Tocá lo que hiciste. Tu forma responde al instante. Las sustancias quedan privadas.</p>
+        <div id="quick-log"></div>
+      </div>
+    </div>
 
     <nav class="tabs"><button data-go="home" class="on"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg><span>HOME</span></button><button data-go="mutations"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="12" cy="12" r="3.5"/></svg><span>MUTATIONS</span></button><button data-go="analytics"><svg viewBox="0 0 24 24"><path d="M5 20V10M10 20V5M15 20v-8M20 20V8"/></svg><span>ANALYTICS</span></button><button data-go="exuvia"><svg viewBox="0 0 24 24"><path d="M12 3c4 3 6 6 6 10a6 6 0 0 1-12 0c0-4 2-7 6-10z"/></svg><span>EXUVIA</span></button><button data-go="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><span>PROFILE</span></button></nav>
   </div>
