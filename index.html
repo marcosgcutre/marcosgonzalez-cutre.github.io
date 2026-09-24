@@ -28,7 +28,7 @@
       font-size: 34px;
       letter-spacing: .2px;
       color: #1a1a1a;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     p { margin-bottom: 0; }
@@ -50,6 +50,36 @@
     .series-item { font-style: italic; }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       IDIOMAS — .lang se oculta salvo que coincida con
+       el body[data-lang] activo. .lang-block fuerza display:block
+       (para párrafos/entries), si no queda inline (para spans sueltos).
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .lang { display: none; }
+    body[data-lang="es"] .lang-es { display: inline; }
+    body[data-lang="en"] .lang-en { display: inline; }
+    body[data-lang="pt"] .lang-pt { display: inline; }
+    body[data-lang="fr"] .lang-fr { display: inline; }
+    body[data-lang="it"] .lang-it { display: inline; }
+    body[data-lang="ja"] .lang-ja { display: inline; }
+    body[data-lang="es"] .lang-es.lang-block { display: block; }
+    body[data-lang="en"] .lang-en.lang-block { display: block; }
+    body[data-lang="pt"] .lang-pt.lang-block { display: block; }
+    body[data-lang="fr"] .lang-fr.lang-block { display: block; }
+    body[data-lang="it"] .lang-it.lang-block { display: block; }
+    body[data-lang="ja"] .lang-ja.lang-block { display: block; }
+
+    .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
+    .langswitch button {
+      all: unset;
+      cursor: pointer;
+      color: #999;
+      margin-right: 12px;
+      padding-bottom: 1px;
+    }
+    .langswitch button:hover { color: #111; }
+    .langswitch button.active { color: #111; border-bottom: 1px solid #111; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        ACORDEÓN — click en un título, se abre el contenido ahí mismo
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     .item { margin-bottom: 2px; }
@@ -69,7 +99,6 @@
       color: #999;
       margin: 22px 0 10px;
     }
-    .panel h3:first-of-type { margin-top: 0; }
 
     .entry { margin-bottom: 10px; }
     .entry .y { color: #999; margin-right: 8px; }
@@ -98,11 +127,17 @@
     }
   </style>
 </head>
-<body>
+<body data-lang="es">
   <div class="wrap">
+
+    <div class="langswitch">
+      <button data-setlang="es">ES</button><button data-setlang="en">EN</button><button data-setlang="pt">PT</button><button data-setlang="fr">FR</button><button data-setlang="it">IT</button><button data-setlang="ja">JA</button>
+    </div>
+
     <h1>Marcos Gonzalez-Cutre</h1>
 
-    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio. -->
+    <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio.
+         Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
     <div class="block">
       <div class="item"><a class="series-item toggle" data-target="portfolio">¿Brava o mansa?</a></div>
       <div class="item"><a class="series-item toggle" data-target="portfolio">Erosión del canon</a></div>
@@ -114,19 +149,76 @@
          BIO
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="bio">Bio</a>
+      <a class="toggle" data-target="bio">
+        <span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span>
+      </a>
       <div class="panel" id="panel-bio">
         <div class="block">
-          <p>
+          <p class="lang lang-es lang-block">
             Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino que
             actualmente estudia la Licenciatura en Arte en la Universidad de Palermo.
             Estudió en la Universidad Nacional de las Artes y realizó el Fine Arts
             Program en la Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff),
             Alemania (2014). Se formó con Laura Varangot y Richard Sturgeon.
           </p>
-          <p>
+          <p class="lang lang-en lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) is an Argentine artist
+            currently studying for a degree in Fine Arts at Universidad de Palermo.
+            He studied at Universidad Nacional de las Artes and completed the Fine
+            Arts Program at the Kunstgut Fine Arts Academy of Berlin (Frank
+            Pieperhoff), Germany (2014). He trained under Laura Varangot and
+            Richard Sturgeon.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) é um artista argentino que
+            atualmente cursa a Licenciatura em Arte na Universidad de Palermo.
+            Estudou na Universidad Nacional de las Artes e realizou o Fine Arts
+            Program na Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff),
+            Alemanha (2014). Formou-se com Laura Varangot e Richard Sturgeon.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) est un artiste argentin qui
+            poursuit actuellement une licence en art à l'Universidad de Palermo.
+            Il a étudié à l'Universidad Nacional de las Artes et suivi le Fine Arts
+            Program à la Kunstgut Fine Arts Academy of Berlin (Frank Pieperhoff),
+            en Allemagne (2014). Il s'est formé auprès de Laura Varangot et Richard
+            Sturgeon.
+          </p>
+          <p class="lang lang-it lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) è un artista argentino che
+            attualmente studia Arte all'Universidad de Palermo. Ha studiato
+            all'Universidad Nacional de las Artes e ha frequentato il Fine Arts
+            Program alla Kunstgut Fine Arts Academy di Berlino (Frank Pieperhoff),
+            Germania (2014). Si è formato con Laura Varangot e Richard Sturgeon.
+          </p>
+          <p class="lang lang-ja lang-block">
+            マルコス・ゴンサレス=クトレ(ブエノスアイレス、1994年生まれ)はアルゼンチンの美術家で、現在パレルモ大学で美術の学士課程に在籍している。国立芸術大学で学び、2014年にはドイツ・ベルリンのクンストグート・ファインアーツ・アカデミー(フランク・ピーパーホフ主宰)のファインアーツ・プログラムを修了した。ラウラ・バランゴットとリチャード・スタージョンに師事した。
+          </p>
+
+          <p class="lang lang-es lang-block">
             Expuso en Barcelona, Nueva York y Buenos Aires, y en exhibiciones
             colectivas en Río de Janeiro, Londres, Helsinki, Osaka, Tokio y Seúl.
+          </p>
+          <p class="lang lang-en lang-block">
+            He has exhibited in Barcelona, New York, and Buenos Aires, and in
+            group exhibitions in Rio de Janeiro, London, Helsinki, Osaka, Tokyo,
+            and Seoul.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Expôs em Barcelona, Nova York e Buenos Aires, e em exposições
+            coletivas no Rio de Janeiro, Londres, Helsinque, Osaka, Tóquio e Seul.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Il a exposé à Barcelone, New York et Buenos Aires, et dans des
+            expositions collectives à Rio de Janeiro, Londres, Helsinki, Osaka,
+            Tokyo et Séoul.
+          </p>
+          <p class="lang lang-it lang-block">
+            Ha esposto a Barcellona, New York e Buenos Aires, e in mostre
+            collettive a Rio de Janeiro, Londra, Helsinki, Osaka, Tokyo e Seul.
+          </p>
+          <p class="lang lang-ja lang-block">
+            バルセロナ、ニューヨーク、ブエノスアイレスで個展を開催し、リオデジャネイロ、ロンドン、ヘルシンキ、大阪、東京、ソウルでのグループ展に参加している。
           </p>
         </div>
       </div>
@@ -136,25 +228,109 @@
          STATEMENT
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="statement">Statement</a>
+      <a class="toggle" data-target="statement">
+        <span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span>
+      </a>
       <div class="panel" id="panel-statement">
         <div class="block">
-          <p>
+          <p class="lang lang-es lang-block">
             Para mí, pintar es una conversación incesante con los materiales que uso
             y el espacio donde realizo mi práctica. El óleo me eleva espiritualmente,
             me hipnotiza con su olor y textura, me erotiza. Intento traducir en mis
             pinturas lo que siento al ver las obras de los artistas que amo, como si
             hubiera recibido un mensaje en algún museo, galería, taller.
           </p>
-          <p>
+          <p class="lang lang-en lang-block">
+            For me, painting is an unceasing conversation with the materials I use
+            and the space where I work. Oil paint lifts me spiritually, it
+            hypnotizes me with its smell and texture, it arouses me. I try to
+            translate into my paintings what I feel when I look at the work of
+            the artists I love, as if I had received a message in some museum,
+            gallery, or studio.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Para mim, pintar é uma conversa incessante com os materiais que uso e
+            o espaço onde realizo minha prática. O óleo me eleva espiritualmente,
+            me hipnotiza com seu cheiro e textura, me erotiza. Tento traduzir em
+            minhas pinturas o que sinto ao ver as obras dos artistas que amo,
+            como se tivesse recebido uma mensagem em algum museu, galeria, ateliê.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Pour moi, peindre est une conversation incessante avec les matériaux
+            que j'utilise et l'espace où je travaille. L'huile m'élève
+            spirituellement, elle m'hypnotise par son odeur et sa texture, elle
+            m'érotise. J'essaie de traduire dans mes peintures ce que je ressens
+            en regardant les œuvres des artistes que j'aime, comme si j'avais
+            reçu un message dans un musée, une galerie, un atelier.
+          </p>
+          <p class="lang lang-it lang-block">
+            Per me, dipingere è una conversazione incessante con i materiali che
+            uso e lo spazio in cui lavoro. L'olio mi eleva spiritualmente, mi
+            ipnotizza con il suo odore e la sua consistenza, mi eccita. Cerco di
+            tradurre nei miei dipinti ciò che provo guardando le opere degli
+            artisti che amo, come se avessi ricevuto un messaggio in un museo,
+            una galleria, uno studio.
+          </p>
+          <p class="lang lang-ja lang-block">
+            私にとって絵を描くことは、使用する素材と制作を行う空間との絶え間ない対話である。油彩は私を精神的に高揚させ、その匂いと質感で私を催眠状態にし、官能的にさせる。愛する作家たちの作品を見て感じたことを、まるで美術館やギャラリー、アトリエで何かメッセージを受け取ったかのように、自分の絵に翻訳しようとしている。
+          </p>
+
+          <p class="lang lang-es lang-block">
             Hago pinturas de gran formato con una paleta que va cambiando:
             composiciones que no cuentan con un punto focal particular sino que
             permiten al espectador forjar su propio recorrido visual.
           </p>
-          <p>
+          <p class="lang lang-en lang-block">
+            I make large-format paintings with a shifting palette: compositions
+            with no single focal point, which let the viewer chart their own
+            visual path.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Faço pinturas de grande formato com uma paleta que vai mudando:
+            composições que não têm um ponto focal específico, mas que permitem
+            ao espectador traçar seu próprio percurso visual.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Je réalise des peintures de grand format avec une palette qui évolue :
+            des compositions sans point focal unique, qui laissent au spectateur
+            le soin de tracer son propre parcours visuel.
+          </p>
+          <p class="lang lang-it lang-block">
+            Realizzo dipinti di grande formato con una palette in continuo
+            cambiamento: composizioni senza un punto focale unico, che lasciano
+            allo spettatore la libertà di costruire il proprio percorso visivo.
+          </p>
+          <p class="lang lang-ja lang-block">
+            変化し続けるパレットを用いて大判の絵画を制作している。特定の焦点を持たない構成により、鑑賞者が自分自身の視線の軌跡を築くことができるようにしている。
+          </p>
+
+          <p class="lang lang-es lang-block">
             Sueño con hacer una obra gigante, instalativa, que necesite horas, años
             para ser recorrida, una obra magna capaz de producir un estruendo
             memorable.
+          </p>
+          <p class="lang lang-en lang-block">
+            I dream of making a giant, immersive work — one that takes hours,
+            years to walk through, a monumental piece capable of producing a
+            memorable roar.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Sonho em fazer uma obra gigante, instalativa, que precise de horas,
+            anos para ser percorrida, uma obra magna capaz de produzir um
+            estrondo memorável.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Je rêve de créer une œuvre gigantesque, immersive, qui nécessite des
+            heures, des années pour être parcourue, une œuvre magistrale capable
+            de produire un fracas mémorable.
+          </p>
+          <p class="lang lang-it lang-block">
+            Sogno di realizzare un'opera gigantesca, immersiva, che richieda ore,
+            anni per essere percorsa, un'opera magna capace di produrre un
+            fragore memorabile.
+          </p>
+          <p class="lang lang-ja lang-block">
+            何時間も、何年もかけて巡ることになるような、巨大でインスタレーション的な作品——記憶に残る轟音を生み出せるような大作を作ることを夢見ている。
           </p>
         </div>
       </div>
@@ -164,31 +340,91 @@
          CV
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="cv">CV</a>
+      <a class="toggle" data-target="cv">
+        <span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span>
+      </a>
       <div class="panel" id="panel-cv">
-        <h3>Educación</h3>
-        <div class="entry"><span class="t">Licenciatura en Arte</span> — Universidad de Palermo (actualmente)</div>
-        <div class="entry"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
-        <div class="entry"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Alemania</div>
 
-        <h3>Talleres</h3>
-        <div class="entry">Taller de Pintura, Richard Sturgeon</div>
-        <div class="entry">Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
-        <div class="entry">Taller de Dibujo, Juan Bernárdez</div>
-        <div class="entry">Taller de Dibujo, Ricardo Conte</div>
+        <h3 class="lang lang-es lang-block">Educación</h3>
+        <h3 class="lang lang-en lang-block">Education</h3>
+        <h3 class="lang lang-pt lang-block">Educação</h3>
+        <h3 class="lang lang-fr lang-block">Formation</h3>
+        <h3 class="lang lang-it lang-block">Formazione</h3>
+        <h3 class="lang lang-ja lang-block">学歴</h3>
+
+        <div class="entry lang lang-es lang-block"><span class="t">Licenciatura en Arte</span> — Universidad de Palermo (actualmente)</div>
+        <div class="entry lang lang-en lang-block"><span class="t">BA in Fine Arts</span> — Universidad de Palermo (in progress)</div>
+        <div class="entry lang lang-pt lang-block"><span class="t">Licenciatura em Arte</span> — Universidad de Palermo (em curso)</div>
+        <div class="entry lang lang-fr lang-block"><span class="t">Licence en art</span> — Universidad de Palermo (en cours)</div>
+        <div class="entry lang lang-it lang-block"><span class="t">Laurea in Arte</span> — Universidad de Palermo (in corso)</div>
+        <div class="entry lang lang-ja lang-block"><span class="t">美術学士課程</span> — パレルモ大学(在学中)</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2014–2017</span><span class="t">BA in Fine Arts</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura em Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2014–2017</span><span class="t">Licence en art</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2014–2017</span><span class="t">Laurea in Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2014–2017</span><span class="t">美術学士課程</span> — 国立芸術大学</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Alemania</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Germany</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Alemanha</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Allemagne</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2014</span><span class="t">Fine Arts Program</span> — Kunstgut Fine Arts Academy of Berlin, Germania</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2014</span><span class="t">ファインアーツ・プログラム</span> — クンストグート・ファインアーツ・アカデミー・オブ・ベルリン、ドイツ</div>
+
+        <h3 class="lang lang-es lang-block">Talleres</h3>
+        <h3 class="lang lang-en lang-block">Workshops</h3>
+        <h3 class="lang lang-pt lang-block">Oficinas</h3>
+        <h3 class="lang lang-fr lang-block">Ateliers</h3>
+        <h3 class="lang lang-it lang-block">Laboratori</h3>
+        <h3 class="lang lang-ja lang-block">講座</h3>
+
+        <div class="entry lang lang-es lang-block">Taller de Pintura, Richard Sturgeon</div>
+        <div class="entry lang lang-en lang-block">Painting Workshop, Richard Sturgeon</div>
+        <div class="entry lang lang-pt lang-block">Oficina de Pintura, Richard Sturgeon</div>
+        <div class="entry lang lang-fr lang-block">Atelier de peinture, Richard Sturgeon</div>
+        <div class="entry lang lang-it lang-block">Laboratorio di pittura, Richard Sturgeon</div>
+        <div class="entry lang lang-ja lang-block">絵画講座、リチャード・スタージョン</div>
+
+        <div class="entry lang lang-es lang-block">Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
+        <div class="entry lang lang-en lang-block">Drawing &amp; Life Model Workshop, Laura Varangot</div>
+        <div class="entry lang lang-pt lang-block">Oficina de Desenho e Modelo Vivo, Laura Varangot</div>
+        <div class="entry lang lang-fr lang-block">Atelier de dessin et modèle vivant, Laura Varangot</div>
+        <div class="entry lang lang-it lang-block">Laboratorio di disegno dal vero, Laura Varangot</div>
+        <div class="entry lang lang-ja lang-block">デッサン・ライブモデル講座、ラウラ・バランゴット</div>
+
+        <div class="entry lang lang-es lang-block">Taller de Dibujo, Juan Bernárdez</div>
+        <div class="entry lang lang-en lang-block">Drawing Workshop, Juan Bernárdez</div>
+        <div class="entry lang lang-pt lang-block">Oficina de Desenho, Juan Bernárdez</div>
+        <div class="entry lang lang-fr lang-block">Atelier de dessin, Juan Bernárdez</div>
+        <div class="entry lang lang-it lang-block">Laboratorio di disegno, Juan Bernárdez</div>
+        <div class="entry lang lang-ja lang-block">デッサン講座、フアン・ベルナルデス</div>
+
+        <div class="entry lang lang-es lang-block">Taller de Dibujo, Ricardo Conte</div>
+        <div class="entry lang lang-en lang-block">Drawing Workshop, Ricardo Conte</div>
+        <div class="entry lang lang-pt lang-block">Oficina de Desenho, Ricardo Conte</div>
+        <div class="entry lang lang-fr lang-block">Atelier de dessin, Ricardo Conte</div>
+        <div class="entry lang lang-it lang-block">Laboratorio di disegno, Ricardo Conte</div>
+        <div class="entry lang lang-ja lang-block">デッサン講座、リカルド・コンテ</div>
+
       </div>
     </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          PORTFOLIO
-         ✏️ Para sumar una obra: copiá el bloque de img + work-caption
+         ✏️ Para sumar una obra: copiá el bloque de img + work-caption (x6 idiomas)
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="portfolio">Portfolio</a>
+      <a class="toggle" data-target="portfolio">
+        <span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span>
+      </a>
       <div class="panel" id="panel-portfolio">
         <div class="block">
           <img class="work-img" src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-          <p class="work-caption">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</p>
+          <p class="work-caption">
+            <span class="lang lang-es">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</span><span class="lang lang-en">Rizoma, 2025 — Oil on canvas, 230 × 203 cm</span><span class="lang lang-pt">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</span><span class="lang lang-fr">Rizoma, 2025 — Huile sur toile, 230 × 203 cm</span><span class="lang lang-it">Rizoma, 2025 — Olio su tela, 230 × 203 cm</span><span class="lang lang-ja">Rizoma, 2025 — 油彩、キャンバス、230 × 203 cm</span>
+          </p>
         </div>
       </div>
     </div>
@@ -197,28 +433,137 @@
          EXPOSICIONES
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="exposiciones">Exposiciones</a>
+      <a class="toggle" data-target="exposiciones">
+        <span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span>
+      </a>
       <div class="panel" id="panel-exposiciones">
-        <h3>Individuales</h3>
-        <div class="entry"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
-        <div class="entry"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
-        <div class="entry"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
 
-        <h3>Colectivas</h3>
-        <div class="entry"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
-        <div class="entry"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
-        <div class="entry"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
-        <div class="entry"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
-        <div class="entry"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
-        <div class="entry"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
-        <div class="entry"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
-        <div class="entry"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
-        <div class="entry"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
+        <h3 class="lang lang-es lang-block">Individuales</h3>
+        <h3 class="lang lang-en lang-block">Solo</h3>
+        <h3 class="lang lang-pt lang-block">Individuais</h3>
+        <h3 class="lang lang-fr lang-block">Individuelles</h3>
+        <h3 class="lang lang-it lang-block">Personali</h3>
+        <h3 class="lang lang-ja lang-block">個展</h3>
 
-        <h3>Ferias</h3>
-        <div class="entry"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
-        <div class="entry"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
-        <div class="entry"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nueva York, Estados Unidos</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, New York, United States</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, Nova York, Estados Unidos</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, New York, États-Unis</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus, ArtLab, New York, Stati Uniti</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span><span class="t">XXI C. Paintings</span> — Jantus、ArtLab、ニューヨーク、アメリカ合衆国</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nueva York, Estados Unidos</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, New York, United States</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, Nova York, Estados Unidos</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, New York, États-Unis</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa, New York, Stati Uniti</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto Gallery // ChaShaMa、ニューヨーク、アメリカ合衆国</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, España</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, Spain</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelona, Espanha</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcelone, Espagne</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor, Barcellona, Spagna</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2018</span><span class="t">Jantus</span> — Galería Cor、バルセロナ、スペイン</div>
+
+        <h3 class="lang lang-es lang-block">Colectivas</h3>
+        <h3 class="lang lang-en lang-block">Group</h3>
+        <h3 class="lang lang-pt lang-block">Coletivas</h3>
+        <h3 class="lang lang-fr lang-block">Collectives</h3>
+        <h3 class="lang lang-it lang-block">Collettive</h3>
+        <h3 class="lang lang-ja lang-block">グループ展</h3>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentine</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez, Argentina</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2024</span>Ministerio de Cultura de Benito Juárez、アルゼンチン</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentine</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2024</span>Departamento 112, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2024</span>Departamento 112、ブエノスアイレス、アルゼンチン</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finland</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlândia</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlande</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek, Varkaus, Finlandia</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2022</span>Varkaus Stadsbibliotek、ヴァルカウス、フィンランド</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2022</span>AVA Art Festival, Osaka, Japón</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2022</span>AVA Art Festival, Osaka, Japan</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2022</span>AVA Art Festival, Osaka, Japão</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2022</span>AVA Art Festival, Osaka, Japon</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2022</span>AVA Art Festival, Osaka, Giappone</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2022</span>AVA Art Festival、大阪、日本</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentine</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span>MAJO, Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span>MAJO、Museo Fundación Rómulo Raggio、ブエノスアイレス、アルゼンチン</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sur</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, South Korea</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Coreia do Sul</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corée du Sud</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span>What We Eat and Wear, CICA Museum, Gimpo, Corea del Sud</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span>What We Eat and Wear、CICA Museum、金浦、韓国</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span>Centro Cultural dos Correios, Río de Janeiro, Brasil</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span>Centro Cultural dos Correios, Rio de Janeiro, Brazil</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span>Centro Cultural dos Correios, Rio de Janeiro, Brasil</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span>Centro Cultural dos Correios, Rio de Janeiro, Brésil</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span>Centro Cultural dos Correios, Rio de Janeiro, Brasile</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span>Centro Cultural dos Correios、リオデジャネイロ、ブラジル</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span>30 under 30, Viridian Gallery, Nueva York, Estados Unidos</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span>30 under 30, Viridian Gallery, New York, United States</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span>30 under 30, Viridian Gallery, Nova York, Estados Unidos</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span>30 under 30, Viridian Gallery, New York, États-Unis</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span>30 under 30, Viridian Gallery, New York, Stati Uniti</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span>30 under 30、Viridian Gallery、ニューヨーク、アメリカ合衆国</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finland</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2018</span>Kaapelitehdas, Helsinque, Finlândia</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlande</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2018</span>Kaapelitehdas, Helsinki, Finlandia</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2018</span>Kaapelitehdas、ヘルシンキ、フィンランド</div>
+
+        <h3 class="lang lang-es lang-block">Ferias</h3>
+        <h3 class="lang lang-en lang-block">Fairs</h3>
+        <h3 class="lang lang-pt lang-block">Feiras</h3>
+        <h3 class="lang lang-fr lang-block">Foires</h3>
+        <h3 class="lang lang-it lang-block">Fiere</h3>
+        <h3 class="lang lang-ja lang-block">アートフェア</h3>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2019</span>ArtExpo New York, Nueva York, Estados Unidos</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2019</span>ArtExpo New York, New York, United States</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2019</span>ArtExpo New York, Nova York, Estados Unidos</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2019</span>ArtExpo New York, New York, États-Unis</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2019</span>ArtExpo New York, New York, Stati Uniti</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2019</span>ArtExpo New York、ニューヨーク、アメリカ合衆国</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2018</span>Parallax Art Fair, London, United Kingdom</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2018</span>Parallax Art Fair, Londres, Reino Unido</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2018</span>Parallax Art Fair, Londres, Royaume-Uni</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2018</span>Parallax Art Fair, Londra, Regno Unito</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2018</span>Parallax Art Fair、ロンドン、イギリス</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2018</span>Tokyo International Art Fair, Tokio, Japón</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2018</span>Tokyo International Art Fair, Tokyo, Japan</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2018</span>Tokyo International Art Fair, Tóquio, Japão</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2018</span>Tokyo International Art Fair, Tokyo, Japon</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2018</span>Tokyo International Art Fair, Tokyo, Giappone</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2018</span>Tokyo International Art Fair、東京、日本</div>
+
       </div>
     </div>
 
@@ -226,7 +571,9 @@
          CONTACTO
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="item">
-      <a class="toggle" data-target="contacto">Contacto</a>
+      <a class="toggle" data-target="contacto">
+        <span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span>
+      </a>
       <div class="panel" id="panel-contacto">
         <div class="block">
           <p><a href="mailto:marcosgcutre@gmail.com">marcosgcutre@gmail.com</a></p>
@@ -260,6 +607,23 @@
         }
       });
     });
+
+    var langNames = { es: 'es', en: 'en', pt: 'pt', fr: 'fr', it: 'it', ja: 'ja' };
+    function setLang(code) {
+      if (!langNames[code]) return;
+      document.body.setAttribute('data-lang', code);
+      document.documentElement.setAttribute('lang', code);
+      document.querySelectorAll('.langswitch button').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-setlang') === code);
+      });
+      try { localStorage.setItem('lang', code); } catch (e) {}
+    }
+    document.querySelectorAll('.langswitch button').forEach(function (b) {
+      b.addEventListener('click', function () { setLang(b.getAttribute('data-setlang')); });
+    });
+    var saved = null;
+    try { saved = localStorage.getItem('lang'); } catch (e) {}
+    setLang(saved || 'es');
   </script>
 </body>
 </html>
