@@ -49,14 +49,17 @@
     }
     a:hover, .toggle:hover { opacity: .6; }
 
-    /* Nav de arriba: sin subrayado permanente, aparece con el hover/activo */
+    /* Nav de arriba: sin subrayado permanente, aparece fino con el hover */
     .nav-grid .toggle {
       border-bottom-color: transparent;
+      text-decoration: none;
     }
     .nav-grid .toggle:hover {
       opacity: 1;
-      border-bottom-color: #ccc;
-      transform: translateX(2px);
+      text-decoration: underline;
+      text-decoration-color: #bbb;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
     }
     a:focus-visible, .toggle:focus-visible, .langswitch button:focus-visible {
       outline: 2px solid #111;
@@ -92,6 +95,10 @@
       padding-bottom: 14px;
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
+      transition: transform .25s ease;
+    }
+    .sticky-top.hide {
+      transform: translateY(-100%);
     }
     .nav-grid {
       display: flex;
@@ -900,6 +907,35 @@
       var openPanel = document.querySelector('.panel.open');
       if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
     });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // NAV — se esconde al bajar, reaparece al subir (o cerca del top)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    (function () {
+      var stickyTop = document.querySelector('.sticky-top');
+      var lastY = window.scrollY;
+      var ticking = false;
+
+      function onScroll() {
+        var y = window.scrollY;
+        if (y < 40) {
+          stickyTop.classList.remove('hide');
+        } else if (y > lastY + 4) {
+          stickyTop.classList.add('hide');
+        } else if (y < lastY - 4) {
+          stickyTop.classList.remove('hide');
+        }
+        lastY = y;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function () {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      }, { passive: true });
+    })();
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // LIGHTBOX — click en una obra para verla grande
