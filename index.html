@@ -45,9 +45,22 @@
       font-style: inherit;
       padding: 0;
       display: inline-block;
-      transition: opacity .15s ease, border-color .15s ease;
+      transition: opacity .15s ease, border-color .15s ease, transform .15s ease;
     }
     a:hover, .toggle:hover { opacity: .6; }
+
+    /* Nav de arriba: sin subrayado permanente, aparece con el hover/activo */
+    .nav-grid .toggle {
+      border-bottom-color: transparent;
+    }
+    .nav-grid .toggle:hover {
+      opacity: 1;
+      border-bottom-color: #ccc;
+      transform: translateX(2px);
+    }
+    .nav-grid .toggle.open {
+      border-bottom-color: #111;
+    }
     a:focus-visible, .toggle:focus-visible, .langswitch button:focus-visible {
       outline: 2px solid #111;
       outline-offset: 3px;
@@ -88,7 +101,7 @@
       gap: 28px;
     }
     .nav-col { flex: 1; min-width: 0; }
-    .nav-col .item { font-size: 17px; }
+    .nav-col .item { font-size: 17px; margin-bottom: 7px; }
 
     .current-title {
       margin-top: 14px;
@@ -134,7 +147,6 @@
        ACORDEÓN — click en un título, se abre el contenido ahí mismo
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     .item { margin-bottom: 2px; }
-    .toggle.open { border-bottom-color: #ccc; }
     .panel {
       max-height: 0;
       opacity: 0;
