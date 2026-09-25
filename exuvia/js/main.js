@@ -421,7 +421,7 @@ function showLimb(h) {
   const since = daysSince(S.days, S.idx, h);
   const when = since === 0 ? 'hoy' : since === 1 ? 'ayer' : since == null ? '—' : `hace ${since} días`;
   const ci = CATALOG.indexOf(h);
-  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${'★'.repeat(t.stars ?? 0) || '—'} esta semana · ${n28} de 28 días · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
+  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${t.stars ?? 0} de 7 días esta semana · ${n28} de 28 · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
   clearTimeout(tapTimer); tapTimer = setTimeout(() => { S.tap = null; renderTapTag(); }, 3200);
   renderTapTag();
 }

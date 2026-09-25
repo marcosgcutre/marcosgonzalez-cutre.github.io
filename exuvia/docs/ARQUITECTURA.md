@@ -148,7 +148,7 @@ El organismo pasó a ser una galaxia, generada con las mismas partículas y el m
 
 ## 6h. Los planetas son esferas
 
-Cada hábito es una esfera sólida y grande, al estilo de las esferas del dragón, en la órbita de su planeta: tamaño según la frecuencia en 28 días, color según el dominio (naranja sustancias, cian cuerpo, violeta mente, azul recuperación, perla nutrición). Adentro tiene de 0 a 7 estrellas rojas: los días que se hizo ese hábito en la última semana. Las esferas se dibujan como impostores (un plano orientado a la cámara con un shader que simula la esfera: luz difusa, reflejo especular, borde luminoso y refracción leve de las estrellas), así que son baratas. Alrededor sigue la galaxia de partículas, con las estelas de cada órbita y un halo tenue alrededor de cada esfera.
+Cada hábito es una esfera sólida y grande en la órbita de su planeta: tamaño según la frecuencia en 28 días, color según el dominio (naranja sustancias, cian cuerpo, violeta mente, azul recuperación, perla nutrición), y late suavemente si el hábito es reciente. Las esferas se dibujan como impostores (un plano orientado a la cámara con un shader que simula la esfera: luz difusa, reflejo especular y borde luminoso), así que son baratas. Alrededor sigue la galaxia de partículas, con las estelas de cada órbita y un halo tenue alrededor de cada esfera.
 
 ## 7. Compartir
 

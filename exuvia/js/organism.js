@@ -66,7 +66,7 @@ ${SNOISE}
 const float TAU = 6.2831853;
 // Órbitas de los planetas (mismas fórmulas en main.js para tocar y etiquetar)
 float planetR(float f) { return 2.0 - 1.15 * f; }
-float orbR(float f) { return 0.12 + 0.13 * f; }   // radio de la esfera: grande
+float orbR(float f) { return 0.14 + 0.16 * f; }   // radio de la esfera: grande
 float planetA(float c, float r) { return c * 2.39996 + uTime * 0.22 / pow(r, 1.5); }
 vec3 planetP(float c, float r, float a) { return vec3(cos(a) * r, sin(c * 1.7) * 0.12, sin(a) * r); }
 // nodo de un acoplamiento: índice ≥ 0 = planeta de ese hábito; negativo = señal fisiológica en el núcleo
@@ -371,9 +371,9 @@ export class Organism {
 }
 
 
-// ===== ESFERAS: cada hábito es una esfera sólida, tipo esferas del dragón =====
-// Tamaño = frecuencia en 28 días. Estrellas adentro = días con el hábito en la última semana (0–7).
-// Color = dominio. Brilla y late si el hábito es reciente. Sigue la misma órbita que en el shader.
+// ===== ESFERAS: cada hábito es una esfera sólida y grande =====
+// Tamaño = frecuencia en 28 días. Color = dominio. Late si el hábito es reciente.
+// Sigue la misma órbita que en el shader de partículas.
 const ORB_VERT = /* glsl */`
 uniform float uSize;
 varying vec2 vUv;
@@ -385,20 +385,8 @@ void main() {
 }`;
 const ORB_FRAG = /* glsl */`
 uniform vec3 uColor;
-uniform float uStars, uFresh, uTime, uAlpha;
+uniform float uFresh, uTime, uAlpha;
 varying vec2 vUv;
-float sdStar5(vec2 p, float r, float rf) {
-  const vec2 k1 = vec2(0.809016994375, -0.587785252292);
-  const vec2 k2 = vec2(-0.809016994375, -0.587785252292);
-  p.x = abs(p.x);
-  p -= 2.0 * max(dot(k1, p), 0.0) * k1;
-  p -= 2.0 * max(dot(k2, p), 0.0) * k2;
-  p.x = abs(p.x);
-  p.y -= r;
-  vec2 ba = rf * vec2(-k1.y, k1.x) - vec2(0.0, 1.0);
-  float h = clamp(dot(p, ba) / dot(ba, ba), 0.0, r);
-  return length(p - ba * h) * sign(p.y * ba.x - p.x * ba.y);
-}
 void main() {
   float d2 = dot(vUv, vUv);
   if (d2 > 1.0) discard;
@@ -408,27 +396,7 @@ void main() {
   float fres = pow(1.0 - n.z, 2.2);
   // cristal: núcleo más luminoso, bordes más saturados
   vec3 col = uColor * (0.38 + 0.55 * diff) + uColor * 0.45 * (1.0 - d2);
-  // estrellas (vistas a través del cristal, con leve refracción)
-  float N = floor(uStars + 0.5);
-  vec2 q = vUv * (1.0 + 0.12 * d2);
-  float st = 1e3;
-  for (int i = 0; i < 7; i++) {
-    float fi = float(i);
-    if (fi >= N) break;
-    vec2 c;
-    if (N < 1.5) c = vec2(0.0);
-    else if (N >= 6.0 && fi < 0.5) c = vec2(0.0);
-    else {
-      float m = N >= 6.0 ? N - 1.0 : N;
-      float k = N >= 6.0 ? fi - 1.0 : fi;
-      float a = k / m * 6.2831853 + 1.5708;
-      c = vec2(cos(a), sin(a)) * (N < 2.5 ? 0.24 : 0.36);
-    }
-    st = min(st, sdStar5(q - c, N < 1.5 ? 0.3 : N < 4.5 ? 0.2 : 0.16, 0.45));
-  }
-  vec3 starCol = vec3(0.9, 0.1, 0.06);
-  col = mix(col, starCol * (0.6 + 0.5 * diff), smoothstep(0.012, -0.012, st));
-  // brillo especular y reflejo tipo ventana
+  // brillo especular y reflejo suave
   vec3 H = normalize(L + vec3(0.0, 0.0, 1.0));
   col += vec3(1.0) * pow(max(dot(n, H), 0.0), 70.0) * 0.9;
   col += vec3(1.0) * smoothstep(0.2, 0.0, length(vUv - vec2(-0.38, 0.42))) * 0.55;
@@ -439,7 +407,7 @@ void main() {
 }`;
 
 const DOMAIN_RGB = [
-  [1.0, 0.52, 0.12],  // sustancias: naranja esfera del dragón
+  [1.0, 0.52, 0.12],  // sustancias: naranja
   [0.2, 0.85, 1.0],   // cuerpo: cian
   [0.62, 0.36, 1.0],  // mente: violeta
   [0.2, 0.45, 1.0],   // recuperación: azul
@@ -457,7 +425,7 @@ export class Orbs {
         vertexShader: ORB_VERT, fragmentShader: ORB_FRAG,
         uniforms: {
           uSize: { value: 0 }, uColor: { value: new THREE.Color(...DOMAIN_RGB[dom]) },
-          uStars: { value: 0 }, uFresh: { value: 0 }, uTime: { value: 0 }, uAlpha: { value: 1 },
+          uFresh: { value: 0 }, uTime: { value: 0 }, uAlpha: { value: 1 },
         },
         transparent: false, depthWrite: true, depthTest: true,
       });
@@ -477,12 +445,12 @@ export class Orbs {
       const f = pat.traces[c] ?? 0;
       const r = 2.0 - 1.15 * f;
       const a = c * 2.39996 + time * 0.22 / Math.pow(r, 1.5);
-      const target = f > 0.02 ? (0.12 + 0.13 * f) * expansion : 0;
+      const target = f > 0.02 ? (0.14 + 0.16 * f) * expansion : 0;
       it.size += (target - it.size) * k;
       it.m.visible = it.size > 0.004;
       it.m.position.set(Math.cos(a) * r * expansion, Math.sin(c * 1.7) * 0.12 * expansion, Math.sin(a) * r * expansion);
       const u = it.m.material.uniforms;
-      u.uSize.value = it.size; u.uStars.value = pat.stars?.[c] ?? 0; u.uFresh.value = pat.fresh[c] ?? 0; u.uTime.value = time;
+      u.uSize.value = it.size; u.uFresh.value = pat.fresh[c] ?? 0; u.uTime.value = time;
     });
   }
 
