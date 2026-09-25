@@ -181,6 +181,59 @@
       font-size: 16px;
     }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SLIDER — obras de una serie, una al lado de la otra
+       ✏️ Para sumar una obra: copiá un <div class="slide"> entero
+       dentro de .slider-track
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .slider { position: relative; margin-bottom: 10px; }
+    .slider-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .slider-track::-webkit-scrollbar { display: none; }
+    .slide {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+    }
+    .slide .work-img { margin-bottom: 0; }
+    .slider-nav {
+      all: unset;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,.6);
+      cursor: pointer;
+      opacity: .8;
+    }
+    .slider-nav:hover { opacity: 1; }
+    .slider-nav.prev { left: 0; }
+    .slider-nav.next { right: 0; }
+    .slider:has(.slide:only-child) .slider-nav { display: none; }
+    .slider-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .slider:has(.slide:only-child) .slider-dots { display: none; }
+    .slider-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #ddd;
+    }
+    .slider-dots span.active { background: #111; }
+
     .lightbox {
       display: none;
       position: fixed;
@@ -521,14 +574,22 @@
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
          SERIE: ¿BRAVA O MANSA?
-         ✏️ Para sumar otra obra de esta serie: copiá el bloque de img + work-caption (x6 idiomas)
+         ✏️ Para sumar otra obra: copiá un <div class="slide">…</div> entero
+         dentro de .slider-track, y agregá un <span> más en .slider-dots.
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
       <div class="panel" id="panel-serie-brava">
-        <div class="block">
-          <img class="work-img" src="./assets/Brava-o-mansa-XVI.webp" alt="¿Brava o mansa? XVI — Marcos Gonzalez-Cutre">
-          <p class="work-caption">
-            <span class="lang lang-es">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-en">¿Brava o mansa? XVI (16), 2025 — Oil on canvas, 20 × 20 cm</span><span class="lang lang-pt">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-fr">¿Brava o mansa? XVI (16), 2025 — Huile sur toile, 20 × 20 cm</span><span class="lang lang-it">¿Brava o mansa? XVI (16), 2025 — Olio su tela, 20 × 20 cm</span><span class="lang lang-ja">¿Brava o mansa? XVI (16), 2025 — 油彩、キャンバス、20 × 20 cm</span>
-          </p>
+        <div class="slider">
+          <div class="slider-track">
+            <div class="slide">
+              <img class="work-img" src="./assets/Brava-o-mansa-XVI.webp" alt="¿Brava o mansa? XVI — Marcos Gonzalez-Cutre">
+              <p class="work-caption">
+                <span class="lang lang-es">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-en">¿Brava o mansa? XVI (16), 2025 — Oil on canvas, 20 × 20 cm</span><span class="lang lang-pt">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-fr">¿Brava o mansa? XVI (16), 2025 — Huile sur toile, 20 × 20 cm</span><span class="lang lang-it">¿Brava o mansa? XVI (16), 2025 — Olio su tela, 20 × 20 cm</span><span class="lang lang-ja">¿Brava o mansa? XVI (16), 2025 — 油彩、キャンバス、20 × 20 cm</span>
+              </p>
+            </div>
+          </div>
+          <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
+          <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
+          <div class="slider-dots"><span class="active"></span></div>
         </div>
       </div>
 
@@ -889,6 +950,30 @@
     window.addEventListener('resize', function () {
       var openPanel = document.querySelector('.panel.open');
       if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
+    });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // SLIDER — obras de una serie, con flechas y puntitos
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    document.querySelectorAll('.slider').forEach(function (slider) {
+      var track = slider.querySelector('.slider-track');
+      var prev = slider.querySelector('.prev');
+      var next = slider.querySelector('.next');
+      var dots = slider.querySelectorAll('.slider-dots span');
+
+      prev.addEventListener('click', function () {
+        track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' });
+      });
+      next.addEventListener('click', function () {
+        track.scrollBy({ left: track.clientWidth, behavior: 'smooth' });
+      });
+
+      if (dots.length) {
+        track.addEventListener('scroll', function () {
+          var i = Math.round(track.scrollLeft / track.clientWidth);
+          dots.forEach(function (d, di) { d.classList.toggle('active', di === i); });
+        }, { passive: true });
+      }
     });
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
