@@ -98,31 +98,6 @@
     }
     .nav-grid .item { font-size: 17px; margin-bottom: 7px; }
 
-    .current-title {
-      margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid #eee;
-      font-size: 20px;
-      font-weight: 500;
-      color: #111;
-      letter-spacing: .2px;
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .current-title[hidden] { display: none; }
-    .current-title .close-x {
-      all: unset;
-      cursor: pointer;
-      font-size: 15px;
-      color: #999;
-      line-height: 1;
-      padding: 4px;
-    }
-    .current-title .close-x:hover { color: #111; }
-    .current-title .close-x:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
-
     .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
     .langswitch button {
       all: unset;
@@ -291,41 +266,119 @@
       <div class="nav-grid">
         <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su panel.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Erosión del canon</button></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button>
+          <div class="panel" id="panel-serie-brava">
+        <div class="slider">
+          <div class="slider-track">
+            <div class="slide">
+              <img class="work-img" src="./assets/Brava-o-mansa-XVI.webp" alt="¿Brava o mansa? XVI — Marcos Gonzalez-Cutre">
+              <p class="work-caption">
+                <span class="lang lang-es">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-en">¿Brava o mansa? XVI (16), 2025 — Oil on canvas, 20 × 20 cm</span><span class="lang lang-pt">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-fr">¿Brava o mansa? XVI (16), 2025 — Huile sur toile, 20 × 20 cm</span><span class="lang lang-it">¿Brava o mansa? XVI (16), 2025 — Olio su tela, 20 × 20 cm</span><span class="lang lang-ja">¿Brava o mansa? XVI (16), 2025 — 油彩、キャンバス、20 × 20 cm</span>
+              </p>
+            </div>
+          </div>
+          <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
+          <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
+          <div class="slider-dots"><span class="active"></span></div>
+        </div>
+      </div></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Erosión del canon</button>
+          <div class="panel" id="panel-serie-erosion">
+        <div class="slider">
+          <div class="slider-track">
+            <div class="slide">
+              <img class="work-img" src="./assets/La-Ocultacion.jpg" alt="La Ocultación — Marcos Gonzalez-Cutre">
+              <p class="work-caption">
+                <span class="lang lang-es">La Ocultación, 2026 — Óleo sobre tela, 70 × 100 cm</span><span class="lang lang-en">La Ocultación, 2026 — Oil on canvas, 70 × 100 cm</span><span class="lang lang-pt">La Ocultación, 2026 — Óleo sobre tela, 70 × 100 cm</span><span class="lang lang-fr">La Ocultación, 2026 — Huile sur toile, 70 × 100 cm</span><span class="lang lang-it">La Ocultación, 2026 — Olio su tela, 70 × 100 cm</span><span class="lang lang-ja">La Ocultación, 2026 — 油彩、キャンバス、70 × 100 cm</span>
+              </p>
+            </div>
+          </div>
+          <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
+          <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
+          <div class="slider-dots"><span class="active"></span></div>
+        </div>
+        <div class="block">
+          <p class="lang lang-es lang-block">
+            Una investigación pictórica que opera desde dentro sobre la historia del
+            arte europeo y sudamericano. No la refuta ni la celebra: la habita, la
+            metaboliza y la erosiona. Cada obra retoma una estructura iconográfica
+            consolidada —Fra Angelico, Leonardo, Goya, Gauguin— y la infiltra
+            gestualmente. A la vez, establece conexiones con la historia del arte
+            sudamericano: Ay Apaec, Tarsila do Amaral, Cildo Meireles. A medida que
+            las capas sedimentan, la imagen original cede y emerge otra cosa: el
+            residuo del gesto.
+          </p>
+          <p class="lang lang-en lang-block">
+            A pictorial investigation that operates on the history of European and
+            South American art from within. It neither refutes nor celebrates: it
+            inhabits, metabolizes and wears away. Each work takes up a consolidated
+            iconographic structure — Fra Angelico, Leonardo, Goya, Gauguin — and
+            infiltrates it gesturally. At the same time, it establishes connections
+            with South American art history: Ay Apaec, Tarsila do Amaral, Cildo
+            Meireles. As layers sediment, the original image yields and something
+            else emerges: the residue of the gesture.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Uma investigação pictórica que opera de dentro sobre a história da arte
+            europeia e sul-americana. Não a refuta nem a celebra: habita-a,
+            metaboliza-a e desgasta-a. Cada obra retoma uma estrutura iconográfica
+            consolidada — Fra Angelico, Leonardo, Goya, Gauguin — e a infiltra
+            gestualmente. Ao mesmo tempo, estabelece conexões com a história da arte
+            sul-americana: Ay Apaec, Tarsila do Amaral, Cildo Meireles. À medida que
+            as camadas sedimentam, a imagem original cede e algo mais emerge: o
+            resíduo do gesto.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Une recherche picturale qui opère de l'intérieur sur l'histoire de l'art
+            européen et sud-américain. Elle ne la réfute ni ne la célèbre : elle
+            l'habite, la métabolise et l'érode. Chaque œuvre reprend une structure
+            iconographique consolidée — Fra Angelico, Léonard, Goya, Gauguin — et
+            l'infiltre par le geste. En même temps, elle établit des liens avec
+            l'histoire de l'art sud-américain : Ay Apaec, Tarsila do Amaral, Cildo
+            Meireles. À mesure que les couches se sédimentent, l'image originale
+            cède et autre chose émerge : le résidu du geste.
+          </p>
+          <p class="lang lang-it lang-block">
+            Un'indagine pittorica che opera dall'interno sulla storia dell'arte
+            europea e sudamericana. Non la confuta né la celebra: la abita, la
+            metabolizza e la erode. Ogni opera riprende una struttura iconografica
+            consolidata — Fra Angelico, Leonardo, Goya, Gauguin — e la infiltra
+            gestualmente. Allo stesso tempo, stabilisce connessioni con la storia
+            dell'arte sudamericana: Ay Apaec, Tarsila do Amaral, Cildo Meireles.
+            Mentre gli strati si sedimentano, l'immagine originale cede e
+            qualcos'altro emerge: il residuo del gesto.
+          </p>
+          <p class="lang lang-ja lang-block">
+            ヨーロッパと南米の美術史に内側から働きかける絵画的探求。それを否定も賞賛もせず、住み込み、代謝し、摩耗させる。各作品はフラ・アンジェリコ、レオナルド、ゴヤ、ゴーギャンといった確立された図像的構造を取り上げ、身振りによってそこに浸透していく。同時に、アイ・アパエク、タルシラ・ド・アマラル、シルド・メイレレスといった南米美術史との接続を築く。層が堆積するにつれ、元のイメージは譲歩し、別の何かが立ち現れる——身振りの残滓。
+          </p>
+        </div>
+      </div></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button>
+          <div class="panel" id="panel-serie-buenosaires">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
+          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
+          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
+        </div>
+      </div></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button>
+          <div class="panel" id="panel-serie-jantus">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
+          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
+          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
+        </div>
+      </div></div>
 
         <div class="item">
           <button class="toggle" type="button" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></button>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></button>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></button>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></button>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></button>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></button>
-        </div>
-      </div>
-
-      <div class="current-title" id="current-title" hidden>
-        <span id="current-title-label"></span>
-        <button class="close-x" id="close-title" type="button" aria-label="Cerrar">✕</button>
-      </div>
-    </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         BIO
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-bio">
+          <div class="panel" id="panel-bio">
         <div class="block">
           <p class="lang lang-es lang-block">
             Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino.
@@ -408,11 +461,10 @@
           </p>
         </div>
       </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         STATEMENT
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-statement">
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></button>
+          <div class="panel" id="panel-statement">
         <div class="block">
           <p class="lang lang-es lang-block">
             Para mí, pintar es una conversación incesante con los materiales que uso
@@ -515,11 +567,10 @@
           </p>
         </div>
       </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         CV
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-cv">
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></button>
+          <div class="panel" id="panel-cv">
 
         <h3 class="lang lang-es lang-block">Educación</h3>
         <h3 class="lang lang-en lang-block">Education</h3>
@@ -571,131 +622,10 @@
         <div class="entry lang lang-ja lang-block"><span class="y">2013</span>ファインアーツ・プログラム — クンストグート・アカデミー、ベルリン</div>
 
       </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         SERIE: ¿BRAVA O MANSA?
-         ✏️ Para sumar otra obra: copiá un <div class="slide">…</div> entero
-         dentro de .slider-track, y agregá un <span> más en .slider-dots.
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-serie-brava">
-        <div class="slider">
-          <div class="slider-track">
-            <div class="slide">
-              <img class="work-img" src="./assets/Brava-o-mansa-XVI.webp" alt="¿Brava o mansa? XVI — Marcos Gonzalez-Cutre">
-              <p class="work-caption">
-                <span class="lang lang-es">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-en">¿Brava o mansa? XVI (16), 2025 — Oil on canvas, 20 × 20 cm</span><span class="lang lang-pt">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-fr">¿Brava o mansa? XVI (16), 2025 — Huile sur toile, 20 × 20 cm</span><span class="lang lang-it">¿Brava o mansa? XVI (16), 2025 — Olio su tela, 20 × 20 cm</span><span class="lang lang-ja">¿Brava o mansa? XVI (16), 2025 — 油彩、キャンバス、20 × 20 cm</span>
-              </p>
-            </div>
-          </div>
-          <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
-          <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
-          <div class="slider-dots"><span class="active"></span></div>
         </div>
-      </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         SERIE: EROSIÓN DEL CANON
-         ✏️ Para sumar otra obra: copiá un <div class="slide">…</div> entero
-         dentro de .slider-track, y agregá un <span> más en .slider-dots.
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-serie-erosion">
-        <div class="block">
-          <p class="lang lang-es lang-block">
-            Una investigación pictórica que opera desde dentro sobre la historia del
-            arte europeo y sudamericano. No la refuta ni la celebra: la habita, la
-            metaboliza y la erosiona. Cada obra retoma una estructura iconográfica
-            consolidada —Fra Angelico, Leonardo, Goya, Gauguin— y la infiltra
-            gestualmente. A la vez, establece conexiones con la historia del arte
-            sudamericano: Ay Apaec, Tarsila do Amaral, Cildo Meireles. A medida que
-            las capas sedimentan, la imagen original cede y emerge otra cosa: el
-            residuo del gesto.
-          </p>
-          <p class="lang lang-en lang-block">
-            A pictorial investigation that operates on the history of European and
-            South American art from within. It neither refutes nor celebrates: it
-            inhabits, metabolizes and wears away. Each work takes up a consolidated
-            iconographic structure — Fra Angelico, Leonardo, Goya, Gauguin — and
-            infiltrates it gesturally. At the same time, it establishes connections
-            with South American art history: Ay Apaec, Tarsila do Amaral, Cildo
-            Meireles. As layers sediment, the original image yields and something
-            else emerges: the residue of the gesture.
-          </p>
-          <p class="lang lang-pt lang-block">
-            Uma investigação pictórica que opera de dentro sobre a história da arte
-            europeia e sul-americana. Não a refuta nem a celebra: habita-a,
-            metaboliza-a e desgasta-a. Cada obra retoma uma estrutura iconográfica
-            consolidada — Fra Angelico, Leonardo, Goya, Gauguin — e a infiltra
-            gestualmente. Ao mesmo tempo, estabelece conexões com a história da arte
-            sul-americana: Ay Apaec, Tarsila do Amaral, Cildo Meireles. À medida que
-            as camadas sedimentam, a imagem original cede e algo mais emerge: o
-            resíduo do gesto.
-          </p>
-          <p class="lang lang-fr lang-block">
-            Une recherche picturale qui opère de l'intérieur sur l'histoire de l'art
-            européen et sud-américain. Elle ne la réfute ni ne la célèbre : elle
-            l'habite, la métabolise et l'érode. Chaque œuvre reprend une structure
-            iconographique consolidée — Fra Angelico, Léonard, Goya, Gauguin — et
-            l'infiltre par le geste. En même temps, elle établit des liens avec
-            l'histoire de l'art sud-américain : Ay Apaec, Tarsila do Amaral, Cildo
-            Meireles. À mesure que les couches se sédimentent, l'image originale
-            cède et autre chose émerge : le résidu du geste.
-          </p>
-          <p class="lang lang-it lang-block">
-            Un'indagine pittorica che opera dall'interno sulla storia dell'arte
-            europea e sudamericana. Non la confuta né la celebra: la abita, la
-            metabolizza e la erode. Ogni opera riprende una struttura iconografica
-            consolidata — Fra Angelico, Leonardo, Goya, Gauguin — e la infiltra
-            gestualmente. Allo stesso tempo, stabilisce connessioni con la storia
-            dell'arte sudamericana: Ay Apaec, Tarsila do Amaral, Cildo Meireles.
-            Mentre gli strati si sedimentano, l'immagine originale cede e
-            qualcos'altro emerge: il residuo del gesto.
-          </p>
-          <p class="lang lang-ja lang-block">
-            ヨーロッパと南米の美術史に内側から働きかける絵画的探求。それを否定も賞賛もせず、住み込み、代謝し、摩耗させる。各作品はフラ・アンジェリコ、レオナルド、ゴヤ、ゴーギャンといった確立された図像的構造を取り上げ、身振りによってそこに浸透していく。同時に、アイ・アパエク、タルシラ・ド・アマラル、シルド・メイレレスといった南米美術史との接続を築く。層が堆積するにつれ、元のイメージは譲歩し、別の何かが立ち現れる——身振りの残滓。
-          </p>
-        </div>
-        <div class="slider">
-          <div class="slider-track">
-            <div class="slide">
-              <img class="work-img" src="./assets/La-Ocultacion.jpg" alt="La Ocultación — Marcos Gonzalez-Cutre">
-              <p class="work-caption">
-                <span class="lang lang-es">La Ocultación, 2026 — Óleo sobre tela, 70 × 100 cm</span><span class="lang lang-en">La Ocultación, 2026 — Oil on canvas, 70 × 100 cm</span><span class="lang lang-pt">La Ocultación, 2026 — Óleo sobre tela, 70 × 100 cm</span><span class="lang lang-fr">La Ocultación, 2026 — Huile sur toile, 70 × 100 cm</span><span class="lang lang-it">La Ocultación, 2026 — Olio su tela, 70 × 100 cm</span><span class="lang lang-ja">La Ocultación, 2026 — 油彩、キャンバス、70 × 100 cm</span>
-              </p>
-            </div>
-          </div>
-          <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
-          <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
-          <div class="slider-dots"><span class="active"></span></div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-serie-buenosaires">
-        <div class="block">
-          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
-          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
-          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
-          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
-          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
-          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-serie-jantus">
-        <div class="block">
-          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
-          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
-          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
-          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
-          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
-          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
-        </div>
-      </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         PORTFOLIO
-         ✏️ Obras sin serie asignada. Para sumar una: copiá el bloque de img + work-caption (x6 idiomas)
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-portfolio">
+        <div class="item">
+          <button class="toggle" type="button" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></button>
+          <div class="panel" id="panel-portfolio">
         <div class="block">
           <img class="work-img" src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
           <p class="work-caption">
@@ -703,11 +633,10 @@
           </p>
         </div>
       </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         EXPOSICIONES
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-exposiciones">
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></button>
+          <div class="panel" id="panel-exposiciones">
 
         <h3 class="lang lang-es lang-block">Individuales</h3>
         <h3 class="lang lang-en lang-block">Solo</h3>
@@ -941,14 +870,15 @@
         <div class="entry lang lang-ja lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río、ブエノスアイレス、アルゼンチン</div>
 
       </div>
-
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         CONTACTO
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-      <div class="panel" id="panel-contacto">
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></button>
+          <div class="panel" id="panel-contacto">
         <div class="block">
           <p><a href="mailto:marcosgcutre@gmail.com">marcosgcutre@gmail.com</a></p>
           <p><a href="https://instagram.com/marcosgonzalezcutre" target="_blank">@marcosgonzalezcutre</a></p>
+        </div>
+      </div>
         </div>
       </div>
 
@@ -963,17 +893,12 @@
   </div>
 
   <script>
-    var currentTitle = document.getElementById('current-title');
-    var currentTitleLabel = document.getElementById('current-title-label');
-
     function closeAll() {
       document.querySelectorAll('.panel').forEach(function (p) {
         p.classList.remove('open');
         p.style.maxHeight = '';
       });
       document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
-      currentTitle.hidden = true;
-      currentTitleLabel.innerHTML = '';
     }
 
     document.querySelectorAll('.toggle').forEach(function (btn) {
@@ -991,13 +916,9 @@
           document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
             t.classList.add('open');
           });
-          currentTitleLabel.innerHTML = btn.innerHTML;
-          currentTitle.hidden = false;
         }
       });
     });
-
-    document.getElementById('close-title').addEventListener('click', closeAll);
 
     // Recalcular la altura si una imagen adentro del panel abierto termina de cargar
     document.querySelectorAll('.work-img').forEach(function (img) {
