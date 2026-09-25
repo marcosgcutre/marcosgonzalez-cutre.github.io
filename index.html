@@ -92,14 +92,19 @@
       top: 0;
       background: #fff;
       z-index: 10;
+      max-height: 600px;
+      overflow: hidden;
       padding-bottom: 14px;
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
-      transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .35s ease;
+      transition: max-height .6s ease, opacity .5s ease, padding-bottom .6s ease, margin-bottom .6s ease, border-color .5s ease;
     }
     .sticky-top.hide {
-      transform: translateY(-100%);
+      max-height: 0;
       opacity: 0;
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border-color: transparent;
       pointer-events: none;
     }
     .nav-grid {
