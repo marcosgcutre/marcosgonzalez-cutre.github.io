@@ -925,11 +925,11 @@
 
       function onScroll() {
         var y = window.scrollY;
-        if (y < 40) {
+        if (y <= 0) {
           stickyTop.classList.remove('hide');
-        } else if (y > lastY + 4) {
+        } else if (y > lastY) {
           stickyTop.classList.add('hide');
-        } else if (y < lastY - 4) {
+        } else if (y < lastY) {
           stickyTop.classList.remove('hide');
         }
         lastY = y;
