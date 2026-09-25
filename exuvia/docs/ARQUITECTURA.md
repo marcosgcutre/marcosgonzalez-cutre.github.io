@@ -146,6 +146,10 @@ El organismo pasó a ser una galaxia, generada con las mismas partículas y el m
 - **Patrones en la galaxia.** Ritmo semanal: halo de 7 lóbulos alrededor del núcleo. Ciclos: chorros polares en espiral. Acoplamientos: puentes de luz entre los planetas de los dos hábitos (o nodos del núcleo para actividad, sueño y HRV). Cambios de hábito: anillos en el disco, del pasado (adentro) al presente (afuera).
 - **La muda es una nebulosa.** En astronomía, las estrellas como el Sol expulsan sus capas externas al final de su vida y forman una nebulosa planetaria: una piel que la estrella deja atrás. En EXUVIA, cuando la galaxia muda, su forma anterior se expande como una nebulosa translúcida y se disuelve. Las exuvias guardadas son esas nebulosas.
 
+## 6h. Los planetas son esferas
+
+Cada hábito es una esfera sólida y grande, al estilo de las esferas del dragón, en la órbita de su planeta: tamaño según la frecuencia en 28 días, color según el dominio (naranja sustancias, cian cuerpo, violeta mente, azul recuperación, perla nutrición). Adentro tiene de 0 a 7 estrellas rojas: los días que se hizo ese hábito en la última semana. Las esferas se dibujan como impostores (un plano orientado a la cámara con un shader que simula la esfera: luz difusa, reflejo especular, borde luminoso y refracción leve de las estrellas), así que son baratas. Alrededor sigue la galaxia de partículas, con las estelas de cada órbita y un halo tenue alrededor de cada esfera.
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.

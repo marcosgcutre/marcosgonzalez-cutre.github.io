@@ -149,7 +149,9 @@ export function detect(allDays, idx) {
     traces: trackedAt(days, idx).map((h) => {
       const since = daysSince(days, idx, h);
       // frescura: 1 si fue hoy, ~0.5 ayer, se apaga en pocos días
-      return { id: h.id, code: h.code, domain: h.domain, freq: trace(days, idx, h).freq, fresh: since == null ? 0 : Math.exp(-since / 1.4) };
+      // estrellas: días con el hábito en la última semana (0–7), como las esferas del dragón
+      const stars = days.slice(Math.max(0, idx - 6), idx + 1).filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
+      return { id: h.id, code: h.code, domain: h.domain, freq: trace(days, idx, h).freq, fresh: since == null ? 0 : Math.exp(-since / 1.4), stars };
     }),
     weekly: weekly(days, S.activity),
     cycle: cycle(days, S.activity),
@@ -181,6 +183,7 @@ export function toUniforms(p) {
     // una traza por hábito del catálogo (posición fija), frecuencia 28 d; 0 = no seguido
     traces: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.freq ?? 0),
     fresh: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.fresh ?? 0),
+    stars: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.stars ?? 0),
   };
 }
 

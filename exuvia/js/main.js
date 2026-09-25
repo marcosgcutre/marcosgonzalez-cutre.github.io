@@ -88,7 +88,7 @@ function refresh(immediate = false) {
   // los patrones sólo se inscriben en la forma dentro de ANALYTICS; en el resto la forma va limpia
   // la anatomía de hábitos (miembros + frescura) está siempre; las demás estructuras sólo en ANALYTICS
   const full = toUniforms(currentPatterns());
-  const pu = S.view === 'analytics' ? full : { ...emptyPatterns(), traces: full.traces, fresh: full.fresh };
+  const pu = S.view === 'analytics' ? full : { ...emptyPatterns(), traces: full.traces, fresh: full.fresh, stars: full.stars };
   stage.organism.setTarget(g, immediate);
   stage.organism.setPatterns(pu, immediate);
   watch?.organism.setTarget(g, immediate);
@@ -401,7 +401,7 @@ function buildAnchors(g, pu) {
 }
 // Posición actual del planeta de un hábito: mismas fórmulas que el shader
 function limbTip(c, f) {
-  const r = 1.9 - 1.3 * f, time = stage.organism.material.uniforms.uTime.value;
+  const r = 2.0 - 1.15 * f, time = stage.organism.material.uniforms.uTime.value;
   const a = c * 2.39996 + time * 0.22 / Math.pow(r, 1.5);
   return new THREE.Vector3(Math.cos(a) * r, Math.sin(c * 1.7) * 0.12, Math.sin(a) * r);
 }
@@ -421,7 +421,7 @@ function showLimb(h) {
   const since = daysSince(S.days, S.idx, h);
   const when = since === 0 ? 'hoy' : since === 1 ? 'ayer' : since == null ? '—' : `hace ${since} días`;
   const ci = CATALOG.indexOf(h);
-  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${n28} de 28 días · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
+  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${'★'.repeat(t.stars ?? 0) || '—'} esta semana · ${n28} de 28 días · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
   clearTimeout(tapTimer); tapTimer = setTimeout(() => { S.tap = null; renderTapTag(); }, 3200);
   renderTapTag();
 }
@@ -644,7 +644,7 @@ function announceMutation() {
     toast(`ALGO CAMBIÓ · MUTACIÓN ${String(e.stage + 1).padStart(2, '0')}`);
     // la piel que se deja: se desprende y queda como cáscara al costado
     const skin = S.history.exuvias[e.stage - 1];
-    if (skin) stage.shed(skin.genome, { ...emptyPatterns(), traces: toUniforms(patternsAt(idxOf(skin.end))).traces });
+    if (skin) stage.shed(skin.genome, (() => { const u = toUniforms(patternsAt(idxOf(skin.end))); return { ...emptyPatterns(), traces: u.traces, stars: u.stars }; })());
   }
   else if (lastSignals && lastStage !== null && e.stage === lastStage) {
     const fresh = ids.find((id) => !lastSignals.has(id));
