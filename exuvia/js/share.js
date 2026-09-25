@@ -3,7 +3,10 @@
 // mutación. Cada indicador se agrega explícitamente.
 
 import { Stage, PARAMS } from './organism.js';
-import { RULES, GLOW } from './genome.js';
+import { RULES, GLOW, IDENTITY } from './genome.js';
+
+// rango de cada parámetro codificado: los que mueven los datos y los de identidad
+const RANGE = { ...Object.fromEntries(Object.entries(RULES).map(([k, r]) => [k, [r.min, r.max]])), ...IDENTITY };
 
 const W = 1080, H = 1350;
 
@@ -117,8 +120,8 @@ const dq = (b, max = 1) => (b / 255) * max;
 const TAU = Math.PI * 2;
 
 export function encodeGenome(genome, meta, patterns) {
-  const bytes = PARAMS.filter((k) => RULES[k]).map((k) => {
-    const r = RULES[k]; return q(genome[k] - r.min, r.max - r.min);
+  const bytes = PARAMS.filter((k) => RANGE[k]).map((k) => {
+    const [a, b] = RANGE[k]; return q(genome[k] - a, b - a);
   });
   bytes.push(q(genome.seedShift % 64, 64), meta.stage & 255);
   let url = `${location.origin}${location.pathname}#m=${b64(bytes)}&n=${encodeURIComponent(meta.name)}&id=${meta.mutantId}`;
@@ -137,10 +140,10 @@ export function decodeGenome(hash) {
   if (!p.get('m')) return null;
   let bytes;
   try { bytes = unb64(p.get('m')); } catch { return null; } // enlace roto → app normal
-  const keys = PARAMS.filter((k) => RULES[k]);
+  const keys = PARAMS.filter((k) => RANGE[k]);
   if (bytes.length < keys.length + 1) return null;
   const g = { glow: GLOW }; let i = 0;
-  for (const k of keys) { const r = RULES[k]; g[k] = r.min + dq(bytes[i++], r.max - r.min); }
+  for (const k of keys) { const [a, b] = RANGE[k]; g[k] = a + dq(bytes[i++], b - a); }
   g.seedShift = dq(bytes[i++], 64);
   let patterns = null;
   try {

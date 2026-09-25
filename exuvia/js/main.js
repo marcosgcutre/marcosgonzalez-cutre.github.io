@@ -4,7 +4,7 @@ import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
 import { normalize } from './ingest.js';
 import { importAppleHealth } from './import-health.js';
-import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
+import { FEATURES, RULES, SIGNALS, toGenome, indicators, weekly, weekSentence } from './genome.js';
 import { CATALOG, DOMAINS, dayValue, byId, trackedAt, daysSince, firstSeen } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
@@ -127,45 +127,32 @@ function renderScrub() {
   $('#scrub-label').textContent = HOY() === 0 ? 'HOY' : `HACE ${HOY()} D`;
 }
 
-// Las 6 tarjetas del mockup: las fijadas por el perfil o, si no hay, las más presentes
-function cardHabits() {
-  const pins = PERSONAS[S.persona].pins;
-  const tracked = trackedAt(S.days, S.idx);
-  if (pins) return pins.map((id) => byId[id]).filter((h) => tracked.includes(h));
-  const sus = tracked.filter((h) => h.domain === 'SUS' && daysSince(S.days, S.idx, h) > 2).slice(0, 2);
-  const rest = indicators(S.days, S.idx).filter((x) => byId[x.id].domain !== 'SUS' && x.id !== 'steps').sort((a, b) => b.count - a.count).map((x) => byId[x.id]);
-  return [...sus, ...rest].slice(0, 6);
-}
-function cardFor(h) {
-  const e = entry();
-  const span = Math.max(e.age, 28);                       // período: la mutación actual (mín. 28 d)
-  const color = DOMAINS[h.domain].color;
-  if (h.domain === 'SUS') {
-    const n = daysSince(S.days, S.idx, h);
-    return { label: h.card, value: n ?? '—', unit: 'DÍAS', bar: n == null ? 0 : Math.min(1, n / span), color };
-  }
-  const win = S.days.slice(Math.max(0, S.idx - span + 1), S.idx + 1);
-  const n = win.filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
-  return { label: h.card, value: n, unit: n < 5 ? (n === 1 ? 'VEZ' : 'VECES') : 'DÍAS', bar: Math.min(1, n / span * 2), color };
-}
+// Cuatro señales automáticas: esta semana contra la anterior, y qué cualidad mueve cada una
 function renderHome() {
   $('#mutation-age').textContent = entry().age;
-  $('#cards').innerHTML = cardHabits().map(cardFor).map((c) => `
+  const ws = weekly(S.days, S.idx);
+  $('#cards').innerHTML = ws.filter((c) => c.now != null).map((c) => {
+    const d = c.delta == null ? '' : `${c.delta >= 0 ? '+' : '−'}${Math.round(Math.abs(c.delta) * 100)}%`;
+    const f = entry().features[c.id];
+    return `
     <div class="card" style="--cc:${c.color}">
       <div class="lbl">${c.label}</div>
       <div class="val">${c.value}<small>${c.unit}</small></div>
-      <div class="bar"><b style="width:${(c.bar * 100).toFixed(0)}%"></b></div>
-    </div>`).join('');
+      <div class="delta">${d ? `${d} vs semana anterior` : 'sin semana anterior'}</div>
+      <div class="bar"><b style="width:${((f ?? 0) * 100).toFixed(0)}%"></b></div>
+      <div class="drives">→ ${c.drives}</div>
+    </div>`;
+  }).join('') || '<p class="note">Sin datos todavía.</p>';
+  $('#week-line').textContent = weekSentence(ws);
 }
 
 // ---------- MUTATIONS ----------
-// Qué está cambiando la forma, en términos de hábitos: frecuencia en 28 d al empezar la etapa vs hoy
+// Qué está cambiando la forma: cada señal (promedio 14 d) al empezar la etapa vs hoy
 function drivers() {
-  const e = entry(), from = S.idx - e.age;
-  const f28 = (idx, h) => S.days.slice(Math.max(0, idx - 27), idx + 1).filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
-  return trackedAt(S.days, S.idx).filter((h) => h.id !== 'steps')
-    .map((h) => ({ h, a: f28(from, h), b: f28(S.idx, h) }))
-    .filter((x) => Math.abs(x.b - x.a) >= 4).sort((x, y) => Math.abs(y.b - y.a) - Math.abs(x.b - x.a)).slice(0, 3);
+  const e = entry(), from = S.history.timeline[S.idx - e.age].features;
+  return SIGNALS.map((sig) => ({ sig, a: from[sig.id], b: e.features[sig.id] }))
+    .filter((x) => x.a != null && x.b != null && Math.abs(x.b - x.a) >= 0.08)
+    .sort((x, y) => Math.abs(y.b - y.a) - Math.abs(x.b - x.a));
 }
 function renderMutations() {
   const e = entry();
@@ -176,8 +163,8 @@ function renderMutations() {
     : pct >= 100 ? 'Tu forma está mudando.' : `Tu forma cambió un ${pct}% de lo necesario para mudar.`;
   const d = drivers();
   const list = d.length
-    ? `<p>Lo que más la está cambiando desde que empezó esta forma:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
-    : '<p>Tus hábitos están estables desde que empezó esta forma.</p>';
+    ? `<p>Lo que más la está cambiando desde que empezó esta forma:</p><ul>${d.map((x) => `<li style="--dc:${x.sig.color}"><b>${x.sig.label}</b> ${x.b > x.a ? 'subió' : 'bajó'} → ${x.sig.drives.toLowerCase()} ${x.b > x.a ? 'mayor' : 'menor'}</li>`).join('')}</ul>`
+    : '<p>Tus señales están estables desde que empezó esta forma.</p>';
   $('#mutation-status').innerHTML = `<p class="lead">${head}</p><div class="meter"><b style="width:${pct}%"></b></div>${list}`;
   renderHistory();
 }

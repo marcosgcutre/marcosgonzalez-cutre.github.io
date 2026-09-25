@@ -12,14 +12,11 @@ import { extractFeatures, toGenome, structuralDistance, STRUCTURAL, normalizedPa
 
 export const WARMUP = 28;  // las ventanas de 28–90 días necesitan datos antes de que la forma signifique algo
 export const MIN_DAYS = 21;
-export const NET = 0.1;    // distancia estructural media desde el inicio de la etapa
+export const NET = 0.18;    // distancia estructural media desde el inicio de la etapa
 
 // Designación de la etapa: código del parámetro que más cambió + signo del cambio.
-// Descriptivo, no narrativo: DNS− significa "la densidad bajó", nada más.
-export const CODES = {
-  coherence: 'COH', density: 'DNS', lobes: 'LOB', lobeAmp: 'LOB',
-  twist: 'TRS', elong: 'AXL', skirt: 'BSE', filament: 'FIL',
-};
+// Descriptivo, no narrativo: CLM− significa "la calma bajó", nada más.
+export const CODES = { expansion: 'TAM', coherence: 'CLM', flow: 'MOV', pulseAmp: 'RSP' };
 export const ORIGIN = 'Ø';
 
 const seedFor = (userSeed, stage) => ((userSeed % 97) / 97) * 6.28 + stage * 1.37;

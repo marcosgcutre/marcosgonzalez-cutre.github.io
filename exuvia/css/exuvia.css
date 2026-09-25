@@ -300,6 +300,9 @@ input[type="checkbox"] { accent-color: var(--cyan); width: 16px; height: 16px; }
 .card .lbl { font-size: 10px; letter-spacing: 0.18em; color: #7fb6d8; }
 .card .val { font-family: var(--display); font-weight: 300; font-size: 26px; margin-top: 6px; }
 .card .val small { font-size: 11px; letter-spacing: 0.14em; color: var(--dim); margin-left: 6px; }
+.card .delta { font-size: 11px; color: var(--dim); margin-top: 2px; }
+.card .drives { font-size: 10px; letter-spacing: 0.16em; color: var(--cc); margin-top: 8px; }
+.week-line { text-align: center; font-size: 14px; line-height: 1.45; color: #cfe6f7; margin: 14px 8px 0; }
 .card .bar { height: 2px; background: rgba(120, 190, 255, 0.12); margin-top: 12px; border-radius: 2px; }
 .card .bar b { display: block; height: 100%; background: var(--cc); border-radius: 2px; box-shadow: 0 0 8px var(--cc); }
 
