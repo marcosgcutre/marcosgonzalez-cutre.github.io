@@ -92,19 +92,17 @@
       top: 0;
       background: #fff;
       z-index: 10;
-      max-height: 600px;
-      overflow: hidden;
       padding-bottom: 14px;
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
-      transition: max-height .6s ease, opacity .5s ease, padding-bottom .6s ease, margin-bottom .6s ease, border-color .5s ease;
+      /* transform/opacity no afectan el layout — evita que esconderse
+         mueva el alto de la página y dispare el scroll de nuevo.
+         La duración real la fuerza el JS por inline style (ver más abajo). */
+      transition: transform .9s ease .1s, opacity 1s ease .1s;
     }
     .sticky-top.hide {
-      max-height: 0;
+      transform: translateY(-100%);
       opacity: 0;
-      padding-bottom: 0;
-      margin-bottom: 0;
-      border-color: transparent;
       pointer-events: none;
     }
     .nav-grid {
@@ -922,15 +920,26 @@
       var stickyTop = document.querySelector('.sticky-top');
       var lastY = window.scrollY;
       var ticking = false;
+      var isHidden = false;
+
+      var HIDE_T = 'transform .22s ease, opacity .15s ease';
+      var SHOW_T = 'transform .9s ease .1s, opacity 1s ease .1s';
+
+      function setHidden(hide) {
+        if (hide === isHidden) return;
+        isHidden = hide;
+        stickyTop.style.transition = hide ? HIDE_T : SHOW_T;
+        stickyTop.classList.toggle('hide', hide);
+      }
 
       function onScroll() {
         var y = window.scrollY;
         if (y <= 0) {
-          stickyTop.classList.remove('hide');
+          setHidden(false);
         } else if (y > lastY) {
-          stickyTop.classList.add('hide');
+          setHidden(true);
         } else if (y < lastY) {
-          stickyTop.classList.remove('hide');
+          setHidden(false);
         }
         lastY = y;
         ticking = false;
