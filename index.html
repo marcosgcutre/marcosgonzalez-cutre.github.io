@@ -95,10 +95,12 @@
       padding-bottom: 14px;
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
-      transition: transform .25s ease;
+      transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .35s ease;
     }
     .sticky-top.hide {
       transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
     }
     .nav-grid {
       display: flex;
