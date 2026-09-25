@@ -132,6 +132,11 @@ Tres cambios para que el organismo comunique en vez de decorar:
 - **Respuesta inmediata.** La punta de cada miembro brilla según cuán reciente es el hábito (hoy al máximo, se apaga en unos días). Con el botón + de HOME registrás el día y el miembro se enciende al instante; si el hábito es nuevo, el miembro crece. La forma cambia el mismo día, no sólo cada semanas.
 - **Génesis.** La primera vez, el organismo crece desde la historia disponible: recorre todos los días en unos segundos, deja sus pieles en el camino y termina en hoy. Con datos reales, la historia de Apple Health permite que la app arranque con una forma ya vivida en lugar de esperar semanas. Se puede volver a ver desde PROFILE.
 
+## 6f. Ritual de esporas y muda con cáscara
+
+- **Ritual de esporas.** El botón + de HOME agranda el organismo y lo rodea de esporas, una por hábito manual todavía no registrado ese día, con el color de su dominio. Arrastrar una espora hacia la forma (o tocarla) la registra: la espora entra al cuerpo, una onda lo recorre desde el centro y el miembro de ese hábito se enciende. Todas las esporas se absorben igual; no hay buenas ni malas.
+- **Muda con cáscara.** Cuando la forma muda, la anterior se desprende como una cáscara translúcida (una segunda instancia del organismo con menos partículas, desaturada), se corre al costado, queda tenue unos segundos y se disuelve. El aviso es sobrio: "Algo cambió · Mutación 05".
+
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.

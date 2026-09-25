@@ -54,9 +54,12 @@ uniform float uCycleTurns, uCycleStr;
 uniform vec2 uRings[8];   // estratos: x = posición temporal 0–1, y = intensidad
 uniform vec4 uLinks[3];   // acoplamientos: ángulo A, ángulo B, intensidad, signo
 uniform float uTrace[24];    // TRAZAS: frecuencia 28 d de cada hábito del catálogo (0 = no seguido)
-uniform float uTraceDom[24];
-uniform float uFresh[24];   // cuán reciente es cada hábito: 1 = hoy, se apaga en días
-uniform float uFocus;        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
+uniform float uTraceDom[24]; // dominio de cada hábito: 0 sustancias, 1 cuerpo, 2 mente, 3 recuperación, 4 nutrición
+uniform float uFresh[24];    // cuán reciente es cada hábito: 1 = hoy, se apaga en días
+uniform float uFocus;        // estructura aislada: 0 ninguna, 1 semana, 2 ciclo, 3 acoplamientos, 5 trazas, 10 estratos
+uniform float uAbsorb;       // onda al absorber una espora (1 → 0)
+uniform float uShell;        // 1 = esta instancia es una cáscara (exuvia desprendida)
+uniform float uShellAlpha;
 varying vec3 vColor;
 varying float vAlpha;
 ${SNOISE}
@@ -209,6 +212,8 @@ void main(){
   p += disp * chaos * (1.0 - 0.8 * structAmt); // las estructuras se leen nítidas
 
   p *= uExpansion * (1.0 + uPulseAmp * 0.035 * sin(uTime * uPulse * TAU));
+  // absorción: una onda que recorre el cuerpo desde el centro hacia afuera
+  p *= 1.0 + uAbsorb * 0.07 * sin(length(p) * 9.0 - (1.0 - uAbsorb) * 18.0);
 
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   gl_Position = projectionMatrix * mv;
@@ -241,6 +246,7 @@ void main(){
   vColor = col;
   vAlpha = visible * (0.35 + 0.75 * uGlow) * (0.5 + 0.5 * fract(s * 71.0));
   vAlpha *= 1.0 + 1.5 * tipGlow;
+  if (uShell > 0.5) { vColor = mix(col, vec3(0.82, 0.9, 1.0), 0.75); vAlpha *= uShellAlpha; }
   if (uFocus > 0.5) {
     float isStrata = step(0.01, ringGlow) * (1.0 - step(0.01, structAmt));
     float inF = uFocus > 9.5 ? isStrata
@@ -304,6 +310,7 @@ export class Organism {
       uTrace: { value: new Array(24).fill(0) },
       uFocus: { value: 0 },
       uFresh: { value: new Array(24).fill(0) },
+      uAbsorb: { value: 0 }, uShell: { value: 0 }, uShellAlpha: { value: 1 },
       uTraceDom: { value: TRACE_DOMAINS },
     };
     this.pat = emptyPatterns();
@@ -401,8 +408,42 @@ export class Stage {
 
   render(dt, time) {
     this.organism.update(dt, time);
+    // onda de absorción
+    const u = this.organism.material.uniforms.uAbsorb;
+    u.value = Math.max(0, u.value - dt * 0.9);
+    // cáscaras: se desprenden, se corren al costado, quedan tenues y se desvanecen
+    for (const sh of this.shells ?? []) {
+      sh.t += dt;
+      const k = Math.min(1, sh.t / 3.5), ease = 1 - Math.pow(1 - k, 3);
+      sh.o.points.position.set(sh.side * 1.25 * ease, 0.2 * ease, -0.9 * ease);
+      sh.o.points.scale.setScalar(1 + 0.08 * ease);
+      sh.o.points.rotation.y = sh.rot + 0.4 * ease;
+      const a = sh.t < 3.5 ? 1.3 - 0.95 * ease : Math.max(0, 0.35 - (sh.t - 3.5) * 0.02);
+      sh.o.material.uniforms.uShellAlpha.value = a;
+      sh.o.update(dt, time * 0.2);
+    }
+    this.shells = (this.shells ?? []).filter((sh) => {
+      if (sh.t < 20) return true;
+      this.scene.remove(sh.o.points); sh.o.dispose(); return false;
+    });
     if (this.controls) this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  // Absorber: dispara la onda
+  absorb() { this.organism.material.uniforms.uAbsorb.value = 1; }
+
+  // Mudar: la forma anterior se desprende como cáscara translúcida
+  shed(genome, patterns) {
+    this.shells = this.shells ?? [];
+    while (this.shells.length > 2) { const old = this.shells.shift(); this.scene.remove(old.o.points); old.o.dispose(); }
+    const o = new Organism(12000, 4721);
+    o.material.uniforms.uShell.value = 1;
+    o.material.uniforms.uPixelRatio.value = this.organism.material.uniforms.uPixelRatio.value;
+    o.setTarget(genome, true);
+    if (patterns) o.setPatterns(patterns, true);
+    this.scene.add(o.points);
+    this.shells.push({ o, t: 0, side: this.shells.length % 2 ? 1 : -1, rot: 0 });
   }
 
   dispose() { this.organism.dispose(); this.renderer.dispose(); }

@@ -246,24 +246,83 @@ function renderLog(sel = '#log') {
   }).join('')}</div>`;
   box.querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
     const id = b.dataset.h, on = !b.classList.contains('on');
-    const m = S.raw.manual.find((x) => x.date === d.date && x.habit === id);
-    if (m) m.value = on; else S.raw.manual.push({ date: d.date, habit: id, value: on });
-    thumbCache.clear();
-    recompute(true);
+    logHabit(id, on, d.date);
     renderLog(sel);
+    if (on) stage.absorb();
     // la forma responde al instante: se enciende la punta de ese miembro
     if (on) { toast(`TU FORMA REGISTRÓ · ${byId[id].label.toUpperCase()}`); showLimb(byId[id]); }
   });
 }
 
-// REGISTRO RÁPIDO desde HOME
-$('#fab').onclick = () => {
-  const ago = S.days.length - 1 - S.idx;
-  $('#quick-date').textContent = ago ? `hace ${ago} días` : 'hoy';
-  renderLog('#quick-log');
-  $('#quick').hidden = false;
-};
-$('#quick-close').onclick = () => { $('#quick').hidden = true; };
+// Registrar un hábito manual en un día
+function logHabit(id, on, date = S.days[S.idx].date) {
+  const m = S.raw.manual.find((x) => x.date === date && x.habit === id);
+  if (m) m.value = on; else S.raw.manual.push({ date, habit: id, value: on });
+  thumbCache.clear();
+  recompute(true);
+}
+
+// RITUAL DE ESPORAS: una espora por hábito manual; arrastrarla a la forma = registrarla.
+// Todas se absorben igual: no hay esporas buenas ni malas.
+function openRitual() {
+  const d = S.days[S.idx];
+  const pending = CATALOG.filter((h) => h.source === 'manual' && d.habits[h.id] !== true);
+  // primero los hábitos que ya seguís, después el resto
+  const tracked = new Set(trackedAt(S.days, S.idx).map((h) => h.id));
+  pending.sort((a, b) => tracked.has(b.id) - tracked.has(a.id));
+  app.classList.add('ritual-on');
+  $('#ritual').hidden = false;
+  // se espera a que el escenario termine de agrandarse (transición de 0.5 s)
+  setTimeout(() => {
+    const box = $('.stage-wrap').getBoundingClientRect();
+    const cx = box.width / 2, cy = box.height / 2 + 10, R = Math.min(box.width, box.height) * 0.4;
+    $('#spores').innerHTML = pending.map((h, i) => {
+      const ring = i < 10 ? 0 : 1, n = ring ? pending.length - 10 : Math.min(10, pending.length);
+      const k = ring ? i - 10 : i, a = (k / n) * Math.PI * 2 - Math.PI / 2 + ring * 0.3;
+      const r = R * (ring ? 0.62 : 1);
+      return `<button class="spore" data-h="${h.id}" data-x="${cx + Math.cos(a) * r}" data-y="${cy + Math.sin(a) * r}"
+        style="--dc:${DOMAINS[h.domain].color}; left:${cx + Math.cos(a) * r}px; top:${cy + Math.sin(a) * r}px; animation-delay:${(-i * 0.7).toFixed(1)}s">
+        <i></i><span>${h.label}</span></button>`;
+    }).join('');
+    $('#spores').querySelectorAll('.spore').forEach((el) => bindSpore(el, cx, cy, R));
+  }, 540);
+}
+function bindSpore(el, cx, cy, R) {
+  let start = null;
+  el.addEventListener('pointerdown', (e) => { start = [e.clientX, e.clientY, parseFloat(el.style.left), parseFloat(el.style.top)]; el.setPointerCapture(e.pointerId); el.classList.add('drag'); });
+  el.addEventListener('pointermove', (e) => {
+    if (!start) return;
+    el.style.left = `${start[2] + e.clientX - start[0]}px`; el.style.top = `${start[3] + e.clientY - start[1]}px`;
+  });
+  el.addEventListener('pointerup', (e) => {
+    if (!start) return;
+    const moved = Math.hypot(e.clientX - start[0], e.clientY - start[1]);
+    const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+    const near = Math.hypot(x - cx, y - cy) < R * 0.5;
+    el.classList.remove('drag'); start = null;
+    if (near || moved < 6) absorbSpore(el, cx, cy);
+    else { el.style.left = `${el.dataset.x}px`; el.style.top = `${el.dataset.y}px`; }
+  });
+}
+function absorbSpore(el, cx, cy) {
+  el.classList.add('absorbing');
+  el.style.left = `${cx}px`; el.style.top = `${cy}px`;
+  setTimeout(() => {
+    const h = byId[el.dataset.h];
+    el.remove();
+    logHabit(h.id, true);
+    stage.absorb();
+    showLimb(h);
+    toast(`ABSORBIDO · ${h.label.toUpperCase()}`);
+  }, 420);
+}
+function closeRitual() {
+  $('#ritual').hidden = true;
+  app.classList.remove('ritual-on');
+  $('#spores').innerHTML = '';
+}
+$('#fab').onclick = openRitual;
+$('#ritual-done').onclick = closeRitual;
 
 // GÉNESIS: la primera vez, el organismo crece desde tu historia
 function genesis() {
@@ -558,6 +617,7 @@ $('#share-link').onclick = async () => {
 // ---------- navegación ----------
 // Navegación por la barra inferior, como el mockup
 function go(view) {
+  if (view !== 'home' && !$('#ritual').hidden) closeRitual();
   if (S.view === 'exuvia' && view !== 'exuvia') { S.ghost = null; }
   S.view = view;
   app.dataset.view = view;
@@ -586,7 +646,12 @@ function toast(text) {
 function announceMutation() {
   const e = entry();
   const p = patternsAt(S.idx), ids = signalIds(p);
-  if (lastStage !== null && e.stage > lastStage) toast(`MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`);
+  if (lastStage !== null && e.stage > lastStage) {
+    toast(`ALGO CAMBIÓ · MUTACIÓN ${String(e.stage + 1).padStart(2, '0')}`);
+    // la piel que se deja: se desprende y queda como cáscara al costado
+    const skin = S.history.exuvias[e.stage - 1];
+    if (skin) stage.shed(skin.genome, { ...emptyPatterns(), traces: toUniforms(patternsAt(idxOf(skin.end))).traces });
+  }
   else if (lastSignals && lastStage !== null && e.stage === lastStage) {
     const fresh = ids.find((id) => !lastSignals.has(id));
     if (fresh) { toast(`PATRÓN NUEVO · ${describeSignal(fresh, p)}`); $('#bell-dot').hidden = false; }
@@ -596,9 +661,10 @@ function announceMutation() {
 function describeSignal(id, p) {
   if (id === 'W') return 'RITMO SEMANAL';
   if (id === 'C') return `CICLO ${p.cycle.period} D`;
-  if (id[0] === 'K') { const c = p.couplings.find((x) => id === `K${x.a}${x.b}`); return `${VARS[c.a].label} ↔ ${VARS[c.b].label}`; }
+  const nm = (k) => (byId[k]?.label ?? { activity: 'actividad', sleep: 'sueño', hrv: 'HRV' }[k] ?? k).toUpperCase();
+  if (id[0] === 'K') { const c = p.couplings.find((x) => id === `K${x.a}${x.b}`); return `${nm(c.a)} ↔ ${nm(c.b)}`; }
   const st = p.strata.find((x) => id === `S${x.key}${x.delta > 0 ? '+' : '-'}${Math.round(x.t / 28)}`);
-  return `ESTRATO · ${VARS[st.key].label} ${st.delta > 0 ? '↑' : '↓'}`;
+  return `${st.delta > 0 ? 'MÁS' : 'MENOS'} ${nm(st.key)} DESDE ${fmt(st.date)}`;
 }
 
 $('#btn-play').onclick = () => {
