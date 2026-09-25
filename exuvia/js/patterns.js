@@ -10,7 +10,7 @@
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
 
-import { CATALOG, dayValue, trackedAt, trace, daysSince, MAX_TRACES } from './catalog.js';
+import { CATALOG, dayValue, trackedAt, trace, MAX_TRACES } from './catalog.js';
 
 // Variables: tres fisiológicas + todos los hábitos del catálogo. El ángulo ubica su nodo
 // alrededor del cuerpo (los filamentos de acoplamiento unen esos nodos).
@@ -146,23 +146,13 @@ export function detect(allDays, idx) {
   const days = allDays.slice(0, idx + 1);
   const S = series(days);
   return {
-    traces: trackedAt(days, idx).map((h) => {
-      const since = daysSince(days, idx, h);
-      // frescura: 1 si fue hoy, ~0.5 ayer, se apaga en pocos días
-      // estrellas: días con el hábito en la última semana (0–7), como las esferas del dragón
-      const stars = days.slice(Math.max(0, idx - 6), idx + 1).filter((d) => (dayValue(d, h) ?? 0) >= 0.5).length;
-      return { id: h.id, code: h.code, domain: h.domain, freq: trace(days, idx, h).freq, fresh: since == null ? 0 : Math.exp(-since / 1.4), stars };
-    }),
+    traces: trackedAt(days, idx).map((h) => ({ id: h.id, code: h.code, domain: h.domain, freq: trace(days, idx, h).freq })),
     weekly: weekly(days, S.activity),
     cycle: cycle(days, S.activity),
     couplings: couplings(S),
     strata: strata(days, S),
   };
 }
-
-// Nodo de un acoplamiento en la galaxia: índice del hábito en el catálogo (su planeta),
-// o −1/−2/−3 para actividad, sueño y HRV, que viven en el núcleo
-export const nodeIndex = (k) => ({ activity: -1, sleep: -2, hrv: -3 }[k] ?? CATALOG.findIndex((h) => h.id === k));
 
 // Forma compacta para el shader (y para el enlace compartido)
 export function toUniforms(p) {
@@ -172,7 +162,7 @@ export function toUniforms(p) {
   });
   const links = Array.from({ length: 3 }, (_, i) => {
     const c = p.couplings[i];
-    return c ? [nodeIndex(c.a), nodeIndex(c.b), clamp01(Math.abs(c.r) / 0.6), c.r >= 0 ? 1 : -1] : [0, 0, 0, 1];
+    return c ? [VARS[c.a].angle, VARS[c.b].angle, clamp01(Math.abs(c.r) / 0.6), c.r >= 0 ? 1 : -1] : [0, 0, 0, 1];
   });
   return {
     week: p.weekly?.profile ?? Array(7).fill(0),
@@ -182,8 +172,6 @@ export function toUniforms(p) {
     rings, links,
     // una traza por hábito del catálogo (posición fija), frecuencia 28 d; 0 = no seguido
     traces: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.freq ?? 0),
-    fresh: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.fresh ?? 0),
-    stars: Array.from({ length: MAX_TRACES }, (_, i) => p.traces.find((t) => t.id === CATALOG[i]?.id)?.stars ?? 0),
   };
 }
 

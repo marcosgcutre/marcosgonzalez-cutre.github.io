@@ -124,32 +124,6 @@ La app sigue el mockup original: cinco pestañas (HOME, MUTATIONS, ANALYTICS, EX
 - **EXUVIA:** las pieles anteriores, una a una, con su duración y fechas.
 - **PROFILE:** fuentes de datos, compartir, Apple Watch, datos crudos y lab.
 
-## 6e. Anatomía de hábitos, respuesta inmediata y génesis
-
-Tres cambios para que el organismo comunique en vez de decorar:
-
-- **Anatomía de hábitos.** El organismo está hecho de tus hábitos. Cada hábito seguido le hace crecer un miembro propio en una posición fija (espiral áurea sobre el cuerpo); su largo es la frecuencia en 28 días y su morfología depende del dominio: tentáculo segmentado (cuerpo), tallo con bulbo (sustancias), doble espiral (mente), abanico (recuperación), anillo (nutrición). Dos personas con hábitos distintos tienen siluetas distintas, y la forma se puede leer: tocás un miembro, o una tarjeta, y aparece qué hábito es, cuántos días de los últimos 28 y cuándo fue la última vez. Reemplaza al espectro de barras, que era un gráfico pegado al organismo, no parte de él.
-- **Respuesta inmediata.** La punta de cada miembro brilla según cuán reciente es el hábito (hoy al máximo, se apaga en unos días). Con el botón + de HOME registrás el día y el miembro se enciende al instante; si el hábito es nuevo, el miembro crece. La forma cambia el mismo día, no sólo cada semanas.
-- **Génesis.** La primera vez, el organismo crece desde la historia disponible: recorre todos los días en unos segundos, deja sus pieles en el camino y termina en hoy. Con datos reales, la historia de Apple Health permite que la app arranque con una forma ya vivida en lugar de esperar semanas. Se puede volver a ver desde PROFILE.
-
-## 6f. Ritual de esporas y muda con cáscara
-
-- **Ritual de esporas.** El botón + de HOME agranda el organismo y lo rodea de esporas, una por hábito manual todavía no registrado ese día, con el color de su dominio. Arrastrar una espora hacia la forma (o tocarla) la registra: la espora entra al cuerpo, una onda lo recorre desde el centro y el miembro de ese hábito se enciende. Todas las esporas se absorben igual; no hay buenas ni malas.
-- **Muda con cáscara.** Cuando la forma muda, la anterior se desprende como una cáscara translúcida (una segunda instancia del organismo con menos partículas, desaturada), se corre al costado, queda tenue unos segundos y se disuelve. El aviso es sobrio: "Algo cambió · Mutación 05".
-
-## 6g. Tu exuvia es una galaxia de hábitos
-
-El organismo pasó a ser una galaxia, generada con las mismas partículas y el mismo genoma:
-
-- **Núcleo y brazos.** El núcleo (bulbo) es la persona. Los brazos espirales salen del genoma: cantidad de brazos (lóbulos), enrollamiento (torsión), nitidez (filamento), grosor del disco (elongación), extensión (base), barra central (amplitud de lóbulos), polvo entre brazos (entropía). Gira lento, según el flujo del día.
-- **Cada hábito es un planeta.** Orbita el núcleo con una órbita más cerrada cuanto más frecuente es el hábito (un hábito nuevo aparece en el borde), con velocidad kepleriana (los cercanos giran más rápido). Tamaño = frecuencia; color = dominio; morfología por dominio: esfera con halo de gas (sustancias), estrella con corona (cuerpo), estrella doble (mente), planeta con anillo (recuperación), mundo-anillo (nutrición). Cada planeta deja una estela de partículas en su órbita. Lo reciente brilla más.
-- **Patrones en la galaxia.** Ritmo semanal: halo de 7 lóbulos alrededor del núcleo. Ciclos: chorros polares en espiral. Acoplamientos: puentes de luz entre los planetas de los dos hábitos (o nodos del núcleo para actividad, sueño y HRV). Cambios de hábito: anillos en el disco, del pasado (adentro) al presente (afuera).
-- **La muda es una nebulosa.** En astronomía, las estrellas como el Sol expulsan sus capas externas al final de su vida y forman una nebulosa planetaria: una piel que la estrella deja atrás. En EXUVIA, cuando la galaxia muda, su forma anterior se expande como una nebulosa translúcida y se disuelve. Las exuvias guardadas son esas nebulosas.
-
-## 6h. Los planetas son esferas
-
-Cada hábito es una esfera sólida y grande en la órbita de su planeta: tamaño según la frecuencia en 28 días, color según el dominio (naranja sustancias, cian cuerpo, violeta mente, azul recuperación, perla nutrición), y late suavemente si el hábito es reciente. Las esferas se dibujan como impostores (un plano orientado a la cámara con un shader que simula la esfera: luz difusa, reflejo especular y borde luminoso), así que son baratas. Alrededor sigue la galaxia de partículas, con las estelas de cada órbita y un halo tenue alrededor de cada esfera.
-
 ## 7. Compartir
 
 Tres formatos, implementados en `js/share.js`: imagen PNG de 1080×1350 (formato vertical de Instagram), animación de 4 segundos grabada desde el canvas con `MediaRecorder` (MP4 donde el navegador lo permite, WebM si no), y un enlace. En móvil se usa la hoja de compartir del sistema (Web Share API); en escritorio, descarga.

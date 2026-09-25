@@ -35,21 +35,6 @@
       <div class="labels" id="labels" aria-hidden="true"></div>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
       <div class="ghost-label" id="ghost-label" hidden></div>
-      <button class="fab" id="fab" aria-label="Registrar el día">+</button>
-      <div class="ritual" id="ritual" hidden>
-        <div class="ritual-head">
-          <div class="eyebrow">¿QUÉ PASÓ HOY?</div>
-          <small>Arrastrá hacia tu galaxia lo que hiciste. Todo deja rastro.</small>
-        </div>
-        <div class="spores" id="spores"></div>
-        <button class="btn ritual-done" id="ritual-done">LISTO</button>
-      </div>
-      <div class="genesis" id="genesis" hidden>
-        <div class="eyebrow">GÉNESIS</div>
-        <p>Tu galaxia se está formando desde tu historia.</p>
-        <p class="gt" id="genesis-text"></p>
-        <button class="btn" id="genesis-skip">SALTAR</button>
-      </div>
     </section>
 
     <main class="panel">
@@ -78,7 +63,7 @@
 
       <!-- ANALYTICS: patrones, registro y últimos 28 días -->
       <div class="view" data-for="analytics">
-        <h2>PATRONES <span class="dim">tocá uno para verlo en tu galaxia</span></h2>
+        <h2>PATRONES <span class="dim">tocá uno para verlo en tu forma</span></h2>
         <div class="signals" id="signals"></div>
         <h2>REGISTRAR <span class="dim" id="log-date"></span></h2>
         <div id="log"></div>
@@ -105,7 +90,7 @@
         </label>
 
         <h2>SHARE MUTATION</h2>
-        <p class="note">Por defecto se comparte sólo tu galaxia. Elegí qué agregar.</p>
+        <p class="note">Por defecto se comparte sólo tu forma. Elegí qué agregar.</p>
         <div class="share-opts" id="share-opts"></div>
         <div class="actions">
           <button class="btn" id="share-img">IMAGEN</button>
@@ -130,8 +115,6 @@
           </div>
         </div>
         <p class="note" id="watch-note"></p>
-
-        <button class="btn" id="replay-genesis" style="margin-top:18px">VER GÉNESIS DE NUEVO</button>
 
         <details class="raw"><summary>DATOS DEL DÍA</summary>
           <div class="kv" id="canonical"></div>

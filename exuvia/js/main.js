@@ -7,7 +7,7 @@ import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
 import { CATALOG, DOMAINS, dayValue, byId, trackedAt, daysSince, firstSeen } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
-import { detect, toUniforms, signalIds, VARS, DAYS, nodeIndex } from './patterns.js';
+import { detect, toUniforms, signalIds, VARS, DAYS } from './patterns.js';
 import { emptyPatterns } from './organism.js';
 
 const $ = (s) => document.querySelector(s);
@@ -31,7 +31,7 @@ try {
     count: COUNT, maxDpr: coarse ? 1.75 : 2, seed: 4721,
     controls: (cam, el) => {
       const c = new OrbitControls(cam, el);
-      Object.assign(c, { enableDamping: true, dampingFactor: 0.06, enablePan: false, minDistance: 4, maxDistance: 12, autoRotate: true, autoRotateSpeed: 0.25 });
+      Object.assign(c, { enableDamping: true, dampingFactor: 0.06, enablePan: false, minDistance: 3, maxDistance: 9, autoRotate: true, autoRotateSpeed: 0.35 });
       return c;
     },
   });
@@ -47,7 +47,7 @@ function ensureWatch() {
   if (watch) return;
   const c = $('#watch-canvas');
   watch = new Stage(c, { count: 2500, maxDpr: 2, seed: 4721, fov: 34 });
-  watch.camera.position.set(0, 4.2, 6.2); watch.camera.lookAt(0, 0, 0);
+  watch.camera.position.set(0, 0.3, 7);
   watch.organism.material.uniforms.uPointSize.value = 24;
 }
 
@@ -86,9 +86,7 @@ const currentGenome = () => (S.ghost ? S.ghost.genome : toGenome(currentFeatures
 function refresh(immediate = false) {
   const g = currentGenome();
   // los patrones sólo se inscriben en la forma dentro de ANALYTICS; en el resto la forma va limpia
-  // la anatomía de hábitos (miembros + frescura) está siempre; las demás estructuras sólo en ANALYTICS
-  const full = toUniforms(currentPatterns());
-  const pu = S.view === 'analytics' ? full : { ...emptyPatterns(), traces: full.traces, fresh: full.fresh, stars: full.stars };
+  const pu = S.view === 'analytics' ? toUniforms(currentPatterns()) : emptyPatterns();
   stage.organism.setTarget(g, immediate);
   stage.organism.setPatterns(pu, immediate);
   watch?.organism.setTarget(g, immediate);
@@ -129,14 +127,12 @@ function cardFor(h) {
 }
 function renderHome() {
   $('#mutation-age').textContent = entry().age;
-  const hs = cardHabits();
-  $('#cards').innerHTML = hs.map(cardFor).map((c, i) => `
-    <div class="card" data-h="${hs[i].id}" style="--cc:${c.color}">
+  $('#cards').innerHTML = cardHabits().map(cardFor).map((c) => `
+    <div class="card" style="--cc:${c.color}">
       <div class="lbl">${c.label}</div>
       <div class="val">${c.value}<small>${c.unit}</small></div>
       <div class="bar"><b style="width:${(c.bar * 100).toFixed(0)}%"></b></div>
     </div>`).join('');
-  $('#cards').querySelectorAll('.card').forEach((el) => el.onclick = () => { showLimb(byId[el.dataset.h]); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 }
 
 // ---------- MUTATIONS ----------
@@ -153,12 +149,12 @@ function renderMutations() {
   $('#mutation-name').textContent = `MUTACIÓN ${String(e.stage + 1).padStart(2, '0')} · ${e.age} DÍAS`;
   const pct = Math.round(Math.min(1, e.net / NET) * 100);
   const head = e.age < MIN_DAYS
-    ? `Esta galaxia tiene ${e.age} días. Una galaxia necesita al menos ${MIN_DAYS} días antes de poder mudar.`
-    : pct >= 100 ? 'Tu galaxia está mudando.' : `Tu galaxia cambió un ${pct}% de lo necesario para mudar.`;
+    ? `Esta forma tiene ${e.age} días. Una forma necesita al menos ${MIN_DAYS} días antes de poder mudar.`
+    : pct >= 100 ? 'Tu forma está mudando.' : `Tu forma cambió un ${pct}% de lo necesario para mudar.`;
   const d = drivers();
   const list = d.length
-    ? `<p>Lo que más la está cambiando desde que empezó esta galaxia:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
-    : '<p>Tus hábitos están estables desde que empezó esta galaxia.</p>';
+    ? `<p>Lo que más la está cambiando desde que empezó esta forma:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
+    : '<p>Tus hábitos están estables desde que empezó esta forma.</p>';
   $('#mutation-status').innerHTML = `<p class="lead">${head}</p><div class="meter"><b style="width:${pct}%"></b></div>${list}`;
   renderHistory();
 }
@@ -204,7 +200,7 @@ function renderSkins() {
   const skins = pastSkins();
   if (!skins.length) {
     S.ghost = null;
-    $('#skin-info').innerHTML = '<p class="note">Todavía no dejaste ninguna exuvia. Cuando tu galaxia mude, expulsa una nebulosa con su forma anterior y queda acá.</p>';
+    $('#skin-info').innerHTML = '<p class="note">Todavía no dejaste ninguna piel atrás. Cuando tu forma mude, la anterior queda acá.</p>';
     $('#skin-dots').innerHTML = '';
     return;
   }
@@ -231,115 +227,25 @@ function traceRows(list) {
 }
 
 // HOY: registro del día seleccionado. Lo manual se toca; lo automático viene del wearable.
-function renderLog(sel = '#log') {
-  const box = $(sel);
-  if (!box) return;
+function renderLog() {
   const d = S.days[S.idx];
   const ago = S.days.length - 1 - S.idx;
-  if (sel === '#log') $('#log-date').textContent = `${ago ? `hace ${ago} días` : 'hoy'} · las sustancias son privadas`;
-  box.innerHTML = `<div class="chips">${CATALOG.map((h) => {
+  $('#log-date').textContent = `${ago ? `hace ${ago} días` : 'hoy'} · las sustancias son privadas`;
+  $('#log').innerHTML = `<div class="chips">${CATALOG.map((h) => {
     const v = dayValue(d, h), on = (v ?? 0) >= 0.5, detail = h.detail?.(d);
     const dc = DOMAINS[h.domain].color;
     return h.source === 'auto'
-      ? `<span class="chip auto ${on ? 'on' : ''}" style="--dc:${dc}" title="${h.label} · automático"><b>${h.label}</b><small>${detail ?? 'automático'}</small></span>`
-      : `<button class="chip ${on ? 'on' : ''}" style="--dc:${dc}" data-h="${h.id}"><b>${h.label}</b><small>${on ? 'registrado' : 'tocar'}</small></button>`;
+      ? `<span class="chip auto ${on ? 'on' : ''}" style="--dc:${dc}" title="${h.label} · automático"><b>${h.code}</b><small>${detail ?? 'AUTO'}</small></span>`
+      : `<button class="chip ${on ? 'on' : ''}" style="--dc:${dc}" data-h="${h.id}" title="${h.label}"><b>${h.code}</b><small>${h.label}</small></button>`;
   }).join('')}</div>`;
-  box.querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
+  $('#log').querySelectorAll('button.chip').forEach((b) => b.onclick = () => {
     const id = b.dataset.h, on = !b.classList.contains('on');
-    logHabit(id, on, d.date);
-    renderLog(sel);
-    if (on) stage.absorb();
-    // la forma responde al instante: se enciende la punta de ese miembro
-    if (on) { toast(`TU FORMA REGISTRÓ · ${byId[id].label.toUpperCase()}`); showLimb(byId[id]); }
+    const m = S.raw.manual.find((x) => x.date === d.date && x.habit === id);
+    if (m) m.value = on; else S.raw.manual.push({ date: d.date, habit: id, value: on });
+    thumbCache.clear();
+    recompute(true);
   });
 }
-
-// Registrar un hábito manual en un día
-function logHabit(id, on, date = S.days[S.idx].date) {
-  const m = S.raw.manual.find((x) => x.date === date && x.habit === id);
-  if (m) m.value = on; else S.raw.manual.push({ date, habit: id, value: on });
-  thumbCache.clear();
-  recompute(true);
-}
-
-// RITUAL DE ESPORAS: una espora por hábito manual; arrastrarla a la forma = registrarla.
-// Todas se absorben igual: no hay esporas buenas ni malas.
-function openRitual() {
-  const d = S.days[S.idx];
-  const pending = CATALOG.filter((h) => h.source === 'manual' && d.habits[h.id] !== true);
-  // primero los hábitos que ya seguís, después el resto
-  const tracked = new Set(trackedAt(S.days, S.idx).map((h) => h.id));
-  pending.sort((a, b) => tracked.has(b.id) - tracked.has(a.id));
-  app.classList.add('ritual-on');
-  $('#ritual').hidden = false;
-  // se espera a que el escenario termine de agrandarse (transición de 0.5 s)
-  setTimeout(() => {
-    const box = $('.stage-wrap').getBoundingClientRect();
-    const cx = box.width / 2, cy = box.height / 2 + 10, R = Math.min(box.width, box.height) * 0.4;
-    $('#spores').innerHTML = pending.map((h, i) => {
-      const ring = i < 10 ? 0 : 1, n = ring ? pending.length - 10 : Math.min(10, pending.length);
-      const k = ring ? i - 10 : i, a = (k / n) * Math.PI * 2 - Math.PI / 2 + ring * 0.3;
-      const r = R * (ring ? 0.62 : 1);
-      return `<button class="spore" data-h="${h.id}" data-x="${cx + Math.cos(a) * r}" data-y="${cy + Math.sin(a) * r}"
-        style="--dc:${DOMAINS[h.domain].color}; left:${cx + Math.cos(a) * r}px; top:${cy + Math.sin(a) * r}px; animation-delay:${(-i * 0.7).toFixed(1)}s">
-        <i></i><span>${h.label}</span></button>`;
-    }).join('');
-    $('#spores').querySelectorAll('.spore').forEach((el) => bindSpore(el, cx, cy, R));
-  }, 540);
-}
-function bindSpore(el, cx, cy, R) {
-  let start = null;
-  el.addEventListener('pointerdown', (e) => { start = [e.clientX, e.clientY, parseFloat(el.style.left), parseFloat(el.style.top)]; el.setPointerCapture(e.pointerId); el.classList.add('drag'); });
-  el.addEventListener('pointermove', (e) => {
-    if (!start) return;
-    el.style.left = `${start[2] + e.clientX - start[0]}px`; el.style.top = `${start[3] + e.clientY - start[1]}px`;
-  });
-  el.addEventListener('pointerup', (e) => {
-    if (!start) return;
-    const moved = Math.hypot(e.clientX - start[0], e.clientY - start[1]);
-    const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
-    const near = Math.hypot(x - cx, y - cy) < R * 0.5;
-    el.classList.remove('drag'); start = null;
-    if (near || moved < 6) absorbSpore(el, cx, cy);
-    else { el.style.left = `${el.dataset.x}px`; el.style.top = `${el.dataset.y}px`; }
-  });
-}
-function absorbSpore(el, cx, cy) {
-  el.classList.add('absorbing');
-  el.style.left = `${cx}px`; el.style.top = `${cy}px`;
-  setTimeout(() => {
-    const h = byId[el.dataset.h];
-    el.remove();
-    logHabit(h.id, true);
-    stage.absorb();
-    showLimb(h);
-    toast(`ABSORBIDO · ${h.label.toUpperCase()}`);
-  }, 420);
-}
-function closeRitual() {
-  $('#ritual').hidden = true;
-  app.classList.remove('ritual-on');
-  $('#spores').innerHTML = '';
-}
-$('#fab').onclick = openRitual;
-$('#ritual-done').onclick = closeRitual;
-
-// GÉNESIS: la primera vez, el organismo crece desde tu historia
-function genesis() {
-  S.idx = 0; S.genesis = true; S.playing = true; lastStage = 0; lastSignals = null;
-  $('#genesis').hidden = false;
-  refresh(true);
-}
-function endGenesis() {
-  S.genesis = false; S.playing = false;
-  S.idx = S.days.length - 1; $('#scrub').value = S.idx;
-  $('#genesis').hidden = true;
-  $('#btn-play').textContent = '▶';
-  try { localStorage.setItem('exuvia.genesis', '1'); } catch { /* sin almacenamiento: se repite, no pasa nada */ }
-  refresh();
-}
-$('#genesis-skip').onclick = endGenesis;
-$('#replay-genesis').onclick = () => { go('home'); genesis(); };
 
 // PATRONES en lenguaje llano; cada uno ligado a su estructura en la forma
 const DAY_NAMES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
@@ -349,17 +255,17 @@ function signalText(p) {
   const w = p.weekly;
   if (w && w.strength > 0.2) {
     const peak = w.profile.indexOf(Math.max(...w.profile)), low = w.profile.indexOf(Math.min(...w.profile));
-    rows.push({ k: 1, c: '#b3ffff', t: `Tu día más activo es el ${DAY_NAMES[peak]}; el más tranquilo, el ${DAY_NAMES[low]}.`, s: 'Halo alrededor del núcleo · un lóbulo por día' });
+    rows.push({ k: 1, c: '#b3ffff', t: `Tu día más activo es el ${DAY_NAMES[peak]}; el más tranquilo, el ${DAY_NAMES[low]}.`, s: 'Anillo alrededor de tu forma · un lóbulo por día' });
   }
-  if (p.cycle) rows.push({ k: 2, c: '#c79bff', t: `Tu actividad sube y baja en ciclos de unas ${Math.round(p.cycle.period / 7)} semanas.`, s: `Chorros polares en espiral · ${p.cycle.turns.toFixed(1)} vueltas = ciclos vistos` });
+  if (p.cycle) rows.push({ k: 2, c: '#c79bff', t: `Tu actividad sube y baja en ciclos de unas ${Math.round(p.cycle.period / 7)} semanas.`, s: `Hélice · ${p.cycle.turns.toFixed(1)} vueltas = ciclos vistos` });
   for (const c of p.couplings) {
     const after = c.lag ? `los días después de ${VAR_NAME(c.a).replace(/^tu /, '')}` : `cuando sube ${VAR_NAME(c.a)}`;
     const eff = c.b === 'sleep' ? (c.r > 0 ? 'dormís mejor' : 'dormís peor') : c.b === 'hrv' ? (c.r > 0 ? 'tu HRV sube' : 'tu HRV baja') : (c.r > 0 ? `sube ${VAR_NAME(c.b)}` : `baja ${VAR_NAME(c.b)}`);
-    rows.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${after[0].toUpperCase()}${after.slice(1)}, ${eff}.`, s: `Puente de luz entre planetas · correlación ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)} en 60 días (asociación, no causa)` });
+    rows.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${after[0].toUpperCase()}${after.slice(1)}, ${eff}.`, s: `Filamento · correlación ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)} en 60 días (asociación, no causa)` });
   }
   for (const x of p.strata.slice().reverse().slice(0, 3)) {
     const what = x.key === 'activity' ? 'actividad' : x.key === 'sleep' ? 'sueño' : byId[x.key]?.label.toLowerCase();
-    rows.push({ k: 10, c: '#cfe9ff', t: `Desde el ${fmt(x.date).toLowerCase()} hay ${x.delta > 0 ? 'más' : 'menos'} ${what}.`, s: 'Anillo en el disco · más adentro = más antiguo' });
+    rows.push({ k: 10, c: '#cfe9ff', t: `Desde el ${fmt(x.date).toLowerCase()} hay ${x.delta > 0 ? 'más' : 'menos'} ${what}.`, s: 'Capa dentro de tu forma · más adentro = más antiguo' });
   }
   return rows;
 }
@@ -383,77 +289,37 @@ const LINK_NODE = (a) => new THREE.Vector3(Math.cos(a) * 0.95, 0.35 + 0.45 * Mat
 function buildAnchors(g, pu) {
   const p = currentPatterns(), A = [];
   const TAU = Math.PI * 2;
-  if (p.weekly && pu.weekStr > 0.05) A.push({ k: 1, c: '#b3ffff', t: 'SEMANA', v: new THREE.Vector3(0.95, 0.15, 0) });
-  if (p.cycle) A.push({ k: 2, c: '#c79bff', t: `CICLO ${Math.round(p.cycle.period / 7)} SEM`, v: new THREE.Vector3(0, 1.5, 0) });
-  p.couplings.forEach((c, i) => {
-    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${(byId[c.a]?.label ?? VARS[c.a].label).toUpperCase()} → ${c.b === 'sleep' ? 'SUEÑO' : c.b === 'hrv' ? 'HRV' : VARS[c.b].label}`, dyn: () => nodeVec(c.a).add(nodeVec(c.b)).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.45 + 0.28 * i, 0)) });
+  if (p.weekly && pu.weekStr > 0.05) {
+    const i = p.weekly.profile.indexOf(Math.max(...p.weekly.profile));
+    const ang = ((i + 0.5) / 7) * TAU, r = 1.3 + 0.42 + 0.06;
+    A.push({ k: 1, c: '#b3ffff', t: `SEMANA`, v: new THREE.Vector3(Math.cos(ang) * r, 0.1, Math.sin(ang) * r) });
+  }
+  if (p.cycle) {
+    const ang = pu.cycleTurns * TAU;
+    A.push({ k: 2, c: '#c79bff', t: `CICLO ${Math.round(p.cycle.period / 7)} SEM`, v: new THREE.Vector3(Math.cos(ang) * 1.42, 1.55, Math.sin(ang) * 1.42) });
+  }
+  p.couplings.forEach((c) => {
+    const a = LINK_NODE(VARS[c.a].angle), b = LINK_NODE(VARS[c.b].angle);
+    const m = a.clone().add(b).multiplyScalar(0.5);
+    const ctl = m.clone().add(m.clone().add(new THREE.Vector3(0, 0.6, 0)).normalize().multiplyScalar(0.9));
+    const mid = a.clone().multiplyScalar(0.25).add(ctl.clone().multiplyScalar(0.5)).add(b.clone().multiplyScalar(0.25));
+    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${(byId[c.a]?.label ?? VARS[c.a].label).toUpperCase()} → ${c.b === 'sleep' ? 'SUEÑO' : c.b === 'hrv' ? 'HRV' : VARS[c.b].label}`, v: mid });
   });
   const st = p.strata.at(-1);
-  if (st) A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4), 0.05, Math.sin(2.4)).multiplyScalar(0.35 + (1.2 + 0.65 * g.skirt - 0.35) * st.pos) });
+  if (st) {
+    const r = 0.3 + 0.7 * st.pos;
+    A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
+  }
   p.traces.filter((t) => t.freq >= 0.1).sort((a, b) => b.freq - a.freq).slice(0, S.focus === 5 ? 24 : 4).forEach((t) => {
     const c = CATALOG.findIndex((h) => h.id === t.id);
-    A.push({ k: 5, c: DOMAINS[t.domain].color, t: byId[t.id].label.toUpperCase(), small: true, dyn: () => limbTip(c, t.freq) });
+    const ang = ((c + 0.5) / 24) * TAU;
+    A.push({ k: 5, c: DOMAINS[t.domain].color, t: t.code, small: true, v: new THREE.Vector3(Math.cos(ang) * 1.72, -0.95 + 0.08 + 2.4 * t.freq + 0.07, Math.sin(ang) * 1.72) });
   });
   S.anchors = S.focus ? A.filter((a) => a.k === S.focus) : A.filter((a) => !a.small);
-  if (S.tap) S.anchors.push(S.tap);
-  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.k === -1 ? 'tap' : a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
+  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
   S.labelEls = [...$('#labels').children];
 }
-// Posición actual del planeta de un hábito: mismas fórmulas que el shader
-function limbTip(c, f) {
-  const r = 2.0 - 1.15 * f, time = stage.organism.material.uniforms.uTime.value;
-  const a = c * 2.39996 + time * 0.22 / Math.pow(r, 1.5);
-  return new THREE.Vector3(Math.cos(a) * r, Math.sin(c * 1.7) * 0.12, Math.sin(a) * r);
-}
-const nodeVec = (k) => {
-  const idx = nodeIndex(k);
-  if (idx < 0) { const a = -idx * 2.1; return new THREE.Vector3(Math.cos(a) * 0.3, 0.12, Math.sin(a) * 0.3); }
-  const t = currentPatterns().traces.find((x) => x.id === CATALOG[idx].id);
-  return limbTip(idx, t?.freq ?? 0);
-};
-
-// TOCAR PARA LEER: tocás un miembro (o una tarjeta) y dice qué hábito es
-let tapTimer = 0;
-function showLimb(h) {
-  const t = currentPatterns().traces.find((x) => x.id === h.id);
-  if (!t) return;
-  const n28 = indicators(S.days, S.idx).find((x) => x.id === h.id)?.count ?? 0;
-  const since = daysSince(S.days, S.idx, h);
-  const when = since === 0 ? 'hoy' : since === 1 ? 'ayer' : since == null ? '—' : `hace ${since} días`;
-  const ci = CATALOG.indexOf(h);
-  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${t.stars ?? 0} de 7 días esta semana · ${n28} de 28 · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
-  clearTimeout(tapTimer); tapTimer = setTimeout(() => { S.tap = null; renderTapTag(); }, 3200);
-  renderTapTag();
-}
-function renderTapTag() {
-  const base = S.view === 'analytics' ? S.anchors.filter((a) => a.k !== -1) : [];
-  S.anchors = S.tap ? [...base, S.tap] : base;
-  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.k === -1 ? 'tap' : a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
-  S.labelEls = [...$('#labels').children];
-}
-{
-  const cv = $('#stage');
-  let down = null;
-  cv.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
-  cv.addEventListener('pointerup', (e) => {
-    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
-    const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
-    const ex = stage.organism.genome.expansion;
-    let best = null, bd = 48;
-    for (const t of currentPatterns().traces) {
-      if (t.freq < 0.03) continue;
-      const c = CATALOG.findIndex((h) => h.id === t.id);
-      for (const k of [1]) {
-        const v = limbTip(c, t.freq * k).multiplyScalar(ex).project(stage.camera);
-        const d = Math.hypot((v.x * 0.5 + 0.5) * r.width - mx, (-v.y * 0.5 + 0.5) * r.height - my);
-        if (d < bd) { bd = d; best = byId[t.id]; }
-      }
-    }
-    if (best) showLimb(best);
-  });
-}
-
-function clearAnchors() { S.anchors = []; S.labelEls = []; $('#labels').innerHTML = ''; if (S.tap) renderTapTag(); }
+function clearAnchors() { S.anchors = []; S.labelEls = []; $('#labels').innerHTML = ''; }
 const _v = new THREE.Vector3(), _dir = new THREE.Vector3();
 function updateLabels() {
   if (!S.labelEls?.length) return;
@@ -462,15 +328,12 @@ function updateLabels() {
   cam.getWorldDirection(_dir);
   S.anchors.forEach((a, i) => {
     const node = S.labelEls[i];
-    if (!node) return;
-    _v.copy(a.dyn ? a.dyn() : a.v).multiplyScalar(ex);
+    _v.copy(a.v).multiplyScalar(ex);
     const depth = _v.clone().sub(cam.position).dot(_dir) - cam.position.length(); // >0: detrás del centro
     _v.project(cam);
     const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;
-    const focus = S.focus === 0 || S.focus === a.k || a.k === -1;
-    // la etiqueta nunca se sale del marco
-    const cx = Math.max(6, Math.min(x, w - node.offsetWidth - 6));
-    node.style.transform = `translate(${cx.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    const focus = S.focus === 0 || S.focus === a.k;
+    node.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
     node.style.opacity = !focus ? 0.12 : depth > 0 ? 0.35 : 1;
   });
 }
@@ -611,7 +474,6 @@ $('#share-link').onclick = async () => {
 // ---------- navegación ----------
 // Navegación por la barra inferior, como el mockup
 function go(view) {
-  if (view !== 'home' && !$('#ritual').hidden) closeRitual();
   if (S.view === 'exuvia' && view !== 'exuvia') { S.ghost = null; }
   S.view = view;
   app.dataset.view = view;
@@ -640,12 +502,7 @@ function toast(text) {
 function announceMutation() {
   const e = entry();
   const p = patternsAt(S.idx), ids = signalIds(p);
-  if (lastStage !== null && e.stage > lastStage) {
-    toast(`ALGO CAMBIÓ · MUTACIÓN ${String(e.stage + 1).padStart(2, '0')}`);
-    // la piel que se deja: se desprende y queda como cáscara al costado
-    const skin = S.history.exuvias[e.stage - 1];
-    if (skin) stage.shed(skin.genome, (() => { const u = toUniforms(patternsAt(idxOf(skin.end))); return { ...emptyPatterns(), traces: u.traces, stars: u.stars }; })());
-  }
+  if (lastStage !== null && e.stage > lastStage) toast(`MUDA · M${String(e.stage + 1).padStart(2, '0')} ${e.name}`);
   else if (lastSignals && lastStage !== null && e.stage === lastStage) {
     const fresh = ids.find((id) => !lastSignals.has(id));
     if (fresh) { toast(`PATRÓN NUEVO · ${describeSignal(fresh, p)}`); $('#bell-dot').hidden = false; }
@@ -655,10 +512,9 @@ function announceMutation() {
 function describeSignal(id, p) {
   if (id === 'W') return 'RITMO SEMANAL';
   if (id === 'C') return `CICLO ${p.cycle.period} D`;
-  const nm = (k) => (byId[k]?.label ?? { activity: 'actividad', sleep: 'sueño', hrv: 'HRV' }[k] ?? k).toUpperCase();
-  if (id[0] === 'K') { const c = p.couplings.find((x) => id === `K${x.a}${x.b}`); return `${nm(c.a)} ↔ ${nm(c.b)}`; }
+  if (id[0] === 'K') { const c = p.couplings.find((x) => id === `K${x.a}${x.b}`); return `${VARS[c.a].label} ↔ ${VARS[c.b].label}`; }
   const st = p.strata.find((x) => id === `S${x.key}${x.delta > 0 ? '+' : '-'}${Math.round(x.t / 28)}`);
-  return `${st.delta > 0 ? 'MÁS' : 'MENOS'} ${nm(st.key)} DESDE ${fmt(st.date)}`;
+  return `ESTRATO · ${VARS[st.key].label} ${st.delta > 0 ? '↑' : '↓'}`;
 }
 
 $('#btn-play').onclick = () => {
@@ -676,11 +532,9 @@ function loop(now) {
   const t = now / 1000;
   if (S.playing) {
     playAcc += dt;
-    if (playAcc > (S.genesis ? 0.03 : 0.09)) {
+    if (playAcc > 0.09) {
       playAcc = 0;
-      if (S.genesis) $('#genesis-text').textContent = `${S.days[S.idx].date} · ${S.history.timeline[S.idx].stage} pieles dejadas`;
-      if (S.idx < S.days.length - 1) { S.idx = Math.min(S.days.length - 1, S.idx + (S.genesis ? 2 : 1)); $('#scrub').value = S.idx; announceMutation(); refresh(); }
-      else if (S.genesis) endGenesis();
+      if (S.idx < S.days.length - 1) { S.idx++; $('#scrub').value = S.idx; announceMutation(); refresh(); }
       else { S.playing = false; $('#btn-play').textContent = '▶'; }
     }
   }
@@ -716,9 +570,6 @@ if (shared) {
 } else {
   load('marcos');
   lastStage = entry().stage;
-  let seen = false;
-  try { seen = localStorage.getItem('exuvia.genesis') === '1'; } catch { /* nada */ }
-  if (!seen && !qs.has('nogenesis')) genesis();
 }
 requestAnimationFrame(loop);
 window.__exuviaReady = true;
