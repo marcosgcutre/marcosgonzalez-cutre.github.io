@@ -45,9 +45,15 @@
       font-style: inherit;
       padding: 0;
       display: inline-block;
+      transition: opacity .15s ease, border-color .15s ease;
     }
     a:hover, .toggle:hover { opacity: .6; }
+    a:focus-visible, .toggle:focus-visible, .langswitch button:focus-visible {
+      outline: 2px solid #111;
+      outline-offset: 3px;
+    }
     .series-item { font-style: italic; }
+    .empty-state { color: #999; font-size: 16px; }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        IDIOMAS — .lang se oculta salvo que coincida con
@@ -85,14 +91,29 @@
     .nav-col .item { font-size: 17px; }
 
     .current-title {
-      margin-top: 12px;
-      padding-top: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
       border-top: 1px solid #eee;
-      font-size: 15px;
+      font-size: 20px;
       font-weight: 500;
-      color: #666;
-      letter-spacing: .3px;
+      color: #111;
+      letter-spacing: .2px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
     }
+    .current-title[hidden] { display: none; }
+    .current-title .close-x {
+      all: unset;
+      cursor: pointer;
+      font-size: 15px;
+      color: #999;
+      line-height: 1;
+      padding: 4px;
+    }
+    .current-title .close-x:hover { color: #111; }
+    .current-title .close-x:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
 
     @media (max-width: 640px) {
       .nav-grid { gap: 20px; }
@@ -115,11 +136,21 @@
     .item { margin-bottom: 2px; }
     .toggle.open { border-bottom-color: #ccc; }
     .panel {
-      display: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      padding: 0 0;
+      margin-bottom: 0;
+      transition: max-height .4s ease, opacity .3s ease, padding .4s ease, margin .4s ease;
+    }
+    .panel.open {
+      opacity: 1;
       padding: 14px 0 18px 0;
       margin-bottom: 6px;
     }
-    .panel.open { display: block; }
+    @media (prefers-reduced-motion: reduce) {
+      .panel { transition: none; }
+    }
 
     .panel .block p { margin-bottom: 14px; }
     .panel h3 {
@@ -138,11 +169,45 @@
       width: 100%;
       display: block;
       margin-bottom: 10px;
+      cursor: zoom-in;
+      transition: opacity .15s ease;
     }
+    .work-img:hover { opacity: .9; }
     .work-caption {
       color: #666;
       font-size: 16px;
     }
+
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,.94);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      box-shadow: 0 10px 60px rgba(0,0,0,.5);
+    }
+    .lightbox .lightbox-close {
+      all: unset;
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      color: #fff;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: .8;
+    }
+    .lightbox .lightbox-close:hover { opacity: 1; }
 
     footer {
       margin-top: 40px;
@@ -171,35 +236,38 @@
         <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
         <div class="nav-col">
-          <div class="item"><a class="series-item toggle" data-target="serie-brava">¿Brava o mansa?</a></div>
-          <div class="item"><a class="series-item toggle" data-target="portfolio">Erosión del canon</a></div>
-          <div class="item"><a class="series-item toggle" data-target="portfolio">Buenos Aires</a></div>
-          <div class="item"><a class="series-item toggle" data-target="portfolio">Jantus (2014–2022)</a></div>
+          <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button></div>
+          <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Erosión del canon</button></div>
+          <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button></div>
+          <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button></div>
         </div>
 
         <div class="nav-col">
           <div class="item">
-            <a class="toggle" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></a>
+            <button class="toggle" type="button" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></button>
           </div>
           <div class="item">
-            <a class="toggle" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></a>
+            <button class="toggle" type="button" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></button>
           </div>
           <div class="item">
-            <a class="toggle" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></a>
+            <button class="toggle" type="button" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></button>
           </div>
           <div class="item">
-            <a class="toggle" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></a>
+            <button class="toggle" type="button" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></button>
           </div>
           <div class="item">
-            <a class="toggle" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></a>
+            <button class="toggle" type="button" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></button>
           </div>
           <div class="item">
-            <a class="toggle" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></a>
+            <button class="toggle" type="button" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></button>
           </div>
         </div>
       </div>
 
-      <div class="current-title" id="current-title" hidden></div>
+      <div class="current-title" id="current-title" hidden>
+        <span id="current-title-label"></span>
+        <button class="close-x" id="close-title" type="button" aria-label="Cerrar">✕</button>
+      </div>
     </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -462,6 +530,41 @@
           <p class="work-caption">
             <span class="lang lang-es">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-en">¿Brava o mansa? XVI (16), 2025 — Oil on canvas, 20 × 20 cm</span><span class="lang lang-pt">¿Brava o mansa? XVI (16), 2025 — Óleo sobre tela, 20 × 20 cm</span><span class="lang lang-fr">¿Brava o mansa? XVI (16), 2025 — Huile sur toile, 20 × 20 cm</span><span class="lang lang-it">¿Brava o mansa? XVI (16), 2025 — Olio su tela, 20 × 20 cm</span><span class="lang lang-ja">¿Brava o mansa? XVI (16), 2025 — 油彩、キャンバス、20 × 20 cm</span>
           </p>
+        </div>
+      </div>
+
+    <!-- ✏️ Series todavía sin obra cargada. Cuando llegue la primera imagen,
+         reemplazá el <p class="empty-state"> por el bloque de img + work-caption. -->
+      <div class="panel" id="panel-serie-erosion">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
+          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
+          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-serie-buenosaires">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
+          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
+          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-serie-jantus">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
+          <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há obras carregadas desta série.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore d'œuvres de cette série.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
+          <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
         </div>
       </div>
 
@@ -731,8 +834,24 @@
     </footer>
   </div>
 
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" type="button" aria-label="Cerrar">✕</button>
+    <img id="lightbox-img" src="" alt="">
+  </div>
+
   <script>
     var currentTitle = document.getElementById('current-title');
+    var currentTitleLabel = document.getElementById('current-title-label');
+
+    function closeAll() {
+      document.querySelectorAll('.panel').forEach(function (p) {
+        p.classList.remove('open');
+        p.style.maxHeight = '';
+      });
+      document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
+      currentTitle.hidden = true;
+      currentTitleLabel.innerHTML = '';
+    }
 
     document.querySelectorAll('.toggle').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
@@ -741,21 +860,54 @@
         var panel = document.getElementById('panel-' + id);
         var isOpen = panel.classList.contains('open');
 
-        document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('open'); });
-        document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
+        closeAll();
 
         if (!isOpen) {
           panel.classList.add('open');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
           document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
             t.classList.add('open');
           });
-          currentTitle.innerHTML = btn.innerHTML;
+          currentTitleLabel.innerHTML = btn.innerHTML;
           currentTitle.hidden = false;
-        } else {
-          currentTitle.hidden = true;
-          currentTitle.innerHTML = '';
         }
       });
+    });
+
+    document.getElementById('close-title').addEventListener('click', closeAll);
+
+    // Recalcular la altura si una imagen adentro del panel abierto termina de cargar
+    document.querySelectorAll('.work-img').forEach(function (img) {
+      img.addEventListener('load', function () {
+        var panel = img.closest('.panel');
+        if (panel && panel.classList.contains('open')) {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        }
+      });
+    });
+
+    // Recalcular al cambiar de idioma o de tamaño de ventana (el texto puede envolver distinto)
+    window.addEventListener('resize', function () {
+      var openPanel = document.querySelector('.panel.open');
+      if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
+    });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // LIGHTBOX — click en una obra para verla grande
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+    document.querySelectorAll('.work-img').forEach(function (img) {
+      img.addEventListener('click', function () {
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.add('open');
+      });
+    });
+    function closeLightbox() { lightbox.classList.remove('open'); }
+    lightbox.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeLightbox(); }
     });
 
     var langNames = { es: 'es', en: 'en', pt: 'pt', fr: 'fr', it: 'it', ja: 'ja' };
@@ -767,6 +919,8 @@
         b.classList.toggle('active', b.getAttribute('data-setlang') === code);
       });
       try { localStorage.setItem('lang', code); } catch (e) {}
+      var openPanel = document.querySelector('.panel.open');
+      if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
     }
     document.querySelectorAll('.langswitch button').forEach(function (b) {
       b.addEventListener('click', function () { setLang(b.getAttribute('data-setlang')); });
