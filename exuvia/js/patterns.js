@@ -158,6 +158,10 @@ export function detect(allDays, idx) {
   };
 }
 
+// Nodo de un acoplamiento en la galaxia: índice del hábito en el catálogo (su planeta),
+// o −1/−2/−3 para actividad, sueño y HRV, que viven en el núcleo
+export const nodeIndex = (k) => ({ activity: -1, sleep: -2, hrv: -3 }[k] ?? CATALOG.findIndex((h) => h.id === k));
+
 // Forma compacta para el shader (y para el enlace compartido)
 export function toUniforms(p) {
   const rings = Array.from({ length: 8 }, (_, i) => {
@@ -166,7 +170,7 @@ export function toUniforms(p) {
   });
   const links = Array.from({ length: 3 }, (_, i) => {
     const c = p.couplings[i];
-    return c ? [VARS[c.a].angle, VARS[c.b].angle, clamp01(Math.abs(c.r) / 0.6), c.r >= 0 ? 1 : -1] : [0, 0, 0, 1];
+    return c ? [nodeIndex(c.a), nodeIndex(c.b), clamp01(Math.abs(c.r) / 0.6), c.r >= 0 ? 1 : -1] : [0, 0, 0, 1];
   });
   return {
     week: p.weekly?.profile ?? Array(7).fill(0),

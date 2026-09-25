@@ -64,71 +64,76 @@ varying vec3 vColor;
 varying float vAlpha;
 ${SNOISE}
 const float TAU = 6.2831853;
+// Órbitas de los planetas (mismas fórmulas en main.js para tocar y etiquetar)
+float planetR(float f) { return 1.9 - 1.3 * f; }
+float planetA(float c, float r) { return c * 2.39996 + uTime * 0.22 / pow(r, 1.5); }
+vec3 planetP(float c, float r, float a) { return vec3(cos(a) * r, sin(c * 1.7) * 0.12, sin(a) * r); }
+// nodo de un acoplamiento: índice ≥ 0 = planeta de ese hábito; negativo = señal fisiológica en el núcleo
+vec3 nodePos(float idx) {
+  if (idx < -0.5) { float a = -idx * 2.1; return vec3(cos(a) * 0.3, 0.12, sin(a) * 0.3); }
+  float f = 0.0;
+  for (int i = 0; i < 24; i++) { if (float(i) == idx) f = uTrace[i]; }
+  float r = planetR(f);
+  return planetP(idx, r, planetA(idx, r));
+}
 void main(){
   float u = aSeed.x, v = aSeed.y, w = aSeed.z, s = aSeed.w;
   // Toda la materia está siempre presente: ningún dato "quita" partículas ni brillo.
   // La densidad sólo decide cómo se distribuye (compacta ↔ dispersa).
   float visible = 1.0;
   float t = uTime * uFlow;
+  float ringGlow = 0.0, structAmt = 0.0, kind = 0.0, tipGlow = 0.0;
 
-  // bandas fijas: el filamento sólo decide cuánto se agrupan, nunca cuántas bandas hay
-  float theta = u * TAU;
-  const float BANDS = 36.0;
-  float banded = (floor(u * BANDS) + 0.5) / BANDS * TAU + (fract(u * 977.0) - 0.5) * 0.015;
-  theta = mix(theta, banded, uFilament * 0.85);
-
-  // cuerpo: volumen con densidad variable hacia la superficie
-  float phi = acos(1.0 - 2.0 * v);
-  float k = fract(w * 7.31 + s * 3.7);
-  float rad = mix(pow(k, 0.33), 0.9 + 0.1 * k, 0.3 + 0.6 * uDensity);
-  rad *= 1.0 + (1.0 - uDensity) * 0.45 * pow(fract(s * 13.7), 3.0); // halo cuando es dispersa
-
-  // ESTRATOS: parte de la materia se deposita en capas concéntricas, una por cambio de
-  // hábito detectado. El radio codifica la fecha: centro = pasado, superficie = presente.
-  float ringGlow = 0.0;
-  if (fract(s * 91.7) < 0.4) {
-    float jf = floor(fract(s * 17.3) * 8.0);
-    for (int i = 0; i < 8; i++) {
-      if (float(i) == jf && uRings[i].y > 0.0) {
-        float target = mix(0.3, 1.0, uRings[i].x) + (fract(s * 431.0) - 0.5) * 0.012;
-        rad = mix(rad, target, uRings[i].y);
-        ringGlow = uRings[i].y;
+  // ===== GALAXIA =====
+  // Núcleo (vos) + disco con brazos espirales generados por el genoma.
+  // Cantidad de brazos = lóbulos, enrollamiento = torsión, nitidez = filamento,
+  // grosor del disco = elongación, extensión = base, barra central = amplitud de lóbulos.
+  float spin = t * 0.07;
+  float diskR = 1.2 + 0.65 * uSkirt;
+  float g1 = fract(w * 7.31 + s * 3.7), g2 = fract(s * 17.9 + u * 3.1);
+  float gauss = (g1 + g2 + fract(w * 91.3)) / 1.5 - 1.0;        // ~normal en [-1, 1]
+  vec3 p;
+  if (fract(s * 5.71) < 0.16 + 0.12 * uDensity) {
+    // bulbo: núcleo brillante, con barra si la amplitud de lóbulos es alta
+    float rb = 0.42 * pow(fract(w * 3.3), 1.6) * (1.25 - 0.5 * uDensity);
+    float th = u * TAU, ph2 = acos(1.0 - 2.0 * v);
+    p = vec3(sin(ph2) * cos(th) * (1.0 + 1.3 * uLobeAmp), cos(ph2) * 0.55, sin(ph2) * sin(th)) * rb;
+    float cb = cos(spin), sb = sin(spin);
+    p.xz = vec2(cb * p.x - sb * p.z, sb * p.x + cb * p.z);
+  } else {
+    // disco: radio con más densidad hacia adentro
+    float r = 0.18 + diskR * pow(v, 0.85);
+    // ESTRATOS: anillos en el disco; el radio codifica la fecha (adentro = pasado)
+    if (fract(s * 91.7) < 0.35) {
+      float jf = floor(fract(s * 17.3) * 8.0);
+      for (int i = 0; i < 8; i++) {
+        if (float(i) == jf && uRings[i].y > 0.0) {
+          float target = mix(0.35, diskR, uRings[i].x) + (fract(s * 431.0) - 0.5) * 0.02;
+          r = mix(r, target, uRings[i].y);
+          ringGlow = uRings[i].y;
+        }
       }
     }
+    // brazos: se mezclan dos cantidades enteras para que nada salte al cambiar
+    float nA = 2.0 + floor(uLobes * 0.8), nB = nA + 1.0, nf = fract(uLobes * 0.8);
+    float wind = 1.1 + 3.2 * uTwist;
+    float spread = mix(0.6, 0.1, uFilament) * (1.2 - 0.4 * uDensity);
+    float off = gauss * spread;
+    float interarm = step(fract(s * 29.3), 0.18 + 0.3 * (1.0 - uCoherence)); // polvo entre brazos
+    float angA = floor(u * nA) / nA * TAU + r * wind + off;
+    float angB = floor(u * nB) / nB * TAU + r * wind + off;
+    float ang = mix(angA, angB, smoothstep(0.35, 0.65, nf));
+    ang = mix(ang, u * TAU * 7.0, interarm) - spin + uSeedShift;
+    float thick = (0.03 + 0.22 * uElong) * (1.0 - 0.6 * r / (diskR + 0.2));
+    p = vec3(cos(ang) * r, gauss * thick, sin(ang) * r);
   }
-  // lóbulos enteros mezclados: sin costura en theta = 0 y sin saltos entre 2 y 3 lóbulos
-  float l0 = floor(uLobes), lf = fract(uLobes);
-  float ph = uSeedShift * 2.0 + t * 0.35;
-  float lobe = mix(sin(l0 * theta + ph) * sin(phi * (1.0 + floor(l0 * 0.5))),
-                   sin((l0 + 1.0) * theta + ph) * sin(phi * (1.0 + floor((l0 + 1.0) * 0.5))), lf);
-  rad *= 1.0 + uLobeAmp * 0.38 * lobe;
-  vec3 body = vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta)) * rad;
-  body.y = body.y * (0.85 + 0.75 * uElong) + 0.15;
-  float up = max(body.y, 0.0);
-  body.x += 0.45 * sin(uSeedShift) * up * up;
-  body.z += 0.35 * cos(uSeedShift * 1.3) * up * up;
-  body.xz *= mix(1.0, 0.55, smoothstep(-0.2, 1.5, body.y) * (0.3 + 0.7 * uElong));
 
-  // base: disco que se abre y se curva, como la cola de la referencia
-  float r = 0.3 + 0.85 * sqrt(v) * (0.5 + 0.5 * uSkirt);
-  float h = -0.92 + 0.10 * sin(theta * 3.0 + r * 5.0 + uSeedShift * 2.3);
-  h += 0.22 * r * r * r * (0.3 + uSkirt) + (fract(w * 531.0) - 0.5) * 0.05;
-  vec3 skirt = vec3(cos(theta) * r, h, sin(theta) * r);
-
-  // pertenencia continua: al crecer la base, las partículas migran del cuerpo al disco
-  vec3 p = mix(body, skirt, smoothstep(w, w + 0.05, uSkirt * 0.42));
-
-  float a = uTwist * p.y * 1.7 + 0.12 * sin(t * 0.4);
-  float ca = cos(a), sa = sin(a);
-  p.xz = vec2(ca * p.x - sa * p.z, sa * p.x + ca * p.z);
-
-  // ESTRUCTURAS: una fracción fija de partículas se reorganiza según los patrones.
-  // Con intensidad 0 vuelven al cuerpo; nunca aparecen ni desaparecen de golpe.
+  // ESTRUCTURAS: una fracción fija de partículas se reorganiza según patrones y hábitos.
+  // Con intensidad 0 vuelven a la galaxia; nunca aparecen ni desaparecen de golpe.
   float role = fract(s * 53.13 + v * 3.7);
-  float structAmt = 0.0, kind = 0.0, tipGlow = 0.0;
   vec3 sp = p;
   if (role < 0.07) {
-    // RITMO SEMANAL: anillo orbital, un lóbulo por día; el radio es la actividad de ese día
+    // RITMO SEMANAL: halo de 7 lóbulos alrededor del núcleo; radio = actividad de ese día
     float d = u * 7.0, i0 = floor(d), f0 = fract(d);
     float w0 = 0.0, w1 = 0.0;
     for (int i = 0; i < 7; i++) {
@@ -136,70 +141,73 @@ void main(){
       if (float(i) == mod(i0 + 1.0, 7.0)) w1 = uWeek[i];
     }
     float wv = mix(w0, w1, smoothstep(0.4, 0.6, f0));
-    float tick = step(f0, 0.012);
-    float rr = 1.3 + 0.42 * wv + (fract(w * 59.0) - 0.5) * 0.06 * (0.3 + wv);
-    float yy = 0.1 + (fract(w * 37.0) - 0.5) * (0.035 + 0.3 * tick);
-    sp = vec3(cos(u * TAU) * rr, yy, sin(u * TAU) * rr);
+    float rr = 0.55 + 0.4 * wv + (fract(w * 59.0) - 0.5) * 0.04;
+    float a7 = u * TAU - spin * 0.5;
+    sp = vec3(cos(a7) * rr, 0.08 + (fract(w * 37.0) - 0.5) * (0.02 + 0.18 * step(f0, 0.015)), sin(a7) * rr);
     structAmt = smoothstep(0.03, 0.2, uWeekStr); kind = 1.0;
   } else if (role < 0.13) {
-    // CICLO: doble hélice; cada vuelta es un ciclo observado
-    float ang = v * uCycleTurns * TAU + step(0.5, fract(s * 7.0)) * 3.14159 + t * 0.05;
-    float rr = 1.42 + (fract(w * 71.0) - 0.5) * 0.035;
-    sp = vec3(cos(ang) * rr, mix(-0.95, 1.55, v), sin(ang) * rr);
+    // CICLO: chorros polares en espiral; cada vuelta es un ciclo observado
+    float sgn = step(0.5, fract(s * 7.0)) * 2.0 - 1.0;
+    float aj = v * uCycleTurns * TAU + t * 0.1;
+    float rj = 0.05 + 0.16 * v;
+    sp = vec3(cos(aj) * rj, sgn * (0.12 + 1.35 * v), sin(aj) * rj);
     structAmt = uCycleStr; kind = 2.0;
   } else if (role < 0.19) {
-    // ACOPLAMIENTOS: arco entre los nodos de dos variables que se mueven juntas
+    // ACOPLAMIENTOS: puente de luz entre dos planetas (o nodos del núcleo)
     float jf = floor(fract(s * 11.0) * 3.0);
     vec4 L = vec4(0.0);
     for (int i = 0; i < 3; i++) { if (float(i) == jf) L = uLinks[i]; }
-    vec3 A = vec3(cos(L.x) * 0.95, 0.35 + 0.45 * sin(L.x * 2.0), sin(L.x) * 0.95);
-    vec3 B = vec3(cos(L.y) * 0.95, 0.35 + 0.45 * sin(L.y * 2.0), sin(L.y) * 0.95);
-    vec3 m = (A + B) * 0.5;
-    vec3 c = m + normalize(m + vec3(0.0, 0.6, 0.0)) * 0.9;
-    sp = mix(mix(A, c, v), mix(c, B, v), v) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.03;
+    vec3 A = nodePos(L.x), B = nodePos(L.y);
+    vec3 c = (A + B) * 0.5 + vec3(0.0, 0.45 + 0.15 * length(A - B), 0.0);
+    sp = mix(mix(A, c, v), mix(c, B, v), v) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.025;
     structAmt = L.z; kind = L.w < 0.0 ? 4.0 : 3.0;
-  } else if (role < 0.42) {
-    // ANATOMÍA DE HÁBITOS: cada hábito seguido es un miembro del organismo.
-    // Posición fija por hábito (espiral áurea), largo = frecuencia en 28 días,
-    // morfología según dominio. La punta brilla si el hábito es reciente.
+  } else if (role < 0.44) {
+    // PLANETAS: cada hábito seguido es un planeta que orbita el núcleo.
+    // Órbita más cerrada = más frecuente. Tamaño = frecuencia. Color = dominio.
+    // Deja una estela en su órbita: every habit leaves a trace.
     float c = floor(fract(s * 23.7) * 24.0);
     float f = 0.0, dom = 0.0, fr = 0.0;
     for (int i = 0; i < 24; i++) { if (float(i) == c) { f = uTrace[i]; dom = uTraceDom[i]; fr = uFresh[i]; } }
-    float yb = mix(0.8, -0.45, (c + 0.5) / 24.0);
-    float az = c * 2.39996;
-    float rxz = sqrt(1.0 - yb * yb);
-    vec3 dir = normalize(vec3(cos(az) * rxz, yb, sin(az) * rxz));
-    vec3 side = normalize(cross(dir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
-    vec3 up2 = cross(side, dir);
-    float L = 0.15 + 1.05 * f;
-    float x = v;
-    float curl = sin(x * 3.0 + t * 0.6 + c) * 0.22 * x;
-    vec3 axis = dir * (0.8 + L * x) + side * curl + up2 * 0.18 * x * x;
-    float a2 = u * TAU;
-    float fill = sqrt(fract(w * 97.0));
-    float r0;
-    if (dom < 0.5) {
-      // sustancias: tallo fino y bulbo en la punta
-      float db = (x - 0.86) / 0.13;
-      r0 = 0.025 + (0.13 + 0.12 * f) * exp(-db * db);
-    } else if (dom < 1.5) {
-      // cuerpo: tentáculo que se afina, con segmentos que viajan hacia la punta
-      r0 = (0.1 + 0.06 * f) * (1.0 - 0.75 * x) * (0.7 + 0.3 * step(0.5, fract(x * 7.0 - t * 0.7)));
-    } else if (dom < 2.5) {
-      // mente: doble espiral alrededor del eje
-      a2 = x * 22.0 + t * 0.8 + step(0.5, fract(w * 13.0)) * 3.14159;
-      r0 = 0.1 * (1.0 - 0.4 * x); fill = 1.0;
-    } else if (dom < 3.5) {
-      // recuperación: abanico plano que se abre
-      a2 = (u - 0.5) * 1.6; r0 = 0.32 * x;
+    float pr = planetR(f);
+    float pa = planetA(c, pr);
+    vec3 P = planetP(c, pr, pa);
+    float size = 0.045 + 0.1 * f;
+    float q = fract(w * 5.3);
+    if (q < 0.42) {
+      // estela: arco de la órbita detrás del planeta, que se desvanece
+      float back = v * (0.35 + 1.4 * f);
+      float ab = pa - back;
+      sp = vec3(cos(ab) * pr, P.y, sin(ab) * pr) + (vec3(fract(w * 13.0), fract(w * 29.0), fract(w * 47.0)) - 0.5) * 0.02;
+      tipGlow = fr * 0.25 * (1.0 - v);
     } else {
-      // nutrición: anillo en la punta
-      x = mix(0.85, 1.0, fract(w * 3.0)); axis = dir * (0.8 + L * x);
-      r0 = 0.16; fill = 1.0;
+      vec3 rnd = normalize(vec3(fract(w * 13.7), fract(w * 31.1), fract(w * 57.3)) - 0.5);
+      float rr = size * pow(fract(w * 77.0), 0.4);
+      if (dom < 0.5) {
+        // sustancias: esfera densa con halo de gas
+        rr = size * (fract(w * 3.1) < 0.75 ? pow(fract(w * 77.0), 0.5) : 1.6 + fract(w * 9.0));
+        sp = P + rnd * rr;
+      } else if (dom < 1.5) {
+        // cuerpo: estrella con corona de rayos
+        rr = size * (0.6 + 2.2 * pow(fract(w * 77.0), 4.0));
+        sp = P + rnd * rr;
+      } else if (dom < 2.5) {
+        // mente: estrella doble, dos cuerpos que giran entre sí
+        float ab = t * 1.6 + c;
+        vec3 o = vec3(cos(ab), 0.0, sin(ab)) * size * 1.2 * (step(0.5, fract(w * 19.0)) * 2.0 - 1.0);
+        sp = P + o + rnd * size * 0.55;
+      } else if (dom < 3.5) {
+        // recuperación: planeta con anillo plano inclinado
+        if (fract(w * 23.0) < 0.5) sp = P + rnd * size * 0.7;
+        else { float ar = u * TAU; sp = P + vec3(cos(ar) * size * 2.0, sin(ar) * size * 0.5, sin(ar) * size * 1.6); }
+      } else {
+        // nutrición: mundo-anillo
+        float ar = u * TAU;
+        sp = P + vec3(cos(ar), (fract(w * 7.0) - 0.5) * 0.15, sin(ar)) * size * 1.3;
+      }
+      tipGlow = fr;
     }
-    sp = axis + (side * cos(a2) + up2 * sin(a2)) * r0 * fill;
     structAmt = smoothstep(0.0, 0.03, f); kind = 5.0 + dom;
-    tipGlow = fr * smoothstep(0.55, 1.0, x) * structAmt;
+    tipGlow *= structAmt;
   }
   p = mix(p, sp, structAmt);
 
@@ -239,8 +247,8 @@ void main(){
   else if (kind == 4.0) col = mix(col, OR, 0.75 * structAmt);
   else if (kind >= 5.0) {
     vec3 dc = kind < 5.5 ? OR : kind < 6.5 ? CY : kind < 7.5 ? VI * 1.3 : kind < 8.5 ? BL * 1.4 : vec3(0.92, 0.97, 1.0);
-    col = mix(col, dc, 0.9 * structAmt);
-    col = mix(col, vec3(1.0), tipGlow * 0.55);
+    col = mix(col, dc * 1.15, 0.95 * structAmt);
+    col = mix(col, vec3(1.0), tipGlow * 0.18); // lo reciente brilla más, sin perder su color
   }
   col = mix(col, vec3(0.8, 0.95, 1.0), ringGlow * 0.45 * (1.0 - structAmt));
   vColor = col;
@@ -388,7 +396,9 @@ export class Stage {
     this.maxDpr = maxDpr;
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 50);
-    this.camera.position.set(0, 0.35, 6.4);
+    // vista inclinada sobre el disco de la galaxia
+    this.camera.position.set(0, 3.0, 6.6);
+    this.camera.lookAt(0, 0, 0);
     this.organism = new Organism(count, seed);
     this.scene.add(this.organism.points);
     this.controls = controls ? controls(this.camera, canvas) : null;
@@ -415,9 +425,10 @@ export class Stage {
     for (const sh of this.shells ?? []) {
       sh.t += dt;
       const k = Math.min(1, sh.t / 3.5), ease = 1 - Math.pow(1 - k, 3);
-      sh.o.points.position.set(sh.side * 1.25 * ease, 0.2 * ease, -0.9 * ease);
-      sh.o.points.scale.setScalar(1 + 0.08 * ease);
-      sh.o.points.rotation.y = sh.rot + 0.4 * ease;
+      // nebulosa: la capa expulsada se expande y se aleja lentamente
+      sh.o.points.position.set(0, 0.15 * ease, -0.4 * ease);
+      sh.o.points.scale.setScalar(1 + 0.9 * ease);
+      sh.o.points.rotation.y = sh.rot + 0.5 * ease;
       const a = sh.t < 3.5 ? 1.3 - 0.95 * ease : Math.max(0, 0.35 - (sh.t - 3.5) * 0.02);
       sh.o.material.uniforms.uShellAlpha.value = a;
       sh.o.update(dt, time * 0.2);

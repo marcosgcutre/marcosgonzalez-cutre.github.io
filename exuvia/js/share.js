@@ -125,7 +125,7 @@ export function encodeGenome(genome, meta, patterns) {
   if (patterns) {
     const pb = [...patterns.week.map((x) => q(x)), q(patterns.weekStr), q(patterns.cycleTurns, 20), q(patterns.cycleStr),
       ...patterns.rings.flatMap(([a, b]) => [q(a), q(b)]),
-      ...patterns.links.flatMap(([a, b, c, d]) => [q(a, TAU), q(b, TAU), q(c), d >= 0 ? 255 : 0]),
+      ...patterns.links.flatMap(([a, b, c, d]) => [a + 3, b + 3, q(c), d >= 0 ? 255 : 0]),
       ...(patterns.traces ?? []).map((x) => q(x))];
     url += `&p=${b64(pb)}`;
   }
@@ -151,7 +151,7 @@ export function decodeGenome(hash) {
         week: Array.from({ length: 7 }, () => dq(b[j++])), weekStr: dq(b[j++]),
         cycleTurns: dq(b[j++], 20), cycleStr: dq(b[j++]),
         rings: Array.from({ length: 8 }, () => [dq(b[j++]), dq(b[j++])]),
-        links: Array.from({ length: 3 }, () => [dq(b[j++], TAU), dq(b[j++], TAU), dq(b[j++]), b[j++] ? 1 : -1]),
+        links: Array.from({ length: 3 }, () => [b[j++] - 3, b[j++] - 3, dq(b[j++]), b[j++] ? 1 : -1]),
         traces: Array.from({ length: 24 }, () => (j < b.length ? dq(b[j++]) : 0)),
       };
     }

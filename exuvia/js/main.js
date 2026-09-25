@@ -7,7 +7,7 @@ import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
 import { CATALOG, DOMAINS, dayValue, byId, trackedAt, daysSince, firstSeen } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
 import { shareImage, shareVideo, encodeGenome, decodeGenome } from './share.js';
-import { detect, toUniforms, signalIds, VARS, DAYS } from './patterns.js';
+import { detect, toUniforms, signalIds, VARS, DAYS, nodeIndex } from './patterns.js';
 import { emptyPatterns } from './organism.js';
 
 const $ = (s) => document.querySelector(s);
@@ -31,7 +31,7 @@ try {
     count: COUNT, maxDpr: coarse ? 1.75 : 2, seed: 4721,
     controls: (cam, el) => {
       const c = new OrbitControls(cam, el);
-      Object.assign(c, { enableDamping: true, dampingFactor: 0.06, enablePan: false, minDistance: 3, maxDistance: 9, autoRotate: true, autoRotateSpeed: 0.35 });
+      Object.assign(c, { enableDamping: true, dampingFactor: 0.06, enablePan: false, minDistance: 4, maxDistance: 12, autoRotate: true, autoRotateSpeed: 0.25 });
       return c;
     },
   });
@@ -47,7 +47,7 @@ function ensureWatch() {
   if (watch) return;
   const c = $('#watch-canvas');
   watch = new Stage(c, { count: 2500, maxDpr: 2, seed: 4721, fov: 34 });
-  watch.camera.position.set(0, 0.3, 7);
+  watch.camera.position.set(0, 4.2, 6.2); watch.camera.lookAt(0, 0, 0);
   watch.organism.material.uniforms.uPointSize.value = 24;
 }
 
@@ -153,12 +153,12 @@ function renderMutations() {
   $('#mutation-name').textContent = `MUTACIÓN ${String(e.stage + 1).padStart(2, '0')} · ${e.age} DÍAS`;
   const pct = Math.round(Math.min(1, e.net / NET) * 100);
   const head = e.age < MIN_DAYS
-    ? `Esta forma tiene ${e.age} días. Una forma necesita al menos ${MIN_DAYS} días antes de poder mudar.`
-    : pct >= 100 ? 'Tu forma está mudando.' : `Tu forma cambió un ${pct}% de lo necesario para mudar.`;
+    ? `Esta galaxia tiene ${e.age} días. Una galaxia necesita al menos ${MIN_DAYS} días antes de poder mudar.`
+    : pct >= 100 ? 'Tu galaxia está mudando.' : `Tu galaxia cambió un ${pct}% de lo necesario para mudar.`;
   const d = drivers();
   const list = d.length
-    ? `<p>Lo que más la está cambiando desde que empezó esta forma:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
-    : '<p>Tus hábitos están estables desde que empezó esta forma.</p>';
+    ? `<p>Lo que más la está cambiando desde que empezó esta galaxia:</p><ul>${d.map((x) => `<li style="--dc:${DOMAINS[x.h.domain].color}"><b>${x.h.label}</b> ${x.a} → ${x.b} días de cada 28</li>`).join('')}</ul>`
+    : '<p>Tus hábitos están estables desde que empezó esta galaxia.</p>';
   $('#mutation-status').innerHTML = `<p class="lead">${head}</p><div class="meter"><b style="width:${pct}%"></b></div>${list}`;
   renderHistory();
 }
@@ -204,7 +204,7 @@ function renderSkins() {
   const skins = pastSkins();
   if (!skins.length) {
     S.ghost = null;
-    $('#skin-info').innerHTML = '<p class="note">Todavía no dejaste ninguna piel atrás. Cuando tu forma mude, la anterior queda acá.</p>';
+    $('#skin-info').innerHTML = '<p class="note">Todavía no dejaste ninguna exuvia. Cuando tu galaxia mude, expulsa una nebulosa con su forma anterior y queda acá.</p>';
     $('#skin-dots').innerHTML = '';
     return;
   }
@@ -349,17 +349,17 @@ function signalText(p) {
   const w = p.weekly;
   if (w && w.strength > 0.2) {
     const peak = w.profile.indexOf(Math.max(...w.profile)), low = w.profile.indexOf(Math.min(...w.profile));
-    rows.push({ k: 1, c: '#b3ffff', t: `Tu día más activo es el ${DAY_NAMES[peak]}; el más tranquilo, el ${DAY_NAMES[low]}.`, s: 'Anillo alrededor de tu forma · un lóbulo por día' });
+    rows.push({ k: 1, c: '#b3ffff', t: `Tu día más activo es el ${DAY_NAMES[peak]}; el más tranquilo, el ${DAY_NAMES[low]}.`, s: 'Halo alrededor del núcleo · un lóbulo por día' });
   }
-  if (p.cycle) rows.push({ k: 2, c: '#c79bff', t: `Tu actividad sube y baja en ciclos de unas ${Math.round(p.cycle.period / 7)} semanas.`, s: `Hélice · ${p.cycle.turns.toFixed(1)} vueltas = ciclos vistos` });
+  if (p.cycle) rows.push({ k: 2, c: '#c79bff', t: `Tu actividad sube y baja en ciclos de unas ${Math.round(p.cycle.period / 7)} semanas.`, s: `Chorros polares en espiral · ${p.cycle.turns.toFixed(1)} vueltas = ciclos vistos` });
   for (const c of p.couplings) {
     const after = c.lag ? `los días después de ${VAR_NAME(c.a).replace(/^tu /, '')}` : `cuando sube ${VAR_NAME(c.a)}`;
     const eff = c.b === 'sleep' ? (c.r > 0 ? 'dormís mejor' : 'dormís peor') : c.b === 'hrv' ? (c.r > 0 ? 'tu HRV sube' : 'tu HRV baja') : (c.r > 0 ? `sube ${VAR_NAME(c.b)}` : `baja ${VAR_NAME(c.b)}`);
-    rows.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${after[0].toUpperCase()}${after.slice(1)}, ${eff}.`, s: `Filamento · correlación ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)} en 60 días (asociación, no causa)` });
+    rows.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${after[0].toUpperCase()}${after.slice(1)}, ${eff}.`, s: `Puente de luz entre planetas · correlación ${c.r >= 0 ? '+' : '−'}${Math.abs(c.r).toFixed(2)} en 60 días (asociación, no causa)` });
   }
   for (const x of p.strata.slice().reverse().slice(0, 3)) {
     const what = x.key === 'activity' ? 'actividad' : x.key === 'sleep' ? 'sueño' : byId[x.key]?.label.toLowerCase();
-    rows.push({ k: 10, c: '#cfe9ff', t: `Desde el ${fmt(x.date).toLowerCase()} hay ${x.delta > 0 ? 'más' : 'menos'} ${what}.`, s: 'Capa dentro de tu forma · más adentro = más antiguo' });
+    rows.push({ k: 10, c: '#cfe9ff', t: `Desde el ${fmt(x.date).toLowerCase()} hay ${x.delta > 0 ? 'más' : 'menos'} ${what}.`, s: 'Anillo en el disco · más adentro = más antiguo' });
   }
   return rows;
 }
@@ -383,41 +383,34 @@ const LINK_NODE = (a) => new THREE.Vector3(Math.cos(a) * 0.95, 0.35 + 0.45 * Mat
 function buildAnchors(g, pu) {
   const p = currentPatterns(), A = [];
   const TAU = Math.PI * 2;
-  if (p.weekly && pu.weekStr > 0.05) {
-    const i = p.weekly.profile.indexOf(Math.max(...p.weekly.profile));
-    const ang = ((i + 0.5) / 7) * TAU, r = 1.3 + 0.42 + 0.06;
-    A.push({ k: 1, c: '#b3ffff', t: `SEMANA`, v: new THREE.Vector3(Math.cos(ang) * r, 0.1, Math.sin(ang) * r) });
-  }
-  if (p.cycle) {
-    const ang = pu.cycleTurns * TAU;
-    A.push({ k: 2, c: '#c79bff', t: `CICLO ${Math.round(p.cycle.period / 7)} SEM`, v: new THREE.Vector3(Math.cos(ang) * 1.42, 1.55, Math.sin(ang) * 1.42) });
-  }
-  p.couplings.forEach((c) => {
-    const a = LINK_NODE(VARS[c.a].angle), b = LINK_NODE(VARS[c.b].angle);
-    const m = a.clone().add(b).multiplyScalar(0.5);
-    const ctl = m.clone().add(m.clone().add(new THREE.Vector3(0, 0.6, 0)).normalize().multiplyScalar(0.9));
-    const mid = a.clone().multiplyScalar(0.25).add(ctl.clone().multiplyScalar(0.5)).add(b.clone().multiplyScalar(0.25));
-    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${(byId[c.a]?.label ?? VARS[c.a].label).toUpperCase()} → ${c.b === 'sleep' ? 'SUEÑO' : c.b === 'hrv' ? 'HRV' : VARS[c.b].label}`, v: mid });
+  if (p.weekly && pu.weekStr > 0.05) A.push({ k: 1, c: '#b3ffff', t: 'SEMANA', v: new THREE.Vector3(0.95, 0.15, 0) });
+  if (p.cycle) A.push({ k: 2, c: '#c79bff', t: `CICLO ${Math.round(p.cycle.period / 7)} SEM`, v: new THREE.Vector3(0, 1.5, 0) });
+  p.couplings.forEach((c, i) => {
+    A.push({ k: 3, c: c.r >= 0 ? '#3ff0ff' : '#ff7a2f', t: `${(byId[c.a]?.label ?? VARS[c.a].label).toUpperCase()} → ${c.b === 'sleep' ? 'SUEÑO' : c.b === 'hrv' ? 'HRV' : VARS[c.b].label}`, dyn: () => nodeVec(c.a).add(nodeVec(c.b)).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.45 + 0.28 * i, 0)) });
   });
   const st = p.strata.at(-1);
-  if (st) {
-    const r = 0.3 + 0.7 * st.pos;
-    A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4) * r, 0.2, Math.sin(2.4) * r) });
-  }
+  if (st) A.push({ k: 10, c: '#cfe9ff', t: `DESDE ${fmt(st.date)}`, v: new THREE.Vector3(Math.cos(2.4), 0.05, Math.sin(2.4)).multiplyScalar(0.35 + (1.2 + 0.65 * g.skirt - 0.35) * st.pos) });
   p.traces.filter((t) => t.freq >= 0.1).sort((a, b) => b.freq - a.freq).slice(0, S.focus === 5 ? 24 : 4).forEach((t) => {
-    A.push({ k: 5, c: DOMAINS[t.domain].color, t: byId[t.id].label.toUpperCase(), small: true, v: limbTip(CATALOG.findIndex((h) => h.id === t.id), t.freq) });
+    const c = CATALOG.findIndex((h) => h.id === t.id);
+    A.push({ k: 5, c: DOMAINS[t.domain].color, t: byId[t.id].label.toUpperCase(), small: true, dyn: () => limbTip(c, t.freq) });
   });
   S.anchors = S.focus ? A.filter((a) => a.k === S.focus) : A.filter((a) => !a.small);
   if (S.tap) S.anchors.push(S.tap);
-  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
+  $('#labels').innerHTML = S.anchors.map((a, i) => `<span class="tag3d ${a.k === -1 ? 'tap' : a.small ? 'sm' : ''}" data-i="${i}" style="--lc:${a.c}">${a.t}</span>`).join('');
   S.labelEls = [...$('#labels').children];
 }
-// Punta del miembro de un hábito: mismo cálculo que el shader (sin la ondulación)
+// Posición actual del planeta de un hábito: mismas fórmulas que el shader
 function limbTip(c, f) {
-  const yb = 0.8 + (-0.45 - 0.8) * ((c + 0.5) / 24), az = c * 2.39996, rxz = Math.sqrt(1 - yb * yb);
-  const dir = new THREE.Vector3(Math.cos(az) * rxz, yb, Math.sin(az) * rxz).normalize();
-  return dir.multiplyScalar(0.8 + 0.15 + 1.05 * f + 0.08);
+  const r = 1.9 - 1.3 * f, time = stage.organism.material.uniforms.uTime.value;
+  const a = c * 2.39996 + time * 0.22 / Math.pow(r, 1.5);
+  return new THREE.Vector3(Math.cos(a) * r, Math.sin(c * 1.7) * 0.12, Math.sin(a) * r);
 }
+const nodeVec = (k) => {
+  const idx = nodeIndex(k);
+  if (idx < 0) { const a = -idx * 2.1; return new THREE.Vector3(Math.cos(a) * 0.3, 0.12, Math.sin(a) * 0.3); }
+  const t = currentPatterns().traces.find((x) => x.id === CATALOG[idx].id);
+  return limbTip(idx, t?.freq ?? 0);
+};
 
 // TOCAR PARA LEER: tocás un miembro (o una tarjeta) y dice qué hábito es
 let tapTimer = 0;
@@ -427,7 +420,8 @@ function showLimb(h) {
   const n28 = indicators(S.days, S.idx).find((x) => x.id === h.id)?.count ?? 0;
   const since = daysSince(S.days, S.idx, h);
   const when = since === 0 ? 'hoy' : since === 1 ? 'ayer' : since == null ? '—' : `hace ${since} días`;
-  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${n28} de 28 días · última: ${when}`, v: limbTip(CATALOG.indexOf(h), t.freq) };
+  const ci = CATALOG.indexOf(h);
+  S.tap = { k: -1, c: DOMAINS[h.domain].color, t: `${h.label.toUpperCase()} · ${n28} de 28 días · última: ${when}`, dyn: () => limbTip(ci, t.freq).add(new THREE.Vector3(0, 0.18, 0)) };
   clearTimeout(tapTimer); tapTimer = setTimeout(() => { S.tap = null; renderTapTag(); }, 3200);
   renderTapTag();
 }
@@ -449,7 +443,7 @@ function renderTapTag() {
     for (const t of currentPatterns().traces) {
       if (t.freq < 0.03) continue;
       const c = CATALOG.findIndex((h) => h.id === t.id);
-      for (const k of [0.55, 1]) { // a lo largo del miembro
+      for (const k of [1]) {
         const v = limbTip(c, t.freq * k).multiplyScalar(ex).project(stage.camera);
         const d = Math.hypot((v.x * 0.5 + 0.5) * r.width - mx, (-v.y * 0.5 + 0.5) * r.height - my);
         if (d < bd) { bd = d; best = byId[t.id]; }
@@ -469,7 +463,7 @@ function updateLabels() {
   S.anchors.forEach((a, i) => {
     const node = S.labelEls[i];
     if (!node) return;
-    _v.copy(a.v).multiplyScalar(ex);
+    _v.copy(a.dyn ? a.dyn() : a.v).multiplyScalar(ex);
     const depth = _v.clone().sub(cam.position).dot(_dir) - cam.position.length(); // >0: detrás del centro
     _v.project(cam);
     const x = (_v.x * 0.5 + 0.5) * w, y = (-_v.y * 0.5 + 0.5) * h;

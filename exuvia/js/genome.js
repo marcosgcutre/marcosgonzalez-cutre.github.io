@@ -33,16 +33,16 @@ export const GLOW = 0.85;
 
 // Cada parámetro = min + (max-min) · Σ(peso · feature) / Σ(pesos con dato).
 export const RULES = {
-  expansion: { min: 0.9, max: 1.1, from: { endurance: 0.4, activityLoad: 0.3, exploration: 0.3 }, meaning: 'Espacio que ocupa (rango corto: más grande no es más)' },
-  coherence: { min: 0, max: 1, from: { consistency: 0.5, sleepQuality: 0.25, mindfulness: 0.25 }, meaning: 'Ordenada ↔ turbulenta' },
-  density: { min: 0, max: 1, from: { consumption: 0.5, consistency: 0.3, sleepQuality: 0.2 }, meaning: 'Dispersa ↔ compacta (misma materia)' },
+  expansion: { min: 0.9, max: 1.1, from: { endurance: 0.4, activityLoad: 0.3, exploration: 0.3 }, meaning: 'Tamaño de la galaxia (rango corto: más grande no es más)' },
+  coherence: { min: 0, max: 1, from: { consistency: 0.5, sleepQuality: 0.25, mindfulness: 0.25 }, meaning: 'Brazos ordenados ↔ turbulentos' },
+  density: { min: 0, max: 1, from: { consumption: 0.5, consistency: 0.3, sleepQuality: 0.2 }, meaning: 'Núcleo difuso ↔ compacto (misma materia)' },
   flow: { min: 0.15, max: 1.1, from: { strainToday: 0.45, activityLoad: 0.35, recovery: 0.2 }, meaning: 'Lenta ↔ rápida' },
-  lobes: { min: 1, max: 6, from: { exploration: 0.7, activityLoad: 0.3 }, meaning: 'Complejidad de la silueta' },
-  lobeAmp: { min: 0.1, max: 1, from: { exploration: 0.5, endurance: 0.5 }, meaning: 'Profundidad de los pliegues' },
-  twist: { min: 0, max: 1.2, from: { endurance: 0.5, consistency: 0.5 }, meaning: 'Torsión sobre el eje' },
-  elong: { min: 0, max: 1, from: { mindfulness: 0.5, sleepQuality: 0.5 }, meaning: 'Verticalidad' },
-  skirt: { min: 0.1, max: 1, from: { exploration: 0.6, endurance: 0.4 }, meaning: 'Base, arraigo al terreno' },
-  filament: { min: 0, max: 1, from: { consistency: 0.6, consumption: 0.4 }, meaning: 'Nube ↔ filamentos' },
+  lobes: { min: 1, max: 6, from: { exploration: 0.7, activityLoad: 0.3 }, meaning: 'Cantidad de brazos espirales' },
+  lobeAmp: { min: 0.1, max: 1, from: { exploration: 0.5, endurance: 0.5 }, meaning: 'Barra central' },
+  twist: { min: 0, max: 1.2, from: { endurance: 0.5, consistency: 0.5 }, meaning: 'Enrollamiento de los brazos' },
+  elong: { min: 0, max: 1, from: { mindfulness: 0.5, sleepQuality: 0.5 }, meaning: 'Grosor del disco' },
+  skirt: { min: 0.1, max: 1, from: { exploration: 0.6, endurance: 0.4 }, meaning: 'Extensión del disco' },
+  filament: { min: 0, max: 1, from: { consistency: 0.6, consumption: 0.4 }, meaning: 'Brazos difusos ↔ nítidos' },
   pulse: { min: 0.12, max: 0.45, from: { strainToday: 0.6, activityLoad: 0.4 }, meaning: 'Frecuencia de respiración visual (Hz)' },
   // la recuperación de WHOOP ya se calcula con HRV y sueño: nunca comparten regla
   pulseAmp: { min: 0.3, max: 1, from: { hrvTrend: 1 }, meaning: 'Amplitud de respiración' },
