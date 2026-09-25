@@ -95,15 +95,6 @@
       padding-bottom: 14px;
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
-      /* transform/opacity no afectan el layout — evita que esconderse
-         mueva el alto de la página y dispare el scroll de nuevo.
-         La duración real la fuerza el JS por inline style (ver más abajo). */
-      transition: transform .9s ease .1s, opacity 1s ease .1s;
-    }
-    .sticky-top.hide {
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
     }
     .nav-grid .item { font-size: 17px; margin-bottom: 7px; }
 
@@ -899,46 +890,6 @@
       var openPanel = document.querySelector('.panel.open');
       if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
     });
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // NAV — se esconde al bajar, reaparece al subir (o cerca del top)
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    (function () {
-      var stickyTop = document.querySelector('.sticky-top');
-      var lastY = window.scrollY;
-      var ticking = false;
-      var isHidden = false;
-
-      var HIDE_T = 'transform .45s ease-out, opacity .4s ease-out';
-      var SHOW_T = 'transform .9s ease .1s, opacity 1s ease .1s';
-
-      function setHidden(hide) {
-        if (hide === isHidden) return;
-        isHidden = hide;
-        stickyTop.style.transition = hide ? HIDE_T : SHOW_T;
-        stickyTop.classList.toggle('hide', hide);
-      }
-
-      function onScroll() {
-        var y = window.scrollY;
-        if (y <= 0) {
-          setHidden(false);
-        } else if (y > lastY) {
-          setHidden(true);
-        } else if (y < lastY) {
-          setHidden(false);
-        }
-        lastY = y;
-        ticking = false;
-      }
-
-      window.addEventListener('scroll', function () {
-        if (!ticking) {
-          window.requestAnimationFrame(onScroll);
-          ticking = true;
-        }
-      }, { passive: true });
-    })();
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // LIGHTBOX — click en una obra para verla grande
