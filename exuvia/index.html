@@ -83,6 +83,11 @@
 
       <!-- PROFILE: fuentes, compartir, reloj, lab -->
       <div class="view" data-for="profile">
+        <h2>TUS DATOS</h2>
+        <p class="note">En el iPhone: app Salud → tu foto → Exportar todos los datos de salud. Después subí ese archivo acá. Se procesa en tu teléfono; no se sube a ningún lado.</p>
+        <label class="btn import-btn">IMPORTAR DESDE APPLE HEALTH<input type="file" id="import-file" accept=".zip,.xml,application/zip,text/xml" hidden></label>
+        <p class="note" id="import-status"></p>
+
         <h2>FUENTES DE DATOS</h2>
         <div class="sources" id="sources"></div>
         <label class="field">PERFIL SIMULADO

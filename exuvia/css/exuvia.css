@@ -341,3 +341,5 @@ h2 .dim { text-transform: none; letter-spacing: 0.02em; font-family: var(--sans)
 .sig .a { font-size: 13px; line-height: 1.4; letter-spacing: 0; }
 .sig small { grid-column: 2; font-family: var(--sans); font-size: 10px; letter-spacing: 0.02em; text-transform: none; margin-top: 3px; }
 .tag3d { font-size: 9px; }
+
+.import-btn { display: block; text-align: center; margin-top: 10px; }

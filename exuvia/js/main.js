@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Stage } from './organism.js';
 import { simulate, PERSONAS } from './simulator.js';
 import { normalize } from './ingest.js';
+import { importAppleHealth } from './import-health.js';
 import { FEATURES, RULES, toGenome, traits, indicators } from './genome.js';
 import { CATALOG, DOMAINS, dayValue, byId, trackedAt, daysSince, firstSeen } from './catalog.js';
 import { runHistory, progress, MIN_DAYS, NET } from './mutations.js';
@@ -54,9 +55,31 @@ function ensureWatch() {
 // ---------- datos ----------
 function load(persona, keepIdx = false) {
   S.persona = persona;
-  S.raw = simulate(persona);
+  S.raw = persona === 'mine' ? S.mine : simulate(persona);
   recompute(keepIdx);
 }
+
+// IMPORTAR DESDE APPLE HEALTH: tus datos reales reemplazan a la simulación
+$('#import-file').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const st = (t) => ($('#import-status').textContent = t);
+  try {
+    st('Leyendo… 0%');
+    S.mine = await importAppleHealth(file, (p) => st(`Leyendo… ${Math.round(p * 100)}%`));
+    const n = S.mine.appleHealth.quantitySamples.length + S.mine.appleHealth.workouts.length;
+    PERSONAS.mine = { label: 'Mis datos (Apple Health)', seed: 7 + (n % 9000), days: 365 };
+    if (!$('#persona option[value="mine"]')) $('#persona').insertAdjacentHTML('afterbegin', '<option value="mine">Mis datos (Apple Health)</option>');
+    $('#persona').value = 'mine';
+    thumbCache.clear(); lastSignals = null; S.ghost = null;
+    load('mine');
+    st(`Listo: ${S.days.length} días, ${S.mine.appleHealth.workouts.length} entrenamientos. Tu organismo ya es tuyo.`);
+    go('home');
+  } catch (err) {
+    st(`No pude leer el archivo: ${err.message}`);
+  }
+  e.target.value = '';
+};
 function recompute(keepIdx = true) {
   patCache.clear();
   S.days = normalize(S.raw);

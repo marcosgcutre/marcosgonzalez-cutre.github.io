@@ -11,6 +11,10 @@ const HK_WORKOUT = {
   HKWorkoutActivityTypeUnderwaterDiving: 'diving',
   HKWorkoutActivityTypeTraditionalStrengthTraining: 'strength',
   HKWorkoutActivityTypeYoga: 'yoga',
+  HKWorkoutActivityTypeFunctionalStrengthTraining: 'strength',
+  HKWorkoutActivityTypeHighIntensityIntervalTraining: 'strength',
+  HKWorkoutActivityTypeMindAndBody: 'yoga',
+  HKWorkoutActivityTypePilates: 'yoga',
 };
 const WHOOP_SPORT = { running: 'running', surfing: 'surf' };
 
@@ -81,6 +85,11 @@ export function normalize({ whoop, appleHealth, manual }) {
 
   for (const m of manual ?? []) { const day = get(m.date); day.habits[m.habit] = m.value; day.sources.add('manual'); }
 
+  // días sin ningún registro: se completan vacíos, la historia tiene que ser continua
+  const keys = [...days.keys()].sort();
+  if (keys.length) {
+    for (let t = Date.parse(keys[0] + 'T12:00:00Z'), end = Date.parse(keys.at(-1) + 'T12:00:00Z'); t <= end; t += 86400000) get(isoDay(t));
+  }
   return [...days.values()].sort((a, b) => a.date.localeCompare(b.date))
     .map((d) => ({ ...d, sources: [...d.sources] }));
 }
