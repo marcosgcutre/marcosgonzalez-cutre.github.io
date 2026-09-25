@@ -679,7 +679,7 @@ function loop(now) {
     if (playAcc > (S.genesis ? 0.03 : 0.09)) {
       playAcc = 0;
       if (S.genesis) $('#genesis-text').textContent = `${S.days[S.idx].date} · ${S.history.timeline[S.idx].stage} pieles dejadas`;
-      if (S.idx < S.days.length - 1) { S.idx++; $('#scrub').value = S.idx; announceMutation(); refresh(); }
+      if (S.idx < S.days.length - 1) { S.idx = Math.min(S.days.length - 1, S.idx + (S.genesis ? 2 : 1)); $('#scrub').value = S.idx; announceMutation(); refresh(); }
       else if (S.genesis) endGenesis();
       else { S.playing = false; $('#btn-play').textContent = '▶'; }
     }
