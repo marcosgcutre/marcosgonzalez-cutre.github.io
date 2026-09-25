@@ -77,7 +77,26 @@
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
     }
-    .sticky-top .block { margin-bottom: 0; }
+    .nav-grid {
+      display: flex;
+      gap: 28px;
+    }
+    .nav-col { flex: 1; min-width: 0; }
+    .nav-col .item { font-size: 17px; }
+
+    .current-title {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      letter-spacing: .3px;
+    }
+
+    @media (max-width: 640px) {
+      .nav-grid { gap: 20px; }
+    }
 
     .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
     .langswitch button {
@@ -148,35 +167,39 @@
 
       <h1>Marcos Gonzalez-Cutre</h1>
 
-      <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio.
-           Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
-      <div class="block">
-        <div class="item"><a class="series-item toggle" data-target="portfolio">¿Brava o mansa?</a></div>
-        <div class="item"><a class="series-item toggle" data-target="portfolio">Erosión del canon</a></div>
-        <div class="item"><a class="series-item toggle" data-target="portfolio">Buenos Aires</a></div>
-        <div class="item"><a class="series-item toggle" data-target="portfolio">Jantus (2014–2022)</a></div>
+      <div class="nav-grid">
+        <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre Portfolio.
+             Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
+        <div class="nav-col">
+          <div class="item"><a class="series-item toggle" data-target="portfolio">¿Brava o mansa?</a></div>
+          <div class="item"><a class="series-item toggle" data-target="portfolio">Erosión del canon</a></div>
+          <div class="item"><a class="series-item toggle" data-target="portfolio">Buenos Aires</a></div>
+          <div class="item"><a class="series-item toggle" data-target="portfolio">Jantus (2014–2022)</a></div>
+        </div>
+
+        <div class="nav-col">
+          <div class="item">
+            <a class="toggle" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></a>
+          </div>
+          <div class="item">
+            <a class="toggle" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></a>
+          </div>
+          <div class="item">
+            <a class="toggle" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></a>
+          </div>
+          <div class="item">
+            <a class="toggle" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></a>
+          </div>
+          <div class="item">
+            <a class="toggle" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></a>
+          </div>
+          <div class="item">
+            <a class="toggle" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></a>
+          </div>
+        </div>
       </div>
 
-      <div class="block nav-list">
-        <div class="item">
-          <a class="toggle" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></a>
-        </div>
-        <div class="item">
-          <a class="toggle" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></a>
-        </div>
-        <div class="item">
-          <a class="toggle" data-target="cv"><span class="lang lang-es">CV</span><span class="lang lang-en">CV</span><span class="lang lang-pt">CV</span><span class="lang lang-fr">CV</span><span class="lang lang-it">CV</span><span class="lang lang-ja">CV</span></a>
-        </div>
-        <div class="item">
-          <a class="toggle" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></a>
-        </div>
-        <div class="item">
-          <a class="toggle" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></a>
-        </div>
-        <div class="item">
-          <a class="toggle" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></a>
-        </div>
-      </div>
+      <div class="current-title" id="current-title" hidden></div>
     </div>
 
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -696,6 +719,8 @@
   </div>
 
   <script>
+    var currentTitle = document.getElementById('current-title');
+
     document.querySelectorAll('.toggle').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -711,7 +736,12 @@
           document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
             t.classList.add('open');
           });
+          currentTitle.innerHTML = btn.innerHTML;
+          currentTitle.hidden = false;
           panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          currentTitle.hidden = true;
+          currentTitle.innerHTML = '';
         }
       });
     });
