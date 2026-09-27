@@ -143,6 +143,39 @@
     .entry .y { color: #999; margin-right: 8px; }
     .entry .t { font-style: italic; }
 
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       EXPOSICIONES — lista al costado, foto aparece al lado
+       sin empujar la lista. Solo las muestras con foto están
+       subrayadas/clickeables (.expo-link).
+       ✏️ Para sumar una foto: envolvé el nombre de la muestra en
+       <button class="expo-link" data-expo="id-unico">Nombre</button>
+       (en cada uno de los 6 idiomas), y agregá su
+       <div class="expo-content" id="expo-id-unico" hidden>…</div>
+       dentro de .expo-viewer.
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .expo-layout { display: flex; gap: 32px; align-items: flex-start; }
+    .expo-list { flex: 1 1 55%; min-width: 0; }
+    .expo-viewer { flex: 1 1 45%; min-width: 0; position: sticky; top: 90px; }
+    .expo-link {
+      all: unset;
+      cursor: pointer;
+      font-style: italic;
+      text-decoration: underline;
+      text-decoration-color: #bbb;
+      text-underline-offset: 3px;
+    }
+    .expo-link:hover { text-decoration-color: #111; }
+    .expo-link:focus-visible { outline: 2px solid #111; outline-offset: 2px; }
+    .expo-link.active { color: #111; text-decoration-color: #111; font-style: normal; }
+    .expo-viewer-empty { color: #999; font-size: 16px; }
+    .expo-viewer-empty[hidden] { display: none !important; }
+    .expo-content .work-img { margin-bottom: 8px; }
+    .expo-content .work-caption { font-size: 14px; }
+    @media (max-width: 640px) {
+      .expo-layout { flex-direction: column; }
+      .expo-viewer { position: static; width: 100%; }
+    }
+
     .work-img {
       width: 100%;
       display: block;
@@ -662,6 +695,8 @@
         <div class="item">
           <button class="toggle" type="button" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></button>
           <div class="panel" id="panel-exposiciones">
+      <div class="expo-layout">
+        <div class="expo-list">
 
         <h3 class="lang lang-es lang-block">Individuales</h3>
         <h3 class="lang lang-en lang-block">Solo</h3>
@@ -880,12 +915,12 @@
         <div class="entry lang lang-it lang-block"><span class="y">2017</span>Museo Fundación Rómulo Raggio, Buenos Aires, Argentina</div>
         <div class="entry lang lang-ja lang-block"><span class="y">2017</span>Museo Fundación Rómulo Raggio、ブエノスアイレス、アルゼンチン</div>
 
-        <div class="entry lang lang-es lang-block"><span class="y">2014</span>Salón Manuel Belgrano, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2014</span>Salón Manuel Belgrano, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2014</span>Salón Manuel Belgrano, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2014</span>Salón Manuel Belgrano, Buenos Aires, Argentine</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2014</span>Salón Manuel Belgrano, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2014</span>Salón Manuel Belgrano、ブエノスアイレス、アルゼンチン</div>
+        <div class="entry lang lang-es lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>, Buenos Aires, Argentine</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>, Buenos Aires, Argentina</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2014</span><button class="expo-link" type="button" data-expo="salon-belgrano">Salón Manuel Belgrano</button>、ブエノスアイレス、アルゼンチン</div>
 
         <div class="entry lang lang-es lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río, Buenos Aires, Argentina</div>
         <div class="entry lang lang-en lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río, Buenos Aires, Argentina</div>
@@ -894,6 +929,22 @@
         <div class="entry lang lang-it lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río, Buenos Aires, Argentina</div>
         <div class="entry lang lang-ja lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río、ブエノスアイレス、アルゼンチン</div>
 
+        </div>
+        <div class="expo-viewer" id="expo-viewer">
+          <p class="expo-viewer-empty lang lang-es lang-block">Elegí una muestra subrayada para ver una foto.</p>
+          <p class="expo-viewer-empty lang lang-en lang-block">Pick an underlined show to see a photo.</p>
+          <p class="expo-viewer-empty lang lang-pt lang-block">Escolha uma mostra sublinhada para ver uma foto.</p>
+          <p class="expo-viewer-empty lang lang-fr lang-block">Choisissez une exposition soulignée pour voir une photo.</p>
+          <p class="expo-viewer-empty lang lang-it lang-block">Scegli una mostra sottolineata per vedere una foto.</p>
+          <p class="expo-viewer-empty lang lang-ja lang-block">下線のある展示を選ぶと写真が表示されます。</p>
+
+          <div class="expo-content" id="expo-salon-belgrano" hidden>
+            <img class="work-img" src="./assets/expos/Salon-Manuel-Belgrano-2014.jpg" alt="Salón Manuel Belgrano, 2014 — Marcos Gonzalez-Cutre">
+            <p class="work-caption">
+              <span class="lang lang-es">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-en">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-pt">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-fr">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentine</span><span class="lang lang-it">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-ja">サロン・マヌエル・ベルグラーノ、2014年 — ブエノスアイレス、アルゼンチン</span>
+            </p>
+          </div>
+        </div>
       </div>
         </div>
         <div class="item">
@@ -983,6 +1034,23 @@
           dots.forEach(function (d, di) { d.classList.toggle('active', di === i); });
         }, { passive: true });
       }
+    });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // EXPOSICIONES — click en una muestra subrayada, aparece su foto al costado
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    document.querySelectorAll('.expo-link').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-expo');
+        document.querySelectorAll('.expo-link').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.expo-link[data-expo="' + id + '"]').forEach(function (b) { b.classList.add('active'); });
+        document.querySelectorAll('.expo-content').forEach(function (c) { c.hidden = true; });
+        var content = document.getElementById('expo-' + id);
+        if (content) { content.hidden = false; }
+        document.querySelectorAll('.expo-viewer-empty').forEach(function (p) { p.hidden = true; });
+        var openPanel = btn.closest('.panel.open');
+        if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
+      });
     });
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
