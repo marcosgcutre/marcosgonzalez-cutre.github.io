@@ -117,6 +117,14 @@
       top: 100px;
     }
     .nav-list .item { font-size: 16px; margin-bottom: 7px; }
+    .nav-list .item.sub-item { margin-left: 14px; margin-bottom: 4px; font-size: 15px; }
+    .nav-label {
+      font-size: 12px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: #999;
+      margin: 14px 0 6px;
+    }
     .content-viewer { flex: 1 1 auto; min-width: 0; }
     .content-viewer-empty { color: #999; font-size: 16px; }
     .content-viewer-empty[hidden] { display: none !important; }
@@ -167,7 +175,7 @@
     }
 
     .entry { margin-bottom: 10px; }
-    .entry .y { color: #999; margin-right: 8px; }
+    .y { color: #999; margin-right: 8px; }
     .entry .t { font-style: italic; }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -348,9 +356,10 @@
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button></div>
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button></div>
 
-        <div class="item">
-          <button class="toggle" type="button" data-target="expo-individuales"><span class="lang lang-es">Exposiciones individuales</span><span class="lang lang-en">Solo exhibitions</span><span class="lang lang-pt">Exposições individuais</span><span class="lang lang-fr">Expositions individuelles</span><span class="lang lang-it">Mostre personali</span><span class="lang lang-ja">個展</span></button>
-        </div>
+        <div class="nav-label"><span class="lang lang-es">Exposiciones individuales</span><span class="lang lang-en">Solo exhibitions</span><span class="lang lang-pt">Exposições individuais</span><span class="lang lang-fr">Expositions individuelles</span><span class="lang lang-it">Mostre personali</span><span class="lang lang-ja">個展</span></div>
+        <div class="item sub-item"><button class="series-item toggle" type="button" data-target="expo-elamigo">El amigo del arte</button></div>
+        <div class="item sub-item"><button class="series-item toggle" type="button" data-target="expo-lenfant">L'enfant Brut</button></div>
+
         <div class="item">
           <button class="toggle" type="button" data-target="expo-colectivas"><span class="lang lang-es">Exposiciones colectivas</span><span class="lang lang-en">Group exhibitions</span><span class="lang lang-pt">Exposições coletivas</span><span class="lang lang-fr">Expositions collectives</span><span class="lang lang-it">Mostre collettive</span><span class="lang lang-ja">グループ展</span></button>
         </div>
@@ -510,34 +519,39 @@
           <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
         </div>
       </div>
-      <div class="panel" id="panel-expo-individuales">
-      <div class="expo-layout">
-        <div class="expo-list">
+      <div class="panel" id="panel-expo-elamigo">
+        <div class="block">
+          <p class="lang lang-es lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
+          <p class="lang lang-en lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
+          <p class="lang lang-pt lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
+          <p class="lang lang-fr lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentine</p>
+          <p class="lang lang-it lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
+          <p class="lang lang-ja lang-block"><span class="y">2025</span> — Petit Estrugamou、ブエノスアイレス、アルゼンチン</p>
 
-        <div class="entry lang lang-es lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentine</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou、ブエノスアイレス、アルゼンチン</div>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, Nueva York, Estados Unidos</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, New York, United States</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, Nova York, Estados Unidos</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, New York, États-Unis</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, New York, Stati Uniti</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa、ニューヨーク、アメリカ合衆国</div>
-
-                </div>
-        <div class="expo-viewer" id="expo-viewer-individuales">
-          <p class="expo-viewer-empty lang lang-es lang-block">Elegí una muestra subrayada para ver una foto.</p>
-          <p class="expo-viewer-empty lang lang-en lang-block">Pick an underlined show to see a photo.</p>
-          <p class="expo-viewer-empty lang lang-pt lang-block">Escolha uma mostra sublinhada para ver uma foto.</p>
-          <p class="expo-viewer-empty lang lang-fr lang-block">Choisissez une exposition soulignée pour voir une photo.</p>
-          <p class="expo-viewer-empty lang lang-it lang-block">Scegli una mostra sottolineata per vedere una foto.</p>
-          <p class="expo-viewer-empty lang lang-ja lang-block">下線のある展示を選ぶと写真が表示されます。</p>
+          <p class="empty-state lang lang-es lang-block">Todavía no hay foto de esta muestra.</p>
+          <p class="empty-state lang lang-en lang-block">No photo of this show yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há foto desta mostra.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore de photo de cette exposition.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna foto di questa mostra.</p>
+          <p class="empty-state lang lang-ja lang-block">この展示の写真はまだありません。</p>
         </div>
       </div>
+      <div class="panel" id="panel-expo-lenfant">
+        <div class="block">
+          <p class="lang lang-es lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, Nueva York, Estados Unidos</p>
+          <p class="lang lang-en lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, New York, United States</p>
+          <p class="lang lang-pt lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, Nova York, Estados Unidos</p>
+          <p class="lang lang-fr lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, New York, États-Unis</p>
+          <p class="lang lang-it lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, New York, Stati Uniti</p>
+          <p class="lang lang-ja lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa、ニューヨーク、アメリカ合衆国</p>
+
+          <p class="empty-state lang lang-es lang-block">Todavía no hay foto de esta muestra.</p>
+          <p class="empty-state lang lang-en lang-block">No photo of this show yet.</p>
+          <p class="empty-state lang lang-pt lang-block">Ainda não há foto desta mostra.</p>
+          <p class="empty-state lang lang-fr lang-block">Pas encore de photo de cette exposition.</p>
+          <p class="empty-state lang lang-it lang-block">Ancora nessuna foto di questa mostra.</p>
+          <p class="empty-state lang lang-ja lang-block">この展示の写真はまだありません。</p>
+        </div>
       </div>
       <div class="panel" id="panel-expo-colectivas">
       <div class="expo-layout">
