@@ -37,6 +37,7 @@
     a, .toggle {
       color: #111;
       text-decoration: none;
+      text-align: left;
       border-bottom: 1px solid #111;
       cursor: pointer;
       background: none;
@@ -108,18 +109,18 @@
        LAYOUT PRINCIPAL — lista a la izquierda (inmóvil),
        contenido aparece a la derecha sin mover la lista.
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    .main-layout { display: flex; align-items: flex-start; gap: 48px; }
+    .main-layout { display: flex; align-items: flex-start; gap: 28px; }
     .nav-list {
       flex: 0 0 auto;
-      width: 230px;
+      width: 190px;
       position: sticky;
       top: 100px;
     }
-    .nav-list .item { font-size: 17px; margin-bottom: 7px; }
+    .nav-list .item { font-size: 16px; margin-bottom: 7px; }
     .content-viewer { flex: 1 1 auto; min-width: 0; }
     .content-viewer-empty { color: #999; font-size: 16px; }
     .content-viewer-empty[hidden] { display: none !important; }
-    @media (max-width: 800px) {
+    @media (max-width: 520px) {
       .main-layout { flex-direction: column; gap: 0; }
       .nav-list { width: 100%; position: static; margin-bottom: 8px; }
     }
