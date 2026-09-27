@@ -18,7 +18,7 @@
       font-size: 20px;
     }
     .wrap {
-      max-width: 700px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 28px 24px 60px;
     }
@@ -49,16 +49,23 @@
     }
     a:hover, .toggle:hover { opacity: .6; }
 
-    /* Nav de arriba: sin subrayado permanente, aparece fino con el hover */
-    .nav-grid .toggle {
+    /* Nav de la izquierda: sin subrayado permanente, aparece fino con el hover */
+    .nav-list .toggle {
       border-bottom-color: transparent;
       text-decoration: none;
     }
-    .nav-grid .toggle:hover {
+    .nav-list .toggle:hover {
       opacity: 1;
       text-decoration: underline;
       text-decoration-color: #bbb;
       text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+    }
+    .nav-list .toggle.open {
+      opacity: 1;
+      font-weight: 500;
+      text-decoration: underline;
+      text-decoration-color: #111;
       text-underline-offset: 4px;
     }
     a:focus-visible, .toggle:focus-visible, .langswitch button:focus-visible {
@@ -96,7 +103,26 @@
       border-bottom: 1px solid #eee;
       margin-bottom: 22px;
     }
-    .nav-grid .item { font-size: 17px; margin-bottom: 7px; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       LAYOUT PRINCIPAL — lista a la izquierda (inmóvil),
+       contenido aparece a la derecha sin mover la lista.
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .main-layout { display: flex; align-items: flex-start; gap: 48px; }
+    .nav-list {
+      flex: 0 0 auto;
+      width: 230px;
+      position: sticky;
+      top: 100px;
+    }
+    .nav-list .item { font-size: 17px; margin-bottom: 7px; }
+    .content-viewer { flex: 1 1 auto; min-width: 0; }
+    .content-viewer-empty { color: #999; font-size: 16px; }
+    .content-viewer-empty[hidden] { display: none !important; }
+    @media (max-width: 800px) {
+      .main-layout { flex-direction: column; gap: 0; }
+      .nav-list { width: 100%; position: static; margin-bottom: 8px; }
+    }
 
     .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
     .langswitch button {
@@ -295,12 +321,45 @@
       </div>
 
       <h1>Marcos Gonzalez-Cutre</h1>
+    </div>
 
-      <div class="nav-grid">
-        <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su panel.
+    <div class="main-layout">
+      <div class="nav-list">
+        <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su contenido a la derecha.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button>
-          <div class="panel" id="panel-serie-brava">
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Erosión del canon</button></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button></div>
+        <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button></div>
+
+        <div class="item">
+          <button class="toggle" type="button" data-target="expo-individuales"><span class="lang lang-es">Exposiciones individuales</span><span class="lang lang-en">Solo exhibitions</span><span class="lang lang-pt">Exposições individuais</span><span class="lang lang-fr">Expositions individuelles</span><span class="lang lang-it">Mostre personali</span><span class="lang lang-ja">個展</span></button>
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="expo-colectivas"><span class="lang lang-es">Exposiciones colectivas</span><span class="lang lang-en">Group exhibitions</span><span class="lang lang-pt">Exposições coletivas</span><span class="lang lang-fr">Expositions collectives</span><span class="lang lang-it">Mostre collettive</span><span class="lang lang-ja">グループ展</span></button>
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></button>
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></button>
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="prensa"><span class="lang lang-es">Prensa</span><span class="lang lang-en">Press</span><span class="lang lang-pt">Imprensa</span><span class="lang lang-fr">Presse</span><span class="lang lang-it">Stampa</span><span class="lang lang-ja">プレス</span></button>
+        </div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></button>
+        </div>
+      </div>
+      <div class="content-viewer">
+        <p class="content-viewer-empty lang lang-es lang-block">Elegí un ítem de la lista para ver su contenido.</p>
+        <p class="content-viewer-empty lang lang-en lang-block">Pick an item from the list to see its content.</p>
+        <p class="content-viewer-empty lang lang-pt lang-block">Escolha um item da lista para ver o conteúdo.</p>
+        <p class="content-viewer-empty lang lang-fr lang-block">Choisissez un élément de la liste pour voir son contenu.</p>
+        <p class="content-viewer-empty lang lang-it lang-block">Scegli una voce dall'elenco per vedere il contenuto.</p>
+        <p class="content-viewer-empty lang lang-ja lang-block">リストから項目を選ぶと内容が表示されます。</p>
+
+      <div class="panel" id="panel-serie-brava">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -314,9 +373,8 @@
           <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
           <div class="slider-dots"><span class="active"></span></div>
         </div>
-      </div></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Erosión del canon</button>
-          <div class="panel" id="panel-serie-erosion">
+      </div>
+      <div class="panel" id="panel-serie-erosion">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -415,9 +473,8 @@
             ヨーロッパと南米の美術史に内側から働きかける絵画的探求。それを否定も賞賛もせず、住み込み、代謝し、摩耗させる。各作品はフラ・アンジェリコ、レオナルド、ゴヤ、ゴーギャンといった確立された図像的構造を取り上げ、身振りによってそこに浸透していく。同時に、アイ・アパエク、タルシラ・ド・アマラル、シルド・メイレレスといった南米美術史との接続を築く。層が堆積するにつれ、元のイメージは譲歩し、別の何かが立ち現れる——身振りの残滓。
           </p>
         </div>
-      </div></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button>
-          <div class="panel" id="panel-serie-buenosaires">
+      </div>
+      <div class="panel" id="panel-serie-buenosaires">
         <div class="block">
           <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
           <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
@@ -426,9 +483,8 @@
           <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
           <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
         </div>
-      </div></div>
-        <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button>
-          <div class="panel" id="panel-serie-jantus">
+      </div>
+      <div class="panel" id="panel-serie-jantus">
         <div class="block">
           <p class="empty-state lang lang-es lang-block">Todavía no hay obras cargadas de esta serie.</p>
           <p class="empty-state lang lang-en lang-block">No works from this series yet.</p>
@@ -437,273 +493,10 @@
           <p class="empty-state lang lang-it lang-block">Ancora nessuna opera di questa serie.</p>
           <p class="empty-state lang lang-ja lang-block">このシリーズの作品はまだありません。</p>
         </div>
-      </div></div>
-
-        <div class="item">
-          <button class="toggle" type="button" data-target="bio"><span class="lang lang-es">Bio</span><span class="lang lang-en">Bio</span><span class="lang lang-pt">Bio</span><span class="lang lang-fr">Bio</span><span class="lang lang-it">Bio</span><span class="lang lang-ja">経歴</span></button>
-          <div class="panel" id="panel-bio">
-        <div class="block">
-          <p class="lang lang-es lang-block">
-            Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino.
-            Se formó con Richard Sturgeon y Laura Varangot (2009–2013) y realizó
-            el Fine Art Program de la Kunstgut Academy, Berlín (2013). Es
-            Licenciado en Arte por la Universidad Nacional de las Artes
-            (2014–2017) y por la Universidad de Palermo (2021–2024).
-          </p>
-          <p class="lang lang-en lang-block">
-            Marcos Gonzalez-Cutre (Buenos Aires, 1994) is an Argentine artist.
-            He trained under Richard Sturgeon and Laura Varangot (2009–2013)
-            and completed the Fine Art Program at the Kunstgut Academy, Berlin
-            (2013). He holds a degree in Fine Arts from Universidad Nacional
-            de las Artes (2014–2017) and from Universidad de Palermo
-            (2021–2024).
-          </p>
-          <p class="lang lang-pt lang-block">
-            Marcos Gonzalez-Cutre (Buenos Aires, 1994) é um artista argentino.
-            Formou-se com Richard Sturgeon e Laura Varangot (2009–2013) e
-            realizou o Fine Art Program na Kunstgut Academy, Berlim (2013). É
-            licenciado em Arte pela Universidad Nacional de las Artes
-            (2014–2017) e pela Universidad de Palermo (2021–2024).
-          </p>
-          <p class="lang lang-fr lang-block">
-            Marcos Gonzalez-Cutre (Buenos Aires, 1994) est un artiste argentin.
-            Il s'est formé auprès de Richard Sturgeon et Laura Varangot
-            (2009–2013) et a suivi le Fine Art Program à la Kunstgut Academy,
-            Berlin (2013). Il est titulaire d'une licence en art de
-            l'Universidad Nacional de las Artes (2014–2017) et de
-            l'Universidad de Palermo (2021–2024).
-          </p>
-          <p class="lang lang-it lang-block">
-            Marcos Gonzalez-Cutre (Buenos Aires, 1994) è un artista argentino.
-            Si è formato con Richard Sturgeon e Laura Varangot (2009–2013) e
-            ha frequentato il Fine Art Program alla Kunstgut Academy di
-            Berlino (2013). È laureato in Arte all'Universidad Nacional de
-            las Artes (2014–2017) e all'Universidad de Palermo (2021–2024).
-          </p>
-          <p class="lang lang-ja lang-block">
-            マルコス・ゴンサレス=クトレ(ブエノスアイレス、1994年生まれ)はアルゼンチンの美術家である。2009年から2013年にかけてリチャード・スタージョンとラウラ・バランゴットに師事し、2013年にはドイツ・ベルリンのクンストグート・アカデミーのファインアーツ・プログラムを修了した。国立芸術大学(2014–2017年)およびパレルモ大学(2021–2024年)で美術の学位を取得している。
-          </p>
-
-          <p class="lang lang-es lang-block">
-            Expuso individualmente en Nueva York (2019) y en Buenos Aires con
-            <em>El amigo del arte</em>, en Petit Estrugamou (2025). Participó
-            en exhibiciones colectivas en Lima, Santiago de Chile, Río de
-            Janeiro, Helsinki, Londres, Tokio, Osaka y Seúl, entre otras
-            ciudades.
-          </p>
-          <p class="lang lang-en lang-block">
-            He exhibited solo in New York (2019) and in Buenos Aires with
-            <em>El amigo del arte</em>, at Petit Estrugamou (2025). He has
-            taken part in group exhibitions in Lima, Santiago de Chile, Rio
-            de Janeiro, Helsinki, London, Tokyo, Osaka, and Seoul, among
-            other cities.
-          </p>
-          <p class="lang lang-pt lang-block">
-            Expôs individualmente em Nova York (2019) e em Buenos Aires com
-            <em>El amigo del arte</em>, no Petit Estrugamou (2025). Participou
-            de exposições coletivas em Lima, Santiago do Chile, Rio de
-            Janeiro, Helsinque, Londres, Tóquio, Osaka e Seul, entre outras
-            cidades.
-          </p>
-          <p class="lang lang-fr lang-block">
-            Il a exposé seul à New York (2019) et à Buenos Aires avec
-            <em>El amigo del arte</em>, au Petit Estrugamou (2025). Il a
-            participé à des expositions collectives à Lima, Santiago du
-            Chili, Rio de Janeiro, Helsinki, Londres, Tokyo, Osaka et Séoul,
-            entre autres villes.
-          </p>
-          <p class="lang lang-it lang-block">
-            Ha esposto individualmente a New York (2019) e a Buenos Aires con
-            <em>El amigo del arte</em>, al Petit Estrugamou (2025). Ha
-            partecipato a mostre collettive a Lima, Santiago del Cile, Rio de
-            Janeiro, Helsinki, Londra, Tokyo, Osaka e Seul, tra le altre
-            città.
-          </p>
-          <p class="lang lang-ja lang-block">
-            2019年にはニューヨークで、2025年にはブエノスアイレスのプティ・エストルガモウにて個展「El amigo del arte」を開催した。リマ、サンティアゴ(チリ)、リオデジャネイロ、ヘルシンキ、ロンドン、東京、大阪、ソウルなど、各都市でのグループ展にも参加している。
-          </p>
-        </div>
-
-        <h3 class="lang lang-es lang-block">Educación</h3>
-        <h3 class="lang lang-en lang-block">Education</h3>
-        <h3 class="lang lang-pt lang-block">Educação</h3>
-        <h3 class="lang lang-fr lang-block">Formation</h3>
-        <h3 class="lang lang-it lang-block">Formazione</h3>
-        <h3 class="lang lang-ja lang-block">学歴</h3>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2021–2024</span><span class="t">Licenciatura en Arte</span> — Universidad de Palermo</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2021–2024</span><span class="t">BA in Fine Arts</span> — Universidad de Palermo</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2021–2024</span><span class="t">Licenciatura em Arte</span> — Universidad de Palermo</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2021–2024</span><span class="t">Licence en art</span> — Universidad de Palermo</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2021–2024</span><span class="t">Laurea in Arte</span> — Universidad de Palermo</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2021–2024</span><span class="t">美術学士課程</span> — パレルモ大学</div>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2014–2017</span><span class="t">BA in Fine Arts</span> — Universidad Nacional de las Artes</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura em Arte</span> — Universidad Nacional de las Artes</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2014–2017</span><span class="t">Licence en art</span> — Universidad Nacional de las Artes</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2014–2017</span><span class="t">Laurea in Arte</span> — Universidad Nacional de las Artes</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2014–2017</span><span class="t">美術学士課程</span> — 国立芸術大学</div>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2009–2013</span>Taller de Pintura, Richard Sturgeon</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2009–2013</span>Painting Workshop, Richard Sturgeon</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2009–2013</span>Oficina de Pintura, Richard Sturgeon</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2009–2013</span>Atelier de peinture, Richard Sturgeon</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2009–2013</span>Laboratorio di pittura, Richard Sturgeon</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2009–2013</span>絵画講座、リチャード・スタージョン</div>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2009–2013</span>Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2009–2013</span>Drawing &amp; Life Model Workshop, Laura Varangot</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2009–2013</span>Oficina de Desenho e Modelo Vivo, Laura Varangot</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2009–2013</span>Atelier de dessin et modèle vivant, Laura Varangot</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2009–2013</span>Laboratorio di disegno dal vero, Laura Varangot</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2009–2013</span>デッサン・ライブモデル講座、ラウラ・バランゴット</div>
-
-        <h3 class="lang lang-es lang-block">Residencias</h3>
-        <h3 class="lang lang-en lang-block">Residencies</h3>
-        <h3 class="lang lang-pt lang-block">Residências</h3>
-        <h3 class="lang lang-fr lang-block">Résidences</h3>
-        <h3 class="lang lang-it lang-block">Residenze</h3>
-        <h3 class="lang lang-ja lang-block">レジデンシー</h3>
-
-        <div class="entry lang lang-es lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlín</div>
-        <div class="entry lang lang-en lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlin</div>
-        <div class="entry lang lang-pt lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlim</div>
-        <div class="entry lang lang-fr lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlin</div>
-        <div class="entry lang lang-it lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlino</div>
-        <div class="entry lang lang-ja lang-block"><span class="y">2013</span>ファインアーツ・プログラム — クンストグート・アカデミー、ベルリン</div>
-
       </div>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="statement"><span class="lang lang-es">Statement</span><span class="lang lang-en">Statement</span><span class="lang lang-pt">Statement</span><span class="lang lang-fr">Démarche</span><span class="lang lang-it">Statement</span><span class="lang lang-ja">ステートメント</span></button>
-          <div class="panel" id="panel-statement">
-        <div class="block">
-          <p class="lang lang-es lang-block">
-            Para mí, pintar es una conversación incesante con los materiales que uso
-            y el espacio donde realizo mi práctica. El óleo me eleva espiritualmente,
-            me hipnotiza con su olor y textura, me erotiza. Intento traducir en mis
-            pinturas lo que siento al ver las obras de los artistas que amo, como si
-            hubiera recibido un mensaje en algún museo, galería, taller.
-          </p>
-          <p class="lang lang-en lang-block">
-            For me, painting is an unceasing conversation with the materials I use
-            and the space where I work. Oil paint lifts me spiritually, it
-            hypnotizes me with its smell and texture, it arouses me. I try to
-            translate into my paintings what I feel when I look at the work of
-            the artists I love, as if I had received a message in some museum,
-            gallery, or studio.
-          </p>
-          <p class="lang lang-pt lang-block">
-            Para mim, pintar é uma conversa incessante com os materiais que uso e
-            o espaço onde realizo minha prática. O óleo me eleva espiritualmente,
-            me hipnotiza com seu cheiro e textura, me erotiza. Tento traduzir em
-            minhas pinturas o que sinto ao ver as obras dos artistas que amo,
-            como se tivesse recebido uma mensagem em algum museu, galeria, ateliê.
-          </p>
-          <p class="lang lang-fr lang-block">
-            Pour moi, peindre est une conversation incessante avec les matériaux
-            que j'utilise et l'espace où je travaille. L'huile m'élève
-            spirituellement, elle m'hypnotise par son odeur et sa texture, elle
-            m'érotise. J'essaie de traduire dans mes peintures ce que je ressens
-            en regardant les œuvres des artistes que j'aime, comme si j'avais
-            reçu un message dans un musée, une galerie, un atelier.
-          </p>
-          <p class="lang lang-it lang-block">
-            Per me, dipingere è una conversazione incessante con i materiali che
-            uso e lo spazio in cui lavoro. L'olio mi eleva spiritualmente, mi
-            ipnotizza con il suo odore e la sua consistenza, mi eccita. Cerco di
-            tradurre nei miei dipinti ciò che provo guardando le opere degli
-            artisti che amo, come se avessi ricevuto un messaggio in un museo,
-            una galleria, uno studio.
-          </p>
-          <p class="lang lang-ja lang-block">
-            私にとって絵を描くことは、使用する素材と制作を行う空間との絶え間ない対話である。油彩は私を精神的に高揚させ、その匂いと質感で私を催眠状態にし、官能的にさせる。愛する作家たちの作品を見て感じたことを、まるで美術館やギャラリー、アトリエで何かメッセージを受け取ったかのように、自分の絵に翻訳しようとしている。
-          </p>
-
-          <p class="lang lang-es lang-block">
-            Hago pinturas de gran formato con una paleta que va cambiando:
-            composiciones que no cuentan con un punto focal particular sino que
-            permiten al espectador forjar su propio recorrido visual.
-          </p>
-          <p class="lang lang-en lang-block">
-            I make large-format paintings with a shifting palette: compositions
-            with no single focal point, which let the viewer chart their own
-            visual path.
-          </p>
-          <p class="lang lang-pt lang-block">
-            Faço pinturas de grande formato com uma paleta que vai mudando:
-            composições que não têm um ponto focal específico, mas que permitem
-            ao espectador traçar seu próprio percurso visual.
-          </p>
-          <p class="lang lang-fr lang-block">
-            Je réalise des peintures de grand format avec une palette qui évolue :
-            des compositions sans point focal unique, qui laissent au spectateur
-            le soin de tracer son propre parcours visuel.
-          </p>
-          <p class="lang lang-it lang-block">
-            Realizzo dipinti di grande formato con una palette in continuo
-            cambiamento: composizioni senza un punto focale unico, che lasciano
-            allo spettatore la libertà di costruire il proprio percorso visivo.
-          </p>
-          <p class="lang lang-ja lang-block">
-            変化し続けるパレットを用いて大判の絵画を制作している。特定の焦点を持たない構成により、鑑賞者が自分自身の視線の軌跡を築くことができるようにしている。
-          </p>
-
-          <p class="lang lang-es lang-block">
-            Sueño con hacer una obra gigante, instalativa, que necesite horas, años
-            para ser recorrida, una obra magna capaz de producir un estruendo
-            memorable.
-          </p>
-          <p class="lang lang-en lang-block">
-            I dream of making a giant, immersive work — one that takes hours,
-            years to walk through, a monumental piece capable of producing a
-            memorable roar.
-          </p>
-          <p class="lang lang-pt lang-block">
-            Sonho em fazer uma obra gigante, instalativa, que precise de horas,
-            anos para ser percorrida, uma obra magna capaz de produzir um
-            estrondo memorável.
-          </p>
-          <p class="lang lang-fr lang-block">
-            Je rêve de créer une œuvre gigantesque, immersive, qui nécessite des
-            heures, des années pour être parcourue, une œuvre magistrale capable
-            de produire un fracas mémorable.
-          </p>
-          <p class="lang lang-it lang-block">
-            Sogno di realizzare un'opera gigantesca, immersiva, che richieda ore,
-            anni per essere percorsa, un'opera magna capace di produrre un
-            fragore memorabile.
-          </p>
-          <p class="lang lang-ja lang-block">
-            何時間も、何年もかけて巡ることになるような、巨大でインスタレーション的な作品——記憶に残る轟音を生み出せるような大作を作ることを夢見ている。
-          </p>
-        </div>
-      </div>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="portfolio"><span class="lang lang-es">Portfolio</span><span class="lang lang-en">Portfolio</span><span class="lang lang-pt">Portfólio</span><span class="lang lang-fr">Portfolio</span><span class="lang lang-it">Portfolio</span><span class="lang lang-ja">ポートフォリオ</span></button>
-          <div class="panel" id="panel-portfolio">
-        <div class="block">
-          <img class="work-img" src="./assets/Rizoma.jpeg" alt="Rizoma — Marcos Gonzalez-Cutre">
-          <p class="work-caption">
-            <span class="lang lang-es">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</span><span class="lang lang-en">Rizoma, 2025 — Oil on canvas, 230 × 203 cm</span><span class="lang lang-pt">Rizoma, 2025 — Óleo sobre tela, 230 × 203 cm</span><span class="lang lang-fr">Rizoma, 2025 — Huile sur toile, 230 × 203 cm</span><span class="lang lang-it">Rizoma, 2025 — Olio su tela, 230 × 203 cm</span><span class="lang lang-ja">Rizoma, 2025 — 油彩、キャンバス、230 × 203 cm</span>
-          </p>
-        </div>
-      </div>
-        </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="exposiciones"><span class="lang lang-es">Exposiciones</span><span class="lang lang-en">Exhibitions</span><span class="lang lang-pt">Exposições</span><span class="lang lang-fr">Expositions</span><span class="lang lang-it">Mostre</span><span class="lang lang-ja">展示</span></button>
-          <div class="panel" id="panel-exposiciones">
+      <div class="panel" id="panel-expo-individuales">
       <div class="expo-layout">
         <div class="expo-list">
-
-        <h3 class="lang lang-es lang-block">Individuales</h3>
-        <h3 class="lang lang-en lang-block">Solo</h3>
-        <h3 class="lang lang-pt lang-block">Individuais</h3>
-        <h3 class="lang lang-fr lang-block">Individuelles</h3>
-        <h3 class="lang lang-it lang-block">Personali</h3>
-        <h3 class="lang lang-ja lang-block">個展</h3>
 
         <div class="entry lang lang-es lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
         <div class="entry lang lang-en lang-block"><span class="y">2025</span><span class="t">El amigo del arte</span> — Petit Estrugamou, Buenos Aires, Argentina</div>
@@ -719,12 +512,20 @@
         <div class="entry lang lang-it lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa, New York, Stati Uniti</div>
         <div class="entry lang lang-ja lang-block"><span class="y">2019</span><span class="t">L'enfant Brut</span> — Amuleto // ChaShaMa、ニューヨーク、アメリカ合衆国</div>
 
-        <h3 class="lang lang-es lang-block">Colectivas</h3>
-        <h3 class="lang lang-en lang-block">Group</h3>
-        <h3 class="lang lang-pt lang-block">Coletivas</h3>
-        <h3 class="lang lang-fr lang-block">Collectives</h3>
-        <h3 class="lang lang-it lang-block">Collettive</h3>
-        <h3 class="lang lang-ja lang-block">グループ展</h3>
+                </div>
+        <div class="expo-viewer" id="expo-viewer-individuales">
+          <p class="expo-viewer-empty lang lang-es lang-block">Elegí una muestra subrayada para ver una foto.</p>
+          <p class="expo-viewer-empty lang lang-en lang-block">Pick an underlined show to see a photo.</p>
+          <p class="expo-viewer-empty lang lang-pt lang-block">Escolha uma mostra sublinhada para ver uma foto.</p>
+          <p class="expo-viewer-empty lang lang-fr lang-block">Choisissez une exposition soulignée pour voir une photo.</p>
+          <p class="expo-viewer-empty lang lang-it lang-block">Scegli una mostra sottolineata per vedere una foto.</p>
+          <p class="expo-viewer-empty lang lang-ja lang-block">下線のある展示を選ぶと写真が表示されます。</p>
+        </div>
+      </div>
+      </div>
+      <div class="panel" id="panel-expo-colectivas">
+      <div class="expo-layout">
+        <div class="expo-list">
 
         <div class="entry lang lang-es lang-block"><span class="y">2026</span><span class="t">SPANDAAAAAA</span> — Mendiburu, Lima, Perú</div>
         <div class="entry lang lang-en lang-block"><span class="y">2026</span><span class="t">SPANDAAAAAA</span> — Mendiburu, Lima, Peru</div>
@@ -929,8 +730,8 @@
         <div class="entry lang lang-it lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río, Buenos Aires, Argentina</div>
         <div class="entry lang lang-ja lang-block"><span class="y">2013</span><span class="t">Beluga</span> — Elsi del Río、ブエノスアイレス、アルゼンチン</div>
 
-        </div>
-        <div class="expo-viewer" id="expo-viewer">
+                </div>
+        <div class="expo-viewer" id="expo-viewer-colectivas">
           <p class="expo-viewer-empty lang lang-es lang-block">Elegí una muestra subrayada para ver una foto.</p>
           <p class="expo-viewer-empty lang lang-en lang-block">Pick an underlined show to see a photo.</p>
           <p class="expo-viewer-empty lang lang-pt lang-block">Escolha uma mostra sublinhada para ver uma foto.</p>
@@ -938,7 +739,7 @@
           <p class="expo-viewer-empty lang lang-it lang-block">Scegli una mostra sottolineata per vedere una foto.</p>
           <p class="expo-viewer-empty lang lang-ja lang-block">下線のある展示を選ぶと写真が表示されます。</p>
 
-          <div class="expo-content" id="expo-salon-belgrano" hidden>
+<div class="expo-content" id="expo-salon-belgrano" hidden>
             <img class="work-img" src="./assets/expos/Salon-Manuel-Belgrano-2014.jpg" alt="Salón Manuel Belgrano, 2014 — Marcos Gonzalez-Cutre">
             <p class="work-caption">
               <span class="lang lang-es">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-en">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-pt">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-fr">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentine</span><span class="lang lang-it">Salón Manuel Belgrano, 2014 — Buenos Aires, Argentina</span><span class="lang lang-ja">サロン・マヌエル・ベルグラーノ、2014年 — ブエノスアイレス、アルゼンチン</span>
@@ -946,17 +747,261 @@
           </div>
         </div>
       </div>
+      </div>
+      <div class="panel" id="panel-bio">
+        <div class="block">
+          <p class="lang lang-es lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) es un artista argentino.
+            Se formó con Richard Sturgeon y Laura Varangot (2009–2013) y realizó
+            el Fine Art Program de la Kunstgut Academy, Berlín (2013). Es
+            Licenciado en Arte por la Universidad Nacional de las Artes
+            (2014–2017) y por la Universidad de Palermo (2021–2024).
+          </p>
+          <p class="lang lang-en lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) is an Argentine artist.
+            He trained under Richard Sturgeon and Laura Varangot (2009–2013)
+            and completed the Fine Art Program at the Kunstgut Academy, Berlin
+            (2013). He holds a degree in Fine Arts from Universidad Nacional
+            de las Artes (2014–2017) and from Universidad de Palermo
+            (2021–2024).
+          </p>
+          <p class="lang lang-pt lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) é um artista argentino.
+            Formou-se com Richard Sturgeon e Laura Varangot (2009–2013) e
+            realizou o Fine Art Program na Kunstgut Academy, Berlim (2013). É
+            licenciado em Arte pela Universidad Nacional de las Artes
+            (2014–2017) e pela Universidad de Palermo (2021–2024).
+          </p>
+          <p class="lang lang-fr lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) est un artiste argentin.
+            Il s'est formé auprès de Richard Sturgeon et Laura Varangot
+            (2009–2013) et a suivi le Fine Art Program à la Kunstgut Academy,
+            Berlin (2013). Il est titulaire d'une licence en art de
+            l'Universidad Nacional de las Artes (2014–2017) et de
+            l'Universidad de Palermo (2021–2024).
+          </p>
+          <p class="lang lang-it lang-block">
+            Marcos Gonzalez-Cutre (Buenos Aires, 1994) è un artista argentino.
+            Si è formato con Richard Sturgeon e Laura Varangot (2009–2013) e
+            ha frequentato il Fine Art Program alla Kunstgut Academy di
+            Berlino (2013). È laureato in Arte all'Universidad Nacional de
+            las Artes (2014–2017) e all'Universidad de Palermo (2021–2024).
+          </p>
+          <p class="lang lang-ja lang-block">
+            マルコス・ゴンサレス=クトレ(ブエノスアイレス、1994年生まれ)はアルゼンチンの美術家である。2009年から2013年にかけてリチャード・スタージョンとラウラ・バランゴットに師事し、2013年にはドイツ・ベルリンのクンストグート・アカデミーのファインアーツ・プログラムを修了した。国立芸術大学(2014–2017年)およびパレルモ大学(2021–2024年)で美術の学位を取得している。
+          </p>
+
+          <p class="lang lang-es lang-block">
+            Expuso individualmente en Nueva York (2019) y en Buenos Aires con
+            <em>El amigo del arte</em>, en Petit Estrugamou (2025). Participó
+            en exhibiciones colectivas en Lima, Santiago de Chile, Río de
+            Janeiro, Helsinki, Londres, Tokio, Osaka y Seúl, entre otras
+            ciudades.
+          </p>
+          <p class="lang lang-en lang-block">
+            He exhibited solo in New York (2019) and in Buenos Aires with
+            <em>El amigo del arte</em>, at Petit Estrugamou (2025). He has
+            taken part in group exhibitions in Lima, Santiago de Chile, Rio
+            de Janeiro, Helsinki, London, Tokyo, Osaka, and Seoul, among
+            other cities.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Expôs individualmente em Nova York (2019) e em Buenos Aires com
+            <em>El amigo del arte</em>, no Petit Estrugamou (2025). Participou
+            de exposições coletivas em Lima, Santiago do Chile, Rio de
+            Janeiro, Helsinque, Londres, Tóquio, Osaka e Seul, entre outras
+            cidades.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Il a exposé seul à New York (2019) et à Buenos Aires avec
+            <em>El amigo del arte</em>, au Petit Estrugamou (2025). Il a
+            participé à des expositions collectives à Lima, Santiago du
+            Chili, Rio de Janeiro, Helsinki, Londres, Tokyo, Osaka et Séoul,
+            entre autres villes.
+          </p>
+          <p class="lang lang-it lang-block">
+            Ha esposto individualmente a New York (2019) e a Buenos Aires con
+            <em>El amigo del arte</em>, al Petit Estrugamou (2025). Ha
+            partecipato a mostre collettive a Lima, Santiago del Cile, Rio de
+            Janeiro, Helsinki, Londra, Tokyo, Osaka e Seul, tra le altre
+            città.
+          </p>
+          <p class="lang lang-ja lang-block">
+            2019年にはニューヨークで、2025年にはブエノスアイレスのプティ・エストルガモウにて個展「El amigo del arte」を開催した。リマ、サンティアゴ(チリ)、リオデジャネイロ、ヘルシンキ、ロンドン、東京、大阪、ソウルなど、各都市でのグループ展にも参加している。
+          </p>
         </div>
-        <div class="item">
-          <button class="toggle" type="button" data-target="contacto"><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span><span class="lang lang-pt">Contato</span><span class="lang lang-fr">Contact</span><span class="lang lang-it">Contatti</span><span class="lang lang-ja">連絡先</span></button>
-          <div class="panel" id="panel-contacto">
+
+        <h3 class="lang lang-es lang-block">Educación</h3>
+        <h3 class="lang lang-en lang-block">Education</h3>
+        <h3 class="lang lang-pt lang-block">Educação</h3>
+        <h3 class="lang lang-fr lang-block">Formation</h3>
+        <h3 class="lang lang-it lang-block">Formazione</h3>
+        <h3 class="lang lang-ja lang-block">学歴</h3>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2021–2024</span><span class="t">Licenciatura en Arte</span> — Universidad de Palermo</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2021–2024</span><span class="t">BA in Fine Arts</span> — Universidad de Palermo</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2021–2024</span><span class="t">Licenciatura em Arte</span> — Universidad de Palermo</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2021–2024</span><span class="t">Licence en art</span> — Universidad de Palermo</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2021–2024</span><span class="t">Laurea in Arte</span> — Universidad de Palermo</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2021–2024</span><span class="t">美術学士課程</span> — パレルモ大学</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura en Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2014–2017</span><span class="t">BA in Fine Arts</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2014–2017</span><span class="t">Licenciatura em Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2014–2017</span><span class="t">Licence en art</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2014–2017</span><span class="t">Laurea in Arte</span> — Universidad Nacional de las Artes</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2014–2017</span><span class="t">美術学士課程</span> — 国立芸術大学</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2009–2013</span>Taller de Pintura, Richard Sturgeon</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2009–2013</span>Painting Workshop, Richard Sturgeon</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2009–2013</span>Oficina de Pintura, Richard Sturgeon</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2009–2013</span>Atelier de peinture, Richard Sturgeon</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2009–2013</span>Laboratorio di pittura, Richard Sturgeon</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2009–2013</span>絵画講座、リチャード・スタージョン</div>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2009–2013</span>Taller de Dibujo y Modelo Vivo, Laura Varangot</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2009–2013</span>Drawing &amp; Life Model Workshop, Laura Varangot</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2009–2013</span>Oficina de Desenho e Modelo Vivo, Laura Varangot</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2009–2013</span>Atelier de dessin et modèle vivant, Laura Varangot</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2009–2013</span>Laboratorio di disegno dal vero, Laura Varangot</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2009–2013</span>デッサン・ライブモデル講座、ラウラ・バランゴット</div>
+
+        <h3 class="lang lang-es lang-block">Residencias</h3>
+        <h3 class="lang lang-en lang-block">Residencies</h3>
+        <h3 class="lang lang-pt lang-block">Residências</h3>
+        <h3 class="lang lang-fr lang-block">Résidences</h3>
+        <h3 class="lang lang-it lang-block">Residenze</h3>
+        <h3 class="lang lang-ja lang-block">レジデンシー</h3>
+
+        <div class="entry lang lang-es lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlín</div>
+        <div class="entry lang lang-en lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlin</div>
+        <div class="entry lang lang-pt lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlim</div>
+        <div class="entry lang lang-fr lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlin</div>
+        <div class="entry lang lang-it lang-block"><span class="y">2013</span>Fine Art Program — Kunstgut Academy, Berlino</div>
+        <div class="entry lang lang-ja lang-block"><span class="y">2013</span>ファインアーツ・プログラム — クンストグート・アカデミー、ベルリン</div>
+
+      </div>
+      <div class="panel" id="panel-statement">
+        <div class="block">
+          <p class="lang lang-es lang-block">
+            Para mí, pintar es una conversación incesante con los materiales que uso
+            y el espacio donde realizo mi práctica. El óleo me eleva espiritualmente,
+            me hipnotiza con su olor y textura, me erotiza. Intento traducir en mis
+            pinturas lo que siento al ver las obras de los artistas que amo, como si
+            hubiera recibido un mensaje en algún museo, galería, taller.
+          </p>
+          <p class="lang lang-en lang-block">
+            For me, painting is an unceasing conversation with the materials I use
+            and the space where I work. Oil paint lifts me spiritually, it
+            hypnotizes me with its smell and texture, it arouses me. I try to
+            translate into my paintings what I feel when I look at the work of
+            the artists I love, as if I had received a message in some museum,
+            gallery, or studio.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Para mim, pintar é uma conversa incessante com os materiais que uso e
+            o espaço onde realizo minha prática. O óleo me eleva espiritualmente,
+            me hipnotiza com seu cheiro e textura, me erotiza. Tento traduzir em
+            minhas pinturas o que sinto ao ver as obras dos artistas que amo,
+            como se tivesse recebido uma mensagem em algum museu, galeria, ateliê.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Pour moi, peindre est une conversation incessante avec les matériaux
+            que j'utilise et l'espace où je travaille. L'huile m'élève
+            spirituellement, elle m'hypnotise par son odeur et sa texture, elle
+            m'érotise. J'essaie de traduire dans mes peintures ce que je ressens
+            en regardant les œuvres des artistes que j'aime, comme si j'avais
+            reçu un message dans un musée, une galerie, un atelier.
+          </p>
+          <p class="lang lang-it lang-block">
+            Per me, dipingere è una conversazione incessante con i materiali che
+            uso e lo spazio in cui lavoro. L'olio mi eleva spiritualmente, mi
+            ipnotizza con il suo odore e la sua consistenza, mi eccita. Cerco di
+            tradurre nei miei dipinti ciò che provo guardando le opere degli
+            artisti che amo, come se avessi ricevuto un messaggio in un museo,
+            una galleria, uno studio.
+          </p>
+          <p class="lang lang-ja lang-block">
+            私にとって絵を描くことは、使用する素材と制作を行う空間との絶え間ない対話である。油彩は私を精神的に高揚させ、その匂いと質感で私を催眠状態にし、官能的にさせる。愛する作家たちの作品を見て感じたことを、まるで美術館やギャラリー、アトリエで何かメッセージを受け取ったかのように、自分の絵に翻訳しようとしている。
+          </p>
+
+          <p class="lang lang-es lang-block">
+            Hago pinturas de gran formato con una paleta que va cambiando:
+            composiciones que no cuentan con un punto focal particular sino que
+            permiten al espectador forjar su propio recorrido visual.
+          </p>
+          <p class="lang lang-en lang-block">
+            I make large-format paintings with a shifting palette: compositions
+            with no single focal point, which let the viewer chart their own
+            visual path.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Faço pinturas de grande formato com uma paleta que vai mudando:
+            composições que não têm um ponto focal específico, mas que permitem
+            ao espectador traçar seu próprio percurso visual.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Je réalise des peintures de grand format avec une palette qui évolue :
+            des compositions sans point focal unique, qui laissent au spectateur
+            le soin de tracer son propre parcours visuel.
+          </p>
+          <p class="lang lang-it lang-block">
+            Realizzo dipinti di grande formato con una palette in continuo
+            cambiamento: composizioni senza un punto focale unico, che lasciano
+            allo spettatore la libertà di costruire il proprio percorso visivo.
+          </p>
+          <p class="lang lang-ja lang-block">
+            変化し続けるパレットを用いて大判の絵画を制作している。特定の焦点を持たない構成により、鑑賞者が自分自身の視線の軌跡を築くことができるようにしている。
+          </p>
+
+          <p class="lang lang-es lang-block">
+            Sueño con hacer una obra gigante, instalativa, que necesite horas, años
+            para ser recorrida, una obra magna capaz de producir un estruendo
+            memorable.
+          </p>
+          <p class="lang lang-en lang-block">
+            I dream of making a giant, immersive work — one that takes hours,
+            years to walk through, a monumental piece capable of producing a
+            memorable roar.
+          </p>
+          <p class="lang lang-pt lang-block">
+            Sonho em fazer uma obra gigante, instalativa, que precise de horas,
+            anos para ser percorrida, uma obra magna capaz de produzir um
+            estrondo memorável.
+          </p>
+          <p class="lang lang-fr lang-block">
+            Je rêve de créer une œuvre gigantesque, immersive, qui nécessite des
+            heures, des années pour être parcourue, une œuvre magistrale capable
+            de produire un fracas mémorable.
+          </p>
+          <p class="lang lang-it lang-block">
+            Sogno di realizzare un'opera gigantesca, immersiva, che richieda ore,
+            anni per essere percorsa, un'opera magna capace di produrre un
+            fragore memorabile.
+          </p>
+          <p class="lang lang-ja lang-block">
+            何時間も、何年もかけて巡ることになるような、巨大でインスタレーション的な作品——記憶に残る轟音を生み出せるような大作を作ることを夢見ている。
+          </p>
+        </div>
+      </div>
+      <div class="panel" id="panel-prensa">
+        <div class="block">
+          <p class="empty-state lang lang-es lang-block">Próximamente.</p>
+          <p class="empty-state lang lang-en lang-block">Coming soon.</p>
+          <p class="empty-state lang lang-pt lang-block">Em breve.</p>
+          <p class="empty-state lang lang-fr lang-block">Bientôt disponible.</p>
+          <p class="empty-state lang lang-it lang-block">Prossimamente.</p>
+          <p class="empty-state lang lang-ja lang-block">近日公開。</p>
+        </div>
+      </div>
+      <div class="panel" id="panel-contacto">
         <div class="block">
           <p><a href="mailto:marcosgcutre@gmail.com">marcosgcutre@gmail.com</a></p>
           <p><a href="https://instagram.com/marcosgonzalezcutre" target="_blank">@marcosgonzalezcutre</a></p>
         </div>
       </div>
-        </div>
       </div>
+    </div>
 
     <footer>
       © <script>document.write(new Date().getFullYear())</script> Marcos Gonzalez-Cutre
@@ -975,9 +1020,10 @@
         p.style.maxHeight = '';
       });
       document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
+      document.querySelectorAll('.content-viewer-empty').forEach(function (p) { p.hidden = false; });
     }
 
-    document.querySelectorAll('.toggle').forEach(function (btn) {
+    document.querySelectorAll('.nav-list .toggle').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         var id = btn.getAttribute('data-target');
@@ -992,6 +1038,7 @@
           document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
             t.classList.add('open');
           });
+          document.querySelectorAll('.content-viewer-empty').forEach(function (p) { p.hidden = true; });
         }
       });
     });
@@ -1042,14 +1089,20 @@
     document.querySelectorAll('.expo-link').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var id = btn.getAttribute('data-expo');
-        document.querySelectorAll('.expo-link').forEach(function (b) { b.classList.remove('active'); });
-        document.querySelectorAll('.expo-link[data-expo="' + id + '"]').forEach(function (b) { b.classList.add('active'); });
-        document.querySelectorAll('.expo-content').forEach(function (c) { c.hidden = true; });
-        var content = document.getElementById('expo-' + id);
-        if (content) { content.hidden = false; }
-        document.querySelectorAll('.expo-viewer-empty').forEach(function (p) { p.hidden = true; });
-        var openPanel = btn.closest('.panel.open');
-        if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
+        var panel = btn.closest('.panel');
+        var viewer = panel ? panel.querySelector('.expo-viewer') : null;
+
+        panel.querySelectorAll('.expo-link').forEach(function (b) { b.classList.remove('active'); });
+        panel.querySelectorAll('.expo-link[data-expo="' + id + '"]').forEach(function (b) { b.classList.add('active'); });
+
+        if (viewer) {
+          viewer.querySelectorAll('.expo-content').forEach(function (c) { c.hidden = true; });
+          var content = viewer.querySelector('#expo-' + id);
+          if (content) { content.hidden = false; }
+          viewer.querySelectorAll('.expo-viewer-empty').forEach(function (p) { p.hidden = true; });
+        }
+
+        if (panel.classList.contains('open')) { panel.style.maxHeight = panel.scrollHeight + 'px'; }
       });
     });
 
