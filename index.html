@@ -286,6 +286,21 @@
       max-height: 100%;
       object-fit: contain;
       box-shadow: 0 10px 60px rgba(0,0,0,.5);
+      cursor: zoom-in;
+    }
+    /* Super zoom: click en la obra agranda y permite hacer scroll para recorrerla */
+    .lightbox.zoomed {
+      overflow: auto;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 0;
+      cursor: default;
+    }
+    .lightbox.zoomed img {
+      max-width: none;
+      max-height: none;
+      box-shadow: none;
+      cursor: zoom-out;
     }
     .lightbox .lightbox-close {
       all: unset;
@@ -1112,6 +1127,8 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     var lightbox = document.getElementById('lightbox');
     var lightboxImg = document.getElementById('lightbox-img');
+    var ZOOM_FACTOR = 2.5;
+
     document.querySelectorAll('.work-img').forEach(function (img) {
       img.addEventListener('click', function () {
         lightboxImg.src = img.src;
@@ -1119,7 +1136,38 @@
         lightbox.classList.add('open');
       });
     });
-    function closeLightbox() { lightbox.classList.remove('open'); }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      unzoom();
+    }
+    function unzoom() {
+      lightbox.classList.remove('zoomed');
+      lightboxImg.style.width = '';
+      lightboxImg.style.height = '';
+      lightbox.scrollLeft = 0;
+      lightbox.scrollTop = 0;
+    }
+    // Super zoom: click en la obra para acercarse (y de nuevo para alejarse),
+    // centrado en el punto donde se clickeó. Mientras está zoomeada, se
+    // recorre haciendo scroll o arrastrando con el dedo.
+    lightboxImg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (lightbox.classList.contains('zoomed')) {
+        unzoom();
+        return;
+      }
+      var fitRect = lightboxImg.getBoundingClientRect();
+      var clickXRatio = (e.clientX - fitRect.left) / fitRect.width;
+      var clickYRatio = (e.clientY - fitRect.top) / fitRect.height;
+      var newW = fitRect.width * ZOOM_FACTOR;
+      var newH = fitRect.height * ZOOM_FACTOR;
+      lightbox.classList.add('zoomed');
+      lightboxImg.style.width = newW + 'px';
+      lightboxImg.style.height = newH + 'px';
+      lightbox.scrollLeft = clickXRatio * newW - lightbox.clientWidth / 2;
+      lightbox.scrollTop = clickYRatio * newH - lightbox.clientHeight / 2;
+    });
     lightbox.addEventListener('click', closeLightbox);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { closeLightbox(); }
