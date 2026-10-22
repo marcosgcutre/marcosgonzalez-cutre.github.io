@@ -299,14 +299,26 @@
       cursor: zoom-out;
     }
     .lightbox.open { display: flex; }
-    .lightbox img {
+    .lightbox-imgs {
+      display: flex;
+      gap: 6px;
+      max-width: 100%;
+      max-height: 100%;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-imgs img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
+      flex: 1 1 auto;
+      min-width: 0;
       box-shadow: 0 10px 60px rgba(0,0,0,.5);
       cursor: zoom-in;
     }
-    /* Super zoom: click en la obra agranda y permite hacer scroll para recorrerla */
+    /* Super zoom: click en la obra agranda y permite hacer scroll para recorrerla.
+       Si hay dos obras juntas (díptico), la que no se clickeó se oculta mientras
+       dura el zoom. */
     .lightbox.zoomed {
       overflow: auto;
       align-items: flex-start;
@@ -314,7 +326,12 @@
       padding: 0;
       cursor: default;
     }
-    .lightbox.zoomed img {
+    .lightbox.zoomed .lightbox-imgs {
+      max-width: none;
+      max-height: none;
+    }
+    .lightbox.zoomed .lightbox-imgs img:not(.zoomed-active) { display: none; }
+    .lightbox.zoomed .lightbox-imgs img.zoomed-active {
       max-width: none;
       max-height: none;
       box-shadow: none;
@@ -1025,7 +1042,7 @@
 
   <div class="lightbox" id="lightbox">
     <button class="lightbox-close" type="button" aria-label="Cerrar">✕</button>
-    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-imgs" id="lightbox-imgs"></div>
   </div>
 
   <script>
@@ -1146,13 +1163,21 @@
     // LIGHTBOX — click en una obra para verla grande
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     var lightbox = document.getElementById('lightbox');
-    var lightboxImg = document.getElementById('lightbox-img');
+    var lightboxImgs = document.getElementById('lightbox-imgs');
     var ZOOM_FACTOR = 2.5;
 
     document.querySelectorAll('.work-img').forEach(function (img) {
       img.addEventListener('click', function () {
-        lightboxImg.src = img.src;
-        lightboxImg.alt = img.alt;
+        // Si la obra es parte de un díptico, se abren las dos juntas.
+        var group = img.closest('.diptych');
+        var imgs = group ? group.querySelectorAll('.work-img') : [img];
+        lightboxImgs.innerHTML = '';
+        imgs.forEach(function (src) {
+          var el = document.createElement('img');
+          el.src = src.src;
+          el.alt = src.alt;
+          lightboxImgs.appendChild(el);
+        });
         lightbox.classList.add('open');
       });
     });
@@ -1163,28 +1188,35 @@
     }
     function unzoom() {
       lightbox.classList.remove('zoomed');
-      lightboxImg.style.width = '';
-      lightboxImg.style.height = '';
+      lightboxImgs.querySelectorAll('img').forEach(function (el) {
+        el.classList.remove('zoomed-active');
+        el.style.width = '';
+        el.style.height = '';
+      });
       lightbox.scrollLeft = 0;
       lightbox.scrollTop = 0;
     }
     // Super zoom: click en la obra para acercarse (y de nuevo para alejarse),
     // centrado en el punto donde se clickeó. Mientras está zoomeada, se
-    // recorre haciendo scroll o arrastrando con el dedo.
-    lightboxImg.addEventListener('click', function (e) {
+    // recorre haciendo scroll o arrastrando con el dedo. Si hay dos obras
+    // juntas (díptico), al zoomear una se oculta la otra momentáneamente.
+    lightboxImgs.addEventListener('click', function (e) {
+      if (e.target.tagName !== 'IMG') return;
       e.stopPropagation();
+      var el = e.target;
       if (lightbox.classList.contains('zoomed')) {
         unzoom();
         return;
       }
-      var fitRect = lightboxImg.getBoundingClientRect();
+      var fitRect = el.getBoundingClientRect();
       var clickXRatio = (e.clientX - fitRect.left) / fitRect.width;
       var clickYRatio = (e.clientY - fitRect.top) / fitRect.height;
       var newW = fitRect.width * ZOOM_FACTOR;
       var newH = fitRect.height * ZOOM_FACTOR;
+      el.classList.add('zoomed-active');
       lightbox.classList.add('zoomed');
-      lightboxImg.style.width = newW + 'px';
-      lightboxImg.style.height = newH + 'px';
+      el.style.width = newW + 'px';
+      el.style.height = newH + 'px';
       lightbox.scrollLeft = clickXRatio * newW - lightbox.clientWidth / 2;
       lightbox.scrollTop = clickYRatio * newH - lightbox.clientHeight / 2;
     });
