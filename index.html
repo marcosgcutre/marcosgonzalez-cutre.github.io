@@ -224,6 +224,18 @@
       font-size: 16px;
     }
 
+    .video-item { margin-bottom: 22px; }
+    .video-item video {
+      width: 100%;
+      display: block;
+      background: #000;
+      margin-bottom: 8px;
+    }
+    .video-title {
+      color: #666;
+      font-size: 16px;
+    }
+
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        SLIDER — obras de una serie, una al lado de la otra
        ✏️ Para sumar una obra: copiá un <div class="slide"> entero
@@ -382,6 +394,9 @@
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-derivas">Derivas</button></div>
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-brava">¿Brava o mansa?</button></div>
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-buenosaires">Buenos Aires</button></div>
+        <div class="item">
+          <button class="toggle" type="button" data-target="videos"><span class="lang lang-es">Videos</span><span class="lang lang-en">Videos</span><span class="lang lang-pt">Vídeos</span><span class="lang lang-fr">Vidéos</span><span class="lang lang-it">Video</span><span class="lang lang-ja">動画</span></button>
+        </div>
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-jantus">Jantus (2014–2022)</button></div>
 
         <div class="nav-label"><span class="lang lang-es">Exposiciones individuales</span><span class="lang lang-en">Solo exhibitions</span><span class="lang lang-pt">Exposições individuais</span><span class="lang lang-fr">Expositions individuelles</span><span class="lang lang-it">Mostre personali</span><span class="lang lang-ja">個展</span></div>
@@ -612,6 +627,16 @@
           <button class="slider-nav prev" type="button" aria-label="Anterior">‹</button>
           <button class="slider-nav next" type="button" aria-label="Siguiente">›</button>
           <div class="slider-dots"><span class="active"></span><span></span></div>
+        </div>
+      </div>
+      <div class="panel" id="panel-videos">
+        <div class="block">
+          <div class="video-item">
+            <p class="video-title">A day in the life (NY, NY)</p>
+            <video controls preload="metadata" playsinline>
+              <source src="./assets/videos/A-day-in-the-life-ny-ny.mp4" type="video/mp4">
+            </video>
+          </div>
         </div>
       </div>
       <div class="panel" id="panel-serie-jantus">
