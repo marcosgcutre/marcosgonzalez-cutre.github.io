@@ -1160,10 +1160,27 @@
   </div>
 
   <script>
+    // En mobile (acordeón), el panel abierto se muda dentro de .nav-list,
+    // justo debajo de su título, y los títulos siguientes quedan debajo.
+    // En desktop se queda en .content-viewer (al lado de la lista), como siempre.
+    var contentViewer = document.querySelector('.content-viewer');
+    function isMobileNav() { return window.matchMedia('(max-width: 520px)').matches; }
+    function placePanel(panel, btn) {
+      if (isMobileNav()) {
+        var itemWrapper = btn.closest('.item');
+        if (itemWrapper && panel.previousElementSibling !== itemWrapper) {
+          itemWrapper.insertAdjacentElement('afterend', panel);
+        }
+      } else if (panel.parentNode !== contentViewer) {
+        contentViewer.appendChild(panel);
+      }
+    }
+
     function closeAll() {
       document.querySelectorAll('.panel').forEach(function (p) {
         p.classList.remove('open');
         p.style.maxHeight = '';
+        if (p.parentNode !== contentViewer) { contentViewer.appendChild(p); }
       });
       document.querySelectorAll('.toggle').forEach(function (t) { t.classList.remove('open'); });
       document.querySelectorAll('.content-viewer-empty').forEach(function (p) { p.hidden = false; });
@@ -1179,6 +1196,7 @@
         closeAll();
 
         if (!isOpen) {
+          placePanel(panel, btn);
           panel.classList.add('open');
           panel.style.maxHeight = panel.scrollHeight + 'px';
           document.querySelectorAll('.toggle[data-target="' + id + '"]').forEach(function (t) {
@@ -1202,7 +1220,11 @@
     // Recalcular al cambiar de idioma o de tamaño de ventana (el texto puede envolver distinto)
     window.addEventListener('resize', function () {
       var openPanel = document.querySelector('.panel.open');
-      if (openPanel) { openPanel.style.maxHeight = openPanel.scrollHeight + 'px'; }
+      if (openPanel) {
+        var openBtn = document.querySelector('.toggle.open');
+        if (openBtn) { placePanel(openPanel, openBtn); }
+        openPanel.style.maxHeight = openPanel.scrollHeight + 'px';
+      }
     });
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
