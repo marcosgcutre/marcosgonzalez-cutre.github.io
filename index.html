@@ -128,13 +128,57 @@
     .content-viewer { flex: 1 1 auto; min-width: 0; }
     .content-viewer-empty { color: #999; font-size: 14px; }
     .content-viewer-empty[hidden] { display: none !important; }
+    .nav-index-toggle { display: none; }
+    .feed-heading { display: none; }
     @media (max-width: 520px) {
       .main-layout { flex-direction: column; gap: 0; align-items: stretch; }
-      .nav-list { width: 100%; position: static; margin-bottom: 8px; }
+      .nav-list { width: 100%; position: static; margin-bottom: 18px; }
       .nav-list .item { margin-bottom: 11px; }
       body { font-size: 15px; }
       h1 { font-size: 22px; }
       .wrap { padding: 20px 18px 48px; }
+
+      /* Índice colapsado por default: solo se ve el botón, no la lista entera */
+      .nav-index-toggle {
+        display: inline-block;
+        font-size: 13px;
+        color: #666;
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 14px;
+        background: none;
+        cursor: pointer;
+      }
+      .nav-list.collapsed .item,
+      .nav-list.collapsed .nav-label { display: none; }
+
+      /* Feed continuo: content-viewer se vuelve columna y cada obra-serie
+         queda siempre visible (no depende del click/acordeón) */
+      .content-viewer { display: flex; flex-direction: column; }
+      .content-viewer-empty { display: none !important; }
+      .panel.feed-panel {
+        max-height: none !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+        padding: 0 0 8px !important;
+        margin-bottom: 36px !important;
+      }
+      .feed-heading {
+        display: block;
+        font-style: italic;
+        font-size: 14px;
+        color: #111;
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid #eee;
+      }
+
+      /* Carrusel horizontal -> fotos apiladas verticalmente */
+      .slider-track { flex-direction: column; overflow-x: visible; scroll-snap-type: none; }
+      .slide { flex: none; width: 100%; min-width: 0; margin-bottom: 22px; }
+      .slide:last-child { margin-bottom: 0; }
+      .slider-nav, .slider-dots { display: none; }
+      .diptych { flex-direction: column; gap: 10px; }
+      .diptych .work-img { width: 100%; }
     }
 
     .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
@@ -392,7 +436,10 @@
     </div>
 
     <div class="main-layout">
-      <div class="nav-list">
+      <div class="nav-list collapsed">
+        <button class="nav-index-toggle" type="button" id="navIndexToggle">
+          <span class="lang lang-es">Índice ▾</span><span class="lang lang-en">Index ▾</span><span class="lang lang-pt">Índice ▾</span><span class="lang lang-fr">Index ▾</span><span class="lang lang-it">Indice ▾</span><span class="lang lang-ja">目次 ▾</span>
+        </button>
         <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su contenido a la derecha.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Lo que queda</button></div>
@@ -435,7 +482,7 @@
         <p class="content-viewer-empty lang lang-it lang-block">Scegli una voce dall'elenco per vedere il contenuto.</p>
         <p class="content-viewer-empty lang lang-ja lang-block">リストから項目を選ぶと内容が表示されます。</p>
 
-      <div class="panel" id="panel-serie-brava">
+      <div class="panel feed-panel" id="panel-serie-brava" style="order:3">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -480,7 +527,7 @@
           <div class="slider-dots"><span class="active"></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
       </div>
-      <div class="panel" id="panel-serie-erosion">
+      <div class="panel feed-panel" id="panel-serie-erosion" style="order:1">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -580,7 +627,7 @@
           </p>
         </div>
       </div>
-      <div class="panel" id="panel-serie-derivas">
+      <div class="panel feed-panel" id="panel-serie-derivas" style="order:2">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -616,7 +663,7 @@
           <div class="slider-dots"><span class="active"></span><span></span><span></span><span></span></div>
         </div>
       </div>
-      <div class="panel" id="panel-serie-buenosaires">
+      <div class="panel feed-panel" id="panel-serie-buenosaires" style="order:4">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -637,7 +684,7 @@
           <div class="slider-dots"><span class="active"></span><span></span></div>
         </div>
       </div>
-      <div class="panel" id="panel-videos">
+      <div class="panel feed-panel" id="panel-videos" style="order:5">
         <div class="block">
           <div class="video-item">
             <p class="video-title">Un día en la vida (NY, NY)</p>
@@ -647,7 +694,7 @@
           </div>
         </div>
       </div>
-      <div class="panel" id="panel-rojo-verde-azul">
+      <div class="panel feed-panel" id="panel-rojo-verde-azul" style="order:6">
         <div class="block">
           <div class="video-item">
             <p class="video-title">Rojo, verde y azul (imagen en movimiento)</p>
@@ -657,7 +704,7 @@
           </div>
         </div>
       </div>
-      <div class="panel" id="panel-serie-jantus">
+      <div class="panel feed-panel" id="panel-serie-jantus" style="order:7">
         <div class="slider">
           <div class="slider-track">
             <div class="slide">
@@ -702,7 +749,7 @@
           <div class="slider-dots"><span class="active"></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
       </div>
-      <div class="panel" id="panel-expo-elamigo">
+      <div class="panel feed-panel" id="panel-expo-elamigo" style="order:8">
         <div class="block">
           <p class="lang lang-es lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
           <p class="lang lang-en lang-block"><span class="y">2025</span> — Petit Estrugamou, Buenos Aires, Argentina</p>
@@ -714,7 +761,7 @@
           <img class="work-img" src="./assets/El-amigo-del-arte-vista.jpg" alt="El amigo del arte — vista de sala, Marcos Gonzalez-Cutre">
         </div>
       </div>
-      <div class="panel" id="panel-expo-lenfant">
+      <div class="panel feed-panel" id="panel-expo-lenfant" style="order:9">
         <div class="block">
           <p class="lang lang-es lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, Nueva York, Estados Unidos</p>
           <p class="lang lang-en lang-block"><span class="y">2019</span> — Amuleto // ChaShaMa, New York, United States</p>
@@ -1186,11 +1233,30 @@
       document.querySelectorAll('.content-viewer-empty').forEach(function (p) { p.hidden = false; });
     }
 
+    // Índice colapsable en mobile (el feed de fotos ya está siempre visible,
+    // el índice es solo para saltar directo a una sección).
+    var navList = document.querySelector('.nav-list');
+    var navIndexToggle = document.getElementById('navIndexToggle');
+    if (navIndexToggle) {
+      navIndexToggle.addEventListener('click', function () {
+        navList.classList.toggle('collapsed');
+      });
+    }
+
     document.querySelectorAll('.nav-list .toggle').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         var id = btn.getAttribute('data-target');
         var panel = document.getElementById('panel-' + id);
+
+        // En mobile, las obras/series ya están siempre visibles en el feed:
+        // tocar el título solo scrollea hasta ahí, no abre/cierra nada.
+        if (isMobileNav() && panel.classList.contains('feed-panel')) {
+          navList.classList.add('collapsed');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+
         var isOpen = panel.classList.contains('open');
 
         closeAll();
@@ -1205,6 +1271,18 @@
           document.querySelectorAll('.content-viewer-empty').forEach(function (p) { p.hidden = true; });
         }
       });
+    });
+
+    // Título de cada sección dentro del feed de mobile (clona el texto del nav)
+    document.querySelectorAll('.panel.feed-panel').forEach(function (panel) {
+      var id = panel.id.replace('panel-', '');
+      var navBtn = document.querySelector('.nav-list .toggle[data-target="' + id + '"]');
+      if (navBtn) {
+        var heading = document.createElement('div');
+        heading.className = 'feed-heading';
+        heading.innerHTML = navBtn.innerHTML;
+        panel.insertBefore(heading, panel.firstChild);
+      }
     });
 
     // Recalcular la altura si una imagen adentro del panel abierto termina de cargar
