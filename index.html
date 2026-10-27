@@ -179,6 +179,10 @@
       .slider-nav, .slider-dots { display: none; }
       .diptych { flex-direction: column; gap: 10px; }
       .diptych .work-img { width: 100%; }
+
+      /* Imágenes fijas en mobile: sin lightbox ni zoom, solo se ven */
+      .work-img { cursor: default; }
+      .work-img:hover { opacity: 1; }
     }
 
     .langswitch { margin-bottom: 26px; font-size: 14px; letter-spacing: .5px; }
@@ -1384,6 +1388,8 @@
 
     document.querySelectorAll('.work-img').forEach(function (img) {
       img.addEventListener('click', function () {
+        // En mobile las imágenes quedan fijas, sin lightbox ni zoom.
+        if (isMobileNav()) return;
         // Si la obra es parte de un díptico, se abren las dos juntas.
         var group = img.closest('.diptych');
         var imgs = group ? group.querySelectorAll('.work-img') : [img];
@@ -1427,8 +1433,11 @@
       var fitRect = el.getBoundingClientRect();
       var clickXRatio = (e.clientX - fitRect.left) / fitRect.width;
       var clickYRatio = (e.clientY - fitRect.top) / fitRect.height;
-      var newW = fitRect.width * ZOOM_FACTOR;
-      var newH = fitRect.height * ZOOM_FACTOR;
+      // Nunca agrandar más allá de la resolución real del archivo (si no, se pixela).
+      var maxScale = el.naturalWidth ? el.naturalWidth / fitRect.width : ZOOM_FACTOR;
+      var scale = Math.min(ZOOM_FACTOR, maxScale);
+      var newW = fitRect.width * scale;
+      var newH = fitRect.height * scale;
       el.classList.add('zoomed-active');
       lightbox.classList.add('zoomed');
       el.style.width = newW + 'px';
