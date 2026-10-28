@@ -289,6 +289,22 @@
       color: #666;
       font-size: 14px;
     }
+    .video-embed {
+      position: relative;
+      width: 100%;
+      max-width: 760px;
+      aspect-ratio: 16 / 9;
+      margin: 0 auto 8px;
+      background: #000;
+    }
+    .video-embed iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        SLIDER — obras de una serie, una al lado de la otra
@@ -689,9 +705,9 @@
         <div class="block">
           <div class="video-item">
             <p class="video-title">Un día en la vida (NY, NY)</p>
-            <video controls autoplay muted playsinline preload="auto">
-              <source src="./assets/videos/A-day-in-the-life-ny-ny.mp4" type="video/mp4">
-            </video>
+            <div class="video-embed">
+              <iframe title="vimeo-player" src="https://player.vimeo.com/video/1240045132?h=b7f60a2e79" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" allowfullscreen></iframe>
+            </div>
           </div>
         </div>
       </div>
