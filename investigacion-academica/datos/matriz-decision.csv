@@ -1,0 +1,19 @@
+id,opcion,calidad_academica_30,pertinencia_30,profesorado_recursos_15,compatibilidad_produccion_movilidad_15,costo_viabilidad_10,total_ponderado_sobre_5,costa_cualitativo,condicion_bloqueante,estado_evidencia
+B01,Beaux-Arts de Paris (DNSAP en curso),5,5,5,2,5,4.55,no,B2 francés; año de ingreso fijado por jurado,confirmado
+B08,Le Fresnoy,5,5,5,2,5,4.55,no,edad ≤35; curso en francés,confirmado
+B02,Villa Arson DNSEP,4,5,4,3,5,4.25,sí,B2 francés; comisión de equivalencia,confirmado
+B03,Beaux-Arts de Marseille DNSEP,4,5,4,3,5,4.25,sí,francés; comisión,probable
+B04,Beaux-Arts Nantes Saint-Nazaire DNSEP,4,5,4,3,5,4.25,sí (estuario),francés; comisión,confirmado
+B09,ENSP Arles,5,4,5,2,5,4.25,cerca,edad <30; B2 aconsejado,confirmado
+B06,EESAB DNSEP,4,5,3,3,5,4.10,sí,francés; ingreso en curso no documentado,probable
+M04,EHESS Arts littératures langages,5,4,4,3,3,4.05,sí (Marsella),francés; proyecto de investigación,no verificado
+M08,UZH Executive Master Art Market Studies,4,3,5,4,2,3.65,no,base de residencia en Francia/permiso suizo; costo,confirmado
+M01,Paris 1 Marché de l'art,5,3,4,2,3,3.60,no,C1 francés; licence HA/droit,confirmado
+M02,École du Louvre parcours marché,4,3,4,2,3,3.30,no,equivalencia; francés,confirmado (estructura)
+M03,Sorbonne M2 Expertise et marché,4,2,4,2,4,3.10,no,M1 historia del arte,confirmado
+A01,TSAA MFA Media Arts (inglés),2,3,2,4,5,2.90,no,sesgo diseño a despejar; reconocimiento de título,confirmado
+A02,TSAA MFA Ceramic Arts (inglés),2,3,2,4,5,2.90,no,idioma contradictorio; sin convocatoria,contradictorio
+B05,Nantes Programme International Équivalence (puente),2,4,3,3,2,2.90,sí,no garantiza 4.º año; 7800 EUR,confirmado
+A03,Paris College of Art MA/MFA Photo,3,3,3,3,1,2.80,no,costo; título estadounidense,probable
+M05,IESA MBA Contemporary Art,3,3,3,2,2,2.75,no,costo no verificado,confirmado (plan)
+M06,ICART MBA International Art Market,2,3,2,2,3,2.40,no,—,probable
