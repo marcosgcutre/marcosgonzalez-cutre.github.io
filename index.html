@@ -138,14 +138,24 @@
       h1 { font-size: 18px; }
       .wrap { padding: 16px 18px 48px; }
 
-      /* Índice colapsado por default: solo se ve el botón, no la lista entera */
+      /* El título/idiomas scrollean normal (no ocupan espacio fijo) */
+      .sticky-top { position: static; }
+
+      /* Índice colapsado por default: solo se ve el botón, no la lista entera.
+         Queda fijo arriba al scrollear, siempre disponible. */
       .nav-index-toggle {
         display: inline-block;
+        position: sticky;
+        top: 0;
+        width: 100%;
         font-size: 13px;
         color: #666;
-        border-bottom: 1px solid #ccc;
+        text-align: left;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
         margin-bottom: 14px;
-        background: none;
+        z-index: 6;
         cursor: pointer;
       }
       .nav-list.collapsed .item,
@@ -162,15 +172,8 @@
         padding: 0 0 8px !important;
         margin-bottom: 36px !important;
       }
-      .feed-heading {
-        display: block;
-        font-style: italic;
-        font-size: 14px;
-        color: #111;
-        padding-bottom: 8px;
-        margin-bottom: 14px;
-        border-bottom: 1px solid #eee;
-      }
+      /* Sin texto de título arriba de cada serie: quedan solo las obras */
+      .feed-heading { display: none; }
 
       /* Carrusel horizontal -> fotos apiladas verticalmente */
       .slider-track { flex-direction: column; overflow-x: visible; scroll-snap-type: none; }
@@ -453,10 +456,10 @@
     </div>
 
     <div class="main-layout">
+      <button class="nav-index-toggle" type="button" id="navIndexToggle">
+        <span class="lang lang-es">Índice ▾</span><span class="lang lang-en">Index ▾</span><span class="lang lang-pt">Índice ▾</span><span class="lang lang-fr">Index ▾</span><span class="lang lang-it">Indice ▾</span><span class="lang lang-ja">目次 ▾</span>
+      </button>
       <div class="nav-list collapsed">
-        <button class="nav-index-toggle" type="button" id="navIndexToggle">
-          <span class="lang lang-es">Índice ▾</span><span class="lang lang-en">Index ▾</span><span class="lang lang-pt">Índice ▾</span><span class="lang lang-fr">Index ▾</span><span class="lang lang-it">Indice ▾</span><span class="lang lang-ja">目次 ▾</span>
-        </button>
         <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su contenido a la derecha.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
         <div class="item"><button class="series-item toggle" type="button" data-target="serie-erosion">Lo que queda</button></div>
