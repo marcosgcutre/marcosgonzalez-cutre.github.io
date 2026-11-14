@@ -138,24 +138,18 @@
       h1 { font-size: 18px; }
       .wrap { padding: 16px 18px 48px; }
 
-      /* El título/idiomas scrollean normal (no ocupan espacio fijo) */
-      .sticky-top { position: static; }
-
       /* Índice colapsado por default: solo se ve el botón, no la lista entera.
-         Queda fijo arriba al scrollear, siempre disponible. */
+         Vive adentro de .sticky-top, así queda fijo junto con el nombre. */
       .nav-index-toggle {
-        display: inline-block;
-        position: sticky;
-        top: 0;
+        display: block;
         width: 100%;
         font-size: 13px;
         color: #666;
         text-align: left;
-        background: #fff;
-        border-bottom: 1px solid #eee;
-        padding: 10px 0;
-        margin-bottom: 14px;
-        z-index: 6;
+        background: none;
+        border-top: 1px solid #eee;
+        padding: 10px 0 0;
+        margin-top: 10px;
         cursor: pointer;
       }
       .nav-list.collapsed .item,
@@ -453,12 +447,13 @@
       </div>
 
       <h1>Marcos Gonzalez-Cutre</h1>
-    </div>
 
-    <div class="main-layout">
       <button class="nav-index-toggle" type="button" id="navIndexToggle">
         <span class="lang lang-es">Índice ▾</span><span class="lang lang-en">Index ▾</span><span class="lang lang-pt">Índice ▾</span><span class="lang lang-fr">Index ▾</span><span class="lang lang-it">Indice ▾</span><span class="lang lang-ja">目次 ▾</span>
       </button>
+    </div>
+
+    <div class="main-layout">
       <div class="nav-list collapsed">
         <!-- ✏️ SERIES: cambiá los nombres o agregá/quitá líneas. Apretar abre su contenido a la derecha.
              Los títulos de serie quedan iguales en todos los idiomas (convención de catálogo). -->
