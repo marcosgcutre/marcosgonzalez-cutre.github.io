@@ -154,6 +154,21 @@
       }
       .nav-list.collapsed .item,
       .nav-list.collapsed .nav-label { display: none; }
+      /* Expandido: queda pegado al header fijo (no en su lugar original del
+         documento), para que se vea sin importar cuánto hayas scrolleado */
+      .nav-list:not(.collapsed) {
+        position: fixed;
+        top: var(--header-h, 110px);
+        left: 0;
+        right: 0;
+        max-height: calc(100vh - var(--header-h, 110px));
+        overflow-y: auto;
+        background: #fff;
+        z-index: 7;
+        padding: 14px 18px 24px;
+        margin: 0;
+        box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      }
 
       /* Feed continuo: content-viewer se vuelve columna y cada obra-serie
          queda siempre visible (no depende del click/acordeón) */
@@ -1298,8 +1313,17 @@
     // el índice es solo para saltar directo a una sección).
     var navList = document.querySelector('.nav-list');
     var navIndexToggle = document.getElementById('navIndexToggle');
+    var stickyTopEl = document.querySelector('.sticky-top');
+    function updateHeaderHeight() {
+      if (stickyTopEl) {
+        document.documentElement.style.setProperty('--header-h', stickyTopEl.offsetHeight + 'px');
+      }
+    }
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
     if (navIndexToggle) {
       navIndexToggle.addEventListener('click', function () {
+        updateHeaderHeight();
         navList.classList.toggle('collapsed');
       });
     }
@@ -1321,6 +1345,7 @@
         var isOpen = panel.classList.contains('open');
 
         closeAll();
+        if (isMobileNav()) { navList.classList.add('collapsed'); }
 
         if (!isOpen) {
           placePanel(panel, btn);
