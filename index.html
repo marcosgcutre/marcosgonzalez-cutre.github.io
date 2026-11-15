@@ -126,10 +126,27 @@
       margin: 14px 0 6px;
     }
     .content-viewer { flex: 1 1 auto; min-width: 0; }
-    .content-viewer-empty { color: #999; font-size: 14px; }
-    .content-viewer-empty[hidden] { display: none !important; }
+    .content-viewer-empty { display: none !important; }
     .nav-index-toggle { display: none; }
     .feed-heading { display: none; }
+
+    /* Feed continuo (desktop y mobile por igual): content-viewer se vuelve
+       columna y cada obra/serie queda siempre visible, sin acordeón ni
+       carrusel — se recorre todo scrolleando, como una curaduría servida. */
+    .content-viewer { display: flex; flex-direction: column; }
+    .panel.feed-panel {
+      max-height: none !important;
+      opacity: 1 !important;
+      overflow: visible !important;
+      padding: 0 0 8px !important;
+      margin-bottom: 36px !important;
+    }
+    /* Carrusel horizontal -> fotos apiladas verticalmente */
+    .slider-track { flex-direction: column; overflow-x: visible; scroll-snap-type: none; }
+    .slide { flex: none; width: 100%; min-width: 0; margin-bottom: 22px; }
+    .slide:last-child { margin-bottom: 0; }
+    .slider-nav, .slider-dots { display: none !important; }
+
     @media (max-width: 520px) {
       .main-layout { flex-direction: column; gap: 0; align-items: stretch; }
       .nav-list { width: 100%; position: static; margin-bottom: 18px; }
@@ -169,28 +186,6 @@
         margin: 0;
         box-shadow: 0 10px 24px rgba(0,0,0,.08);
       }
-
-      /* Feed continuo: content-viewer se vuelve columna y cada obra-serie
-         queda siempre visible (no depende del click/acordeón) */
-      .content-viewer { display: flex; flex-direction: column; }
-      .content-viewer-empty { display: none !important; }
-      .panel.feed-panel {
-        max-height: none !important;
-        opacity: 1 !important;
-        overflow: visible !important;
-        padding: 0 0 8px !important;
-        margin-bottom: 36px !important;
-      }
-      /* Sin texto de título arriba de cada serie: quedan solo las obras */
-      .feed-heading { display: none; }
-
-      /* Carrusel horizontal -> fotos apiladas verticalmente */
-      .slider-track { flex-direction: column; overflow-x: visible; scroll-snap-type: none; }
-      .slide { flex: none; width: 100%; min-width: 0; margin-bottom: 22px; }
-      .slide:last-child { margin-bottom: 0; }
-      .slider-nav, .slider-dots { display: none; }
-      /* El díptico sigue lado a lado (no apilado): son una sola composición */
-      .diptych { gap: 4px; }
 
       /* Imágenes fijas en mobile: sin lightbox ni zoom, solo se ven */
       .work-img { cursor: default; }
@@ -1334,10 +1329,10 @@
         var id = btn.getAttribute('data-target');
         var panel = document.getElementById('panel-' + id);
 
-        // En mobile, las obras/series ya están siempre visibles en el feed:
-        // tocar el título solo scrollea hasta ahí, no abre/cierra nada.
-        if (isMobileNav() && panel.classList.contains('feed-panel')) {
-          navList.classList.add('collapsed');
+        // Las obras/series ya están siempre visibles en el feed (desktop y
+        // mobile por igual): tocar el título solo scrollea hasta ahí.
+        if (panel.classList.contains('feed-panel')) {
+          if (isMobileNav()) { navList.classList.add('collapsed'); }
           panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
