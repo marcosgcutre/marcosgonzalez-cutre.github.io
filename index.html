@@ -126,22 +126,14 @@
       margin: 14px 0 6px;
     }
     .content-viewer { flex: 1 1 auto; min-width: 0; }
-    .content-viewer-empty { display: none !important; }
+    .content-viewer-empty { color: #999; font-size: 14px; }
+    .content-viewer-empty[hidden] { display: none !important; }
     .nav-index-toggle { display: none; }
     .feed-heading { display: none; }
 
-    /* Feed continuo (desktop y mobile por igual): content-viewer se vuelve
-       columna y cada obra/serie queda siempre visible, sin acordeón ni
-       carrusel — se recorre todo scrolleando, como una curaduría servida. */
-    .content-viewer { display: flex; flex-direction: column; }
-    .panel.feed-panel {
-      max-height: none !important;
-      opacity: 1 !important;
-      overflow: visible !important;
-      padding: 0 0 8px !important;
-      margin-bottom: 36px !important;
-    }
-    /* Carrusel horizontal -> fotos apiladas verticalmente */
+    /* Dentro de la serie abierta, las fotos van apiladas verticalmente
+       (sin carrusel de flechas — para pasar de una obra a otra se usa el
+       lightbox, con sus propias flechas) */
     .slider-track { flex-direction: column; overflow-x: visible; scroll-snap-type: none; }
     .slide { flex: none; width: 100%; min-width: 0; margin-bottom: 22px; }
     .slide:last-child { margin-bottom: 0; }
@@ -190,6 +182,18 @@
       /* Imágenes fijas en mobile: sin lightbox ni zoom, solo se ven */
       .work-img { cursor: default; }
       .work-img:hover { opacity: 1; }
+
+      /* Mobile sigue como feed continuo: cada serie siempre visible,
+         sin depender del click/acordeón (a diferencia de desktop) */
+      .content-viewer { display: flex; flex-direction: column; }
+      .content-viewer-empty { display: none !important; }
+      .panel.feed-panel {
+        max-height: none !important;
+        opacity: 1 !important;
+        overflow: visible !important;
+        padding: 0 0 8px !important;
+        margin-bottom: 36px !important;
+      }
     }
 
     .langswitch { margin-bottom: 14px; font-size: 13px; letter-spacing: .5px; }
@@ -418,6 +422,25 @@
       opacity: .8;
     }
     .lightbox .lightbox-close:hover { opacity: 1; }
+    .lightbox .lightbox-arrow {
+      all: unset;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #fff;
+      font-size: 40px;
+      line-height: 1;
+      padding: 10px 14px;
+      cursor: pointer;
+      opacity: .7;
+    }
+    .lightbox .lightbox-arrow:hover { opacity: 1; }
+    .lightbox .lightbox-arrow.prev { left: 10px; }
+    .lightbox .lightbox-arrow.next { right: 10px; }
+    .lightbox .lightbox-arrow[hidden] { display: none; }
+    @media (max-width: 520px) {
+      .lightbox .lightbox-arrow { font-size: 32px; }
+    }
 
     footer {
       margin-top: 40px;
@@ -1253,6 +1276,8 @@
 
   <div class="lightbox" id="lightbox">
     <button class="lightbox-close" type="button" aria-label="Cerrar">✕</button>
+    <button class="lightbox-arrow prev" type="button" aria-label="Anterior">‹</button>
+    <button class="lightbox-arrow next" type="button" aria-label="Siguiente">›</button>
     <div class="lightbox-imgs" id="lightbox-imgs"></div>
   </div>
 
@@ -1308,10 +1333,11 @@
         var id = btn.getAttribute('data-target');
         var panel = document.getElementById('panel-' + id);
 
-        // Las obras/series ya están siempre visibles en el feed (desktop y
-        // mobile por igual): tocar el título solo scrollea hasta ahí.
-        if (panel.classList.contains('feed-panel')) {
-          if (isMobileNav()) { navList.classList.add('collapsed'); }
+        // En mobile las obras/series ya están siempre visibles en el feed:
+        // tocar el título solo scrollea hasta ahí. En desktop se abre una
+        // serie por vez (acordeón), como el resto de los paneles.
+        if (isMobileNav() && panel.classList.contains('feed-panel')) {
+          navList.classList.add('collapsed');
           panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
@@ -1438,23 +1464,57 @@
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     var lightbox = document.getElementById('lightbox');
     var lightboxImgs = document.getElementById('lightbox-imgs');
+    var lightboxPrev = document.querySelector('.lightbox-arrow.prev');
+    var lightboxNext = document.querySelector('.lightbox-arrow.next');
+    var currentSlides = [];
+    var currentSlideIndex = 0;
+
+    function renderLightboxSlide(index) {
+      currentSlideIndex = (index + currentSlides.length) % currentSlides.length;
+      var imgs = currentSlides[currentSlideIndex].querySelectorAll('.work-img');
+      lightboxImgs.innerHTML = '';
+      imgs.forEach(function (src) {
+        var el = document.createElement('img');
+        el.src = src.src;
+        el.alt = src.alt;
+        lightboxImgs.appendChild(el);
+      });
+    }
 
     document.querySelectorAll('.work-img').forEach(function (img) {
       img.addEventListener('click', function () {
         // En mobile las imágenes quedan fijas, sin lightbox.
         if (isMobileNav()) return;
-        // Si la obra es parte de un díptico, se abren las dos juntas.
-        var group = img.closest('.diptych');
-        var imgs = group ? group.querySelectorAll('.work-img') : [img];
-        lightboxImgs.innerHTML = '';
-        imgs.forEach(function (src) {
+        // Si la obra está en un carrusel, se puede recorrer el resto con
+        // flechas sin cerrar. Si hay dos obras juntas (díptico), se abren
+        // las dos a la vez (son un mismo "slide").
+        var slide = img.closest('.slide');
+        var track = slide ? slide.closest('.slider-track') : null;
+        if (track) {
+          currentSlides = Array.prototype.slice.call(track.querySelectorAll('.slide'));
+          renderLightboxSlide(currentSlides.indexOf(slide));
+        } else {
+          currentSlides = [];
+          lightboxImgs.innerHTML = '';
           var el = document.createElement('img');
-          el.src = src.src;
-          el.alt = src.alt;
+          el.src = img.src;
+          el.alt = img.alt;
           lightboxImgs.appendChild(el);
-        });
+        }
+        var showArrows = currentSlides.length > 1;
+        lightboxPrev.hidden = !showArrows;
+        lightboxNext.hidden = !showArrows;
         lightbox.classList.add('open');
       });
+    });
+
+    lightboxPrev.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (currentSlides.length > 1) { renderLightboxSlide(currentSlideIndex - 1); }
+    });
+    lightboxNext.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (currentSlides.length > 1) { renderLightboxSlide(currentSlideIndex + 1); }
     });
 
     function closeLightbox() {
@@ -1463,30 +1523,11 @@
     // Un solo nivel: click en cualquier lado (imagen incluida) cierra.
     lightbox.addEventListener('click', closeLightbox);
     document.addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('open')) return;
       if (e.key === 'Escape') { closeLightbox(); }
+      if (e.key === 'ArrowLeft' && currentSlides.length > 1) { renderLightboxSlide(currentSlideIndex - 1); }
+      if (e.key === 'ArrowRight' && currentSlides.length > 1) { renderLightboxSlide(currentSlideIndex + 1); }
     });
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // SCROLLSPY (solo desktop) — marca en negrita/subrayado, en el menú
-    // de la izquierda, la serie que está pasando por el centro de la
-    // pantalla mientras se scrollea el feed.
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    if (!isMobileNav() && 'IntersectionObserver' in window) {
-      var navButtonsByTarget = {};
-      document.querySelectorAll('.nav-list .toggle').forEach(function (b) {
-        var id = b.getAttribute('data-target');
-        (navButtonsByTarget[id] = navButtonsByTarget[id] || []).push(b);
-      });
-      var scrollSpy = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          var id = entry.target.id.replace('panel-', '');
-          (navButtonsByTarget[id] || []).forEach(function (b) {
-            b.classList.toggle('open', entry.isIntersecting);
-          });
-        });
-      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-      document.querySelectorAll('.panel.feed-panel').forEach(function (p) { scrollSpy.observe(p); });
-    }
 
     var langNames = { es: 'es', en: 'en', pt: 'pt', fr: 'fr', it: 'it', ja: 'ja' };
     function setLang(code) {
